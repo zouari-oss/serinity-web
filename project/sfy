@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+# =========================================
+# .FILE
+#   sfy
+#
+# .SYNOPSIS
+#   Symfony CLI helper (with less typing)
+#
+# .DESCRIPTION
+#   Wrapper script for frequently used Symfony CLI commands
+#   to reduce keystrokes and simplify development.
+#
+# .PARAMETER command
+#   The Symfony command to run (e.g., console, serve, etc.)
+#
+# .INPUTS
+#   None
+#
+# .OUTPUTS
+#   Depends on the Symfony command used
+#
+# .NOTES
+#   Version       : 1.0
+#   Author        : @ZouariOmar <zouariomar20@gmail.com>
+#   Created       : 2025-10-11
+#   Change Log    : 5101517
+#
+# .EXAMPLE
+#   ./sfy cc   # Runs 'symfony console cache:clear'
+# =========================================
+
+# Load custom colors
+[[ -s ${HOME}/.bash/.bash_colors ]] && source "${HOME}/.bash/.bash_colors"
+
+# Configuration part
+EXIT_SUCCESS=0
+EXIT_FAILED=1
+SYMFONY_BIN="symfony"
+CONSOLE_BIN="php bin/console"
+
+# Aliases for common commands
+declare -A COMMANDS
+COMMANDS["cc"]="${CONSOLE_BIN} cache:clear"
+COMMANDS["cda"]="${SYMFONY_BIN} console debug:autowiring"
+COMMANDS["cw"]="${SYMFONY_BIN} cache:warmup"
+COMMANDS["dmm"]="${CONSOLE_BIN} doctrine:migrations:migrate"
+COMMANDS["ma"]="${CONSOLE_BIN} make:auth"
+COMMANDS["mc"]="${CONSOLE_BIN} make:controller"
+COMMANDS["mco"]="${SYMFONY_BIN} messenger:consume"
+COMMANDS["mcr"]="${CONSOLE_BIN} make:crud"
+COMMANDS["me"]="${CONSOLE_BIN} make:entity"
+COMMANDS["mf"]="${CONSOLE_BIN} make:form"
+COMMANDS["mm"]="${CONSOLE_BIN} make:migration"
+COMMANDS["ss"]="${SYMFONY_BIN} server:start"
+COMMANDS["sst"]="${SYMFONY_BIN} server:stop"
+
+# Main func to execute shortcuts
+function run_cmd() {
+  if [[ $1 == "--help" ]] || [[ $1 == "-h" ]]; then
+    help
+  fi
+
+  local key="$1"
+  shift
+
+  if [[ -n "${COMMANDS[${key}]}" ]]; then
+    ${COMMANDS[${key}]} "$@"
+    exit ${EXIT_SUCCESS}
+  fi
+
+  usage "${RED}[ERROR] Unknown shortcut ${key}${RESET}"
+  exit ${EXIT_FAILED}
+
+}
+
+usage() {
+  if [ ! -z "$1" ]; then
+    echo -e "$1"
+  fi
+  echo -e "${BLUE}[INFO]Try './sfy --help' for more information.${RESET}"
+}
+
+help() {
+  echo -e "${YELLOW}[FILE]${RESET}
+  sfy
+${YELLOW}[LINK]${RESET}
+  https://github.com/ZouariOmar
+${YELLOW}[BRIEF]${RESET}
+  Symfony CLI helper (with less typing)
+${YELLOW}[USAGE]${RESET}
+  ./sfy cc        -- Runs 'symfony console cache:clear'
+${YELLOW}[OPTIONS]${RESET}
+  cc  -- ${CONSOLE_BIN} cache:clear
+  cw  -- ${SYMFONY_BIN} cache:warmup
+  da  -- ${SYMFONY_BIN} debug:autowiring
+  dmm -- ${CONSOLE_BIN} doctrine:migrations:migrate
+  ma  -- ${CONSOLE_BIN} make:auth
+  mc  -- ${CONSOLE_BIN} make:controller
+  mco -- ${SYMFONY_BIN} messenger:consume
+  mcr -- ${CONSOLE_BIN} make:crud
+  me  -- ${CONSOLE_BIN} make:entity
+  mf  -- ${CONSOLE_BIN} make:form
+  mm  -- ${CONSOLE_BIN} make:migration
+  ss  -- ${SYMFONY_BIN} server:start
+  sst -- ${SYMFONY_BIN} server:stop
+
+${YELLOW}[VERSION]${RESET}
+  1.0
+${YELLOW}[AUTHOR]${RESET}
+  @ZouariOmar <zouariomar20@gmail.com>
+${YELLOW}[CREATED]${RESET}
+  11/10/2025
+${YELLOW}[CHANGELOG]${RESET}
+  5101517"
+  exit ${EXIT_SUCCESS}
+}
+
+if [[ $# -lt 1 ]]; then
+  usage "${RED}[ERROR] sfy: you must specify the option with there args.${RESET}"
+  exit 1
+fi
+
+run_cmd "$@"

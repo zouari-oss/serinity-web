@@ -1,0 +1,18 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Audit logs | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Audit logs', subtitle: 'Security and access history', username: userName } %}
+        <section class="ac-card">
+            {% include 'access_control/components/_table.html.twig' with {
+                columns: ['Date', 'Action', 'IP', 'Host', 'OS'],
+                rows: auditLogs,
+                searchable: true
+            } %}
+        </section>
+    </div>
+</div>
+{% endblock %}

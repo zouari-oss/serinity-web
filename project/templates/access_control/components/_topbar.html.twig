@@ -1,0 +1,10 @@
+<header class="ac-topbar">
+    <div>
+        <h1>{{ title }}</h1>
+        {% if subtitle is defined %}<p>{{ subtitle }}</p>{% endif %}
+    </div>
+    <div class="ac-topbar-user">
+        <span>{{ username|default('Guest') }}</span>
+        <div class="ac-avatar">{{ (username|default('G'))|slice(0,1)|upper }}</div>
+    </div>
+</header>

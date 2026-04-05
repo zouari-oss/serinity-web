@@ -1,23 +1,45 @@
 {% extends 'access_control/layout.html.twig' %}
 {% block title %}Profile | Serinity{% endblock %}
+{% set isReadonly = readonly|default(false) %}
+{% set headerTitle = pageTitle|default('Profile') %}
+{% set headerSubtitle = pageSubtitle|default('Update account information') %}
 
 {% block content %}
 <div class="ac-app-layout">
     {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
     <div class="ac-main">
-        {% include 'access_control/components/_topbar.html.twig' with { title: 'Profile', subtitle: 'Update account information', username: userName } %}
+        {% include 'access_control/components/_topbar.html.twig' with { title: headerTitle, subtitle: headerSubtitle, username: userName } %}
+        {% for message in app.flashes('success') %}
+            <section class="ac-card"><p style="color: var(--success);">{{ message }}</p></section>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <section class="ac-card"><p style="color: var(--danger);">{{ message }}</p></section>
+        {% endfor %}
         <section class="ac-card">
-            <form class="ac-form ac-grid-two" method="post">
-                <label>Username<input class="ac-input" type="text" value="{{ profile.username }}"></label>
-                <label>Email<input class="ac-input" type="email" value="{{ profile.email }}"></label>
-                <label>First name<input class="ac-input" type="text" value="{{ profile.firstName }}"></label>
-                <label>Last name<input class="ac-input" type="text" value="{{ profile.lastName }}"></label>
-                <label>Country<input class="ac-input" type="text" value="{{ profile.country }}"></label>
-                <label>State<input class="ac-input" type="text" value="{{ profile.state }}"></label>
-                <label class="ac-col-span-2">About
-                    <textarea class="ac-input" rows="4">{{ profile.aboutMe }}</textarea>
+            {% if isReadonly %}
+                <div class="ac-row-between"><span style="color: var(--muted);">Preview mode</span><a class="ac-ghost-btn" href="{{ path('ac_ui_users') }}">Back to users</a></div>
+            {% endif %}
+            <form class="ac-form ac-grid-two" method="post" action="{{ path('ac_ui_profile') }}" enctype="multipart/form-data">
+                <label class="ac-col-span-2">Profile image
+                    {% if profile.profileImageUrl %}
+                        <div style="margin-bottom: .6rem;">
+                            <img src="{{ profile.profileImageUrl }}" alt="Profile image" style="max-width: 120px; max-height: 120px; border-radius: 12px; border: 1px solid var(--border);">
+                        </div>
+                    {% endif %}
+                    <input class="ac-input" name="profileImage" type="file" accept="image/jpeg,image/png,image/webp,image/gif" {{ isReadonly ? 'disabled' : '' }}>
                 </label>
-                <div class="ac-row-end ac-col-span-2"><button class="ac-btn" type="button">Save changes</button></div>
+                <label>Username<input class="ac-input" name="username" type="text" value="{{ profile.username }}" {{ isReadonly ? 'readonly' : '' }}></label>
+                <label>Email<input class="ac-input" name="email" type="email" value="{{ profile.email }}" required {{ isReadonly ? 'readonly' : '' }}></label>
+                <label>First name<input class="ac-input" name="firstName" type="text" value="{{ profile.firstName }}" {{ isReadonly ? 'readonly' : '' }}></label>
+                <label>Last name<input class="ac-input" name="lastName" type="text" value="{{ profile.lastName }}" {{ isReadonly ? 'readonly' : '' }}></label>
+                <label>Country<input class="ac-input" name="country" type="text" value="{{ profile.country }}" {{ isReadonly ? 'readonly' : '' }}></label>
+                <label>State<input class="ac-input" name="state" type="text" value="{{ profile.state }}" {{ isReadonly ? 'readonly' : '' }}></label>
+                <label class="ac-col-span-2">About
+                    <textarea class="ac-input" name="aboutMe" rows="4" {{ isReadonly ? 'readonly' : '' }}>{{ profile.aboutMe }}</textarea>
+                </label>
+                {% if not isReadonly %}
+                    <div class="ac-row-end ac-col-span-2"><button class="ac-btn" type="submit">Save changes</button></div>
+                {% endif %}
             </form>
         </section>
     </div>

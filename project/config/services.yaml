@@ -8,6 +8,8 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     app.jwt_secret: '%env(APP_SECRET)%'
+    app.image_request_url: '%env(IMAGE_REQUEST_URL)%'
+    app.image_api_key: '%env(IMAGE_API_KEY)%'
 
 services:
     # default configuration for services in *this* file
@@ -20,9 +22,14 @@ services:
     App\:
         resource: '../src/'
 
-    App\Service\AccessControl\JwtService:
+    App\Service\JwtService:
         arguments:
             $appSecret: '%app.jwt_secret%'
+
+    App\Service\ImageUploadService:
+        arguments:
+            $imageRequestUrl: '%app.image_request_url%'
+            $imageApiKey: '%app.image_api_key%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

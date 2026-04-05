@@ -49,7 +49,11 @@ export default class extends Controller {
       }
 
       // Store token
-      localStorage.setItem('access_token', payload?.data?.token || '');
+      const token = payload?.data?.token || '';
+      localStorage.setItem('access_token', token);
+      if (token) {
+        document.cookie = `access_token=${encodeURIComponent(token)}; Path=/; SameSite=Lax`;
+      }
       
       // Show success state
       if (submitBtn && btnSpinner) {
@@ -60,7 +64,7 @@ export default class extends Controller {
       
       // Redirect after animation
       setTimeout(() => {
-        window.location.href = '/dashboard';
+        window.location.href = '/admin/dashboard';
       }, 800);
       
     } catch (e) {

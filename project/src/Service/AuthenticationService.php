@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Service\AccessControl;
+namespace App\Service;
 
 use App\Dto\Auth\LoginRequest;
 use App\Dto\Auth\RegisterRequest;

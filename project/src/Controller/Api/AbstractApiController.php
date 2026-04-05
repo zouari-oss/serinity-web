@@ -47,11 +47,36 @@ abstract class AbstractApiController extends AbstractController
 
         foreach ($payload as $key => $value) {
             if (property_exists($dto, (string) $key)) {
-                $dto->{$key} = $value;
+                $dto->{$key} = $this->coerceValue($dto, (string) $key, $value);
             }
         }
 
         return $dto;
+    }
+
+    private function coerceValue(object $dto, string $property, mixed $value): mixed
+    {
+        $reflection = new \ReflectionClass($dto);
+        if (!$reflection->hasProperty($property)) {
+            return $value;
+        }
+
+        $type = $reflection->getProperty($property)->getType();
+        if (!$type instanceof \ReflectionNamedType) {
+            return $value;
+        }
+
+        if ($value === '' && $type->allowsNull()) {
+            return null;
+        }
+
+        return match ($type->getName()) {
+            'bool' => filter_var($value, FILTER_VALIDATE_BOOLEAN),
+            'int' => (int) $value,
+            'float' => (float) $value,
+            'string' => (string) $value,
+            default => $value,
+        };
     }
 
     protected function bearerToken(Request $request): ?string

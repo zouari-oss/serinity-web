@@ -7,6 +7,10 @@ import UiThemeController from './controllers/ui_theme_controller.js';
 import PasswordToggleController from './controllers/password_toggle_controller.js';
 import SubmitStateController from './controllers/submit_state_controller.js';
 import AuthFormController from './controllers/auth_form_controller.js';
+import EditUserController from './controllers/edit_user_controller.js';
+import UserActionsController from './controllers/user_actions_controller.js';
+import SidebarToggleController from './controllers/sidebar_toggle_controller.js';
+import HomeSessionController from './controllers/home_session_controller.js';
 
 const app = startStimulusApp();
 
@@ -18,3 +22,7 @@ app.register('ui-theme', UiThemeController);
 app.register('password-toggle', PasswordToggleController);
 app.register('submit-state', SubmitStateController);
 app.register('auth-form', AuthFormController);
+app.register('edit-user', EditUserController);
+app.register('user-actions', UserActionsController);
+app.register('sidebar-toggle', SidebarToggleController);
+app.register('home-session', HomeSessionController);

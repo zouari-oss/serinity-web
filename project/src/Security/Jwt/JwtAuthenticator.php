@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Security\Jwt;
 
 use App\Repository\UserRepository;
-use App\Service\AccessControl\JwtService;
+use App\Service\JwtService;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
@@ -21,22 +23,28 @@ final class JwtAuthenticator extends AbstractAuthenticator
     public function __construct(
         private readonly JwtService $jwtService,
         private readonly UserRepository $userRepository,
+        private readonly RouterInterface $router,
     ) {
     }
 
     public function supports(Request $request): ?bool
     {
-        return str_starts_with($request->getPathInfo(), '/api/auth/me');
+        $path = $request->getPathInfo();
+        if (preg_match('#^/api/auth/(login|signin|register|signup|refresh|logout|reset/send|reset/confirm)$#', $path) === 1) {
+            return false;
+        }
+
+        return $this->extractToken($request) !== null
+            && (str_starts_with($path, '/api/') || str_starts_with($path, '/admin'));
     }
 
     public function authenticate(Request $request): SelfValidatingPassport
     {
-        $header = (string) $request->headers->get('Authorization', '');
-        if (!str_starts_with($header, 'Bearer ')) {
+        $token = $this->extractToken($request);
+        if ($token === null || $token === '') {
             throw new CustomUserMessageAuthenticationException('Missing bearer token.');
         }
 
-        $token = trim(substr($header, 7));
         $payload = $this->jwtService->parseAndValidate($token);
 
         if ($payload === null || !isset($payload['sub']) || !is_string($payload['sub'])) {
@@ -60,9 +68,31 @@ final class JwtAuthenticator extends AbstractAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
+        if (str_starts_with($request->getPathInfo(), '/admin')) {
+            $response = new RedirectResponse($this->router->generate('ac_ui_login'));
+            $response->headers->clearCookie('access_token', '/');
+
+            return $response;
+        }
+
         return new JsonResponse([
             'success' => false,
             'message' => $exception->getMessageKey(),
         ], Response::HTTP_UNAUTHORIZED);
+    }
+
+    private function extractToken(Request $request): ?string
+    {
+        $header = (string) $request->headers->get('Authorization', '');
+        if (str_starts_with($header, 'Bearer ')) {
+            return trim(substr($header, 7));
+        }
+
+        $cookieToken = $request->cookies->get('access_token');
+        if (is_string($cookieToken) && $cookieToken !== '') {
+            return $cookieToken;
+        }
+
+        return null;
     }
 }

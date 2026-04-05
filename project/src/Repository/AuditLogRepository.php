@@ -29,4 +29,32 @@ class AuditLogRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /** @return list<AuditLog> */
+    public function findRecent(int $limit = 10): array
+    {
+        return $this->createQueryBuilder('a')
+            ->leftJoin('a.authSession', 's')
+            ->addSelect('s')
+            ->orderBy('a.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Count audit events from the last N days.
+     */
+    public function countRecentEvents(int $days = 7): int
+    {
+        $since = new \DateTimeImmutable("-{$days} days");
+        
+        return (int) $this->createQueryBuilder('a')
+            ->select('COUNT(a.id)')
+            ->where('a.createdAt >= :since')
+            ->setParameter('since', $since)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }
+

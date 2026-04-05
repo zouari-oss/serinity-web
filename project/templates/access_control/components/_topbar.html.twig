@@ -1,10 +1,23 @@
-<header class="ac-topbar">
-    <div>
+<header class="ac-topbar" data-controller="sidebar-toggle">
+    <div class="ac-topbar-left">
+        <button type="button" class="ac-icon-btn" title="Toggle sidebar" data-action="click->sidebar-toggle#toggle">
+            <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div>
         <h1>{{ title }}</h1>
         {% if subtitle is defined %}<p>{{ subtitle }}</p>{% endif %}
+        </div>
     </div>
     <div class="ac-topbar-user">
         <span>{{ username|default('Guest') }}</span>
-        <div class="ac-avatar">{{ (username|default('G'))|slice(0,1)|upper }}</div>
+        <button type="button" class="ac-icon-btn" title="Toggle theme" aria-label="Toggle theme" data-action="ui-theme#toggle">
+            <span class="material-symbols-outlined">dark_mode</span>
+        </button>
+        {% set profileImageUrl = app.user and app.user.profile ? app.user.profile.profileImageUrl : null %}
+        {% if profileImageUrl %}
+            <img class="ac-avatar ac-avatar-image" src="{{ profileImageUrl }}" alt="Profile image">
+        {% else %}
+            <div class="ac-avatar">{{ (username|default('G'))|slice(0,1)|upper }}</div>
+        {% endif %}
     </div>
 </header>

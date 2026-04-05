@@ -1,0 +1,19 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}{{ title }} | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: title, subtitle: subtitle, username: userName } %}
+        <section class="ac-card ac-coming-soon">
+            <div class="ac-coming-soon-icon">
+                <span class="material-symbols-outlined">construction</span>
+            </div>
+            <h2>{{ title }} module</h2>
+            <p>{{ subtitle }}</p>
+            <p class="ac-coming-soon-meta">This section is reserved for upcoming admin capabilities.</p>
+        </section>
+    </div>
+</div>
+{% endblock %}

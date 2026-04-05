@@ -20,6 +20,6 @@ final class RegisterRequest
     #[Assert\NotBlank]
     public string $confirmPassword = '';
 
-    #[Assert\Choice(choices: ['ADMIN', 'THERAPIST', 'PATIENT'])]
+    #[Assert\Choice(choices: ['THERAPIST', 'PATIENT'])]
     public string $role = 'PATIENT';
 }

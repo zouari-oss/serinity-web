@@ -5,14 +5,17 @@
 {% block body %}
 <div class="home-page">
     <!-- Navigation -->
-    <nav class="home-navbar">
+    <nav class="home-navbar" data-controller="navbar-menu">
         <div class="container">
             <div class="navbar-content">
                 <div class="navbar-brand">
                     <img src="{{ asset('assets/logo/serinity-logo-without-bg-and-app-name.png') }}" alt="Serinity" class="navbar-logo">
                     <span class="navbar-title">Serinity</span>
                 </div>
-                <div class="navbar-links" data-controller="home-session">
+                <button type="button" class="navbar-menu-btn" aria-label="Open navigation menu" data-action="click->navbar-menu#toggle">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <div class="navbar-links" data-controller="home-session" data-navbar-menu-target="links">
                     <a href="#features" class="nav-link">Features</a>
                     <a href="#about" class="nav-link">About</a>
                     <a href="#download" class="nav-link">Download</a>

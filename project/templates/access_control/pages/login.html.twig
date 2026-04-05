@@ -5,14 +5,17 @@
 
 {% block content %}
 <div class="auth-page-shell">
-    <nav class="home-navbar auth-navbar">
+    <nav class="home-navbar auth-navbar" data-controller="navbar-menu">
         <div class="container">
             <div class="navbar-content">
                 <a class="navbar-brand" href="{{ path('home') }}">
                     <img src="{{ asset('assets/logo/serinity-logo-without-bg-and-app-name.png') }}" alt="Serinity" class="navbar-logo">
                     <span class="navbar-title">Serinity</span>
                 </a>
-                <div class="navbar-links">
+                <button type="button" class="navbar-menu-btn" aria-label="Open navigation menu" data-action="click->navbar-menu#toggle">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <div class="navbar-links" data-navbar-menu-target="links">
                     <a href="{{ path('home') }}#features" class="nav-link">Features</a>
                     <a href="{{ path('home') }}#about" class="nav-link">About</a>
                     <a href="{{ path('home') }}#download" class="nav-link">Download</a>
@@ -130,7 +133,6 @@
                         <select class="ac-input" name="role">
                             <option value="PATIENT">Patient</option>
                             <option value="THERAPIST">Therapist</option>
-                            <option value="ADMIN">Admin</option>
                         </select>
                     </label>
                     <button class="ac-btn ac-btn-primary" type="submit">

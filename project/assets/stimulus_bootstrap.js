@@ -11,6 +11,7 @@ import EditUserController from './controllers/edit_user_controller.js';
 import UserActionsController from './controllers/user_actions_controller.js';
 import SidebarToggleController from './controllers/sidebar_toggle_controller.js';
 import HomeSessionController from './controllers/home_session_controller.js';
+import NavbarMenuController from './controllers/navbar_menu_controller.js';
 
 const app = startStimulusApp();
 
@@ -26,3 +27,4 @@ app.register('edit-user', EditUserController);
 app.register('user-actions', UserActionsController);
 app.register('sidebar-toggle', SidebarToggleController);
 app.register('home-session', HomeSessionController);
+app.register('navbar-menu', NavbarMenuController);

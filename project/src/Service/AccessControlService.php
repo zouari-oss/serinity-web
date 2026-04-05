@@ -54,6 +54,9 @@ final readonly class AccessControlService
         if ($role === null) {
             return ServiceResult::failure('Invalid role.');
         }
+        if ($role === UserRole::ADMIN) {
+            return ServiceResult::failure('Admin role cannot be assigned from signup.');
+        }
 
         $now = new \DateTimeImmutable();
         $user = (new User())

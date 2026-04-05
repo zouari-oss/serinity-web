@@ -12,6 +12,7 @@ import UserActionsController from './controllers/user_actions_controller.js';
 import SidebarToggleController from './controllers/sidebar_toggle_controller.js';
 import HomeSessionController from './controllers/home_session_controller.js';
 import NavbarMenuController from './controllers/navbar_menu_controller.js';
+import FlashToastController from './controllers/flash_toast_controller.js';
 
 const app = startStimulusApp();
 
@@ -28,3 +29,4 @@ app.register('user-actions', UserActionsController);
 app.register('sidebar-toggle', SidebarToggleController);
 app.register('home-session', HomeSessionController);
 app.register('navbar-menu', NavbarMenuController);
+app.register('flash-toast', FlashToastController);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Security\Jwt;
 
+use App\Exception\DisabledAccountException;
 use App\Repository\UserRepository;
 use App\Service\JwtService;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -35,7 +36,12 @@ final class JwtAuthenticator extends AbstractAuthenticator
         }
 
         return $this->extractToken($request) !== null
-            && (str_starts_with($path, '/api/') || str_starts_with($path, '/admin'));
+            && (
+                str_starts_with($path, '/api/')
+                || str_starts_with($path, '/admin')
+                || str_starts_with($path, '/user')
+                || $path === '/dashboard'
+            );
     }
 
     public function authenticate(Request $request): SelfValidatingPassport
@@ -68,11 +74,23 @@ final class JwtAuthenticator extends AbstractAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
-        if (str_starts_with($request->getPathInfo(), '/admin')) {
+        if (
+            str_starts_with($request->getPathInfo(), '/admin')
+            || str_starts_with($request->getPathInfo(), '/user')
+            || $request->getPathInfo() === '/dashboard'
+        ) {
             $response = new RedirectResponse($this->router->generate('ac_ui_login'));
             $response->headers->clearCookie('access_token', '/');
 
             return $response;
+        }
+
+        if ($exception instanceof DisabledAccountException) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'account_disabled',
+                'message' => 'Your account is disabled.',
+            ], Response::HTTP_FORBIDDEN);
         }
 
         return new JsonResponse([

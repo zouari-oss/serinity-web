@@ -19,15 +19,16 @@
                     <a href="#features" class="nav-link">Features</a>
                     <a href="#about" class="nav-link">About</a>
                     <a href="#download" class="nav-link">Download</a>
-                    {% set hasAdminSession = (app.user and is_granted('ROLE_ADMIN')) or app.request.cookies.get('access_token') %}
-                    {% if hasAdminSession %}
+                    {% set hasLoggedSession = app.user or app.request.cookies.get('access_token') %}
+                    {% if hasLoggedSession %}
+                        {% set dashboardRoute = app.user ? (is_granted('ROLE_ADMIN') ? 'ac_ui_dashboard' : 'user_ui_dashboard') : 'ac_ui_dashboard_legacy' %}
                         <div class="nav-dropdown">
                             <button type="button" class="nav-link-btn nav-dropdown-trigger" data-action="click->home-session#toggleMenu">
                                 <span class="material-symbols-outlined">account_circle</span>
                                 <span class="material-symbols-outlined">expand_more</span>
                             </button>
                             <div class="nav-dropdown-menu" data-home-session-target="menu" hidden>
-                                <a href="{{ path('ac_ui_dashboard') }}" class="nav-dropdown-item">
+                                <a href="{{ path(dashboardRoute) }}" class="nav-dropdown-item">
                                     <span class="material-symbols-outlined">dashboard</span>
                                     <span>Dashboard</span>
                                 </a>

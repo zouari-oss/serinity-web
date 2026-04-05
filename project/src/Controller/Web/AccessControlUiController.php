@@ -60,19 +60,40 @@ final class AccessControlUiController extends AbstractController
     #[Route('/dashboard', name: 'ac_ui_dashboard_legacy', methods: ['GET'])]
     public function dashboardLegacy(): Response
     {
-        return $this->redirectToRoute('ac_ui_dashboard');
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('ac_ui_login');
+        }
+
+        if ($user->getRole() === 'ADMIN') {
+            return $this->redirectToRoute('ac_ui_dashboard');
+        }
+
+        if (in_array($user->getRole(), ['PATIENT', 'THERAPIST'], true)) {
+            return $this->redirectToRoute('user_ui_dashboard');
+        }
+
+        return $this->redirectToRoute('ac_ui_login');
     }
 
     #[Route('/admin/dashboard', name: 'ac_ui_dashboard', methods: ['GET'])]
-    #[IsGranted('ROLE_ADMIN')]
     public function dashboard(): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('ac_ui_login');
+        }
+
+        if ($user->getRole() !== 'ADMIN') {
+            return $this->redirectToRoute('user_ui_dashboard');
+        }
+
         $stats = $this->dashboardService->getStatistics();
         $recentActivity = $this->dashboardService->getRecentActivity(10);
 
         return $this->render('access_control/pages/dashboard.html.twig', [
             'nav' => $this->buildNav('ac_ui_dashboard'),
-            'userName' => $this->getUser()?->getEmail() ?? 'Admin',
+            'userName' => $user->getEmail(),
             'stats' => $stats,
             'recentActivity' => $recentActivity,
         ]);

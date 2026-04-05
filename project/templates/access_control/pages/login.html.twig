@@ -1,0 +1,130 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Authentication | Serinity{% endblock %}
+
+{% set authMode = mode|default('signin') %}
+
+{% block content %}
+<main class="ac-auth" data-controller="auth-switcher auth-form password-toggle">
+    <section class="ac-auth-side-brand">
+        <div class="ac-brand-gradient"></div>
+        <div class="ac-brand-content">
+            <img src="{{ asset('assets/logo/serinity-logo-without-bg-and-app-name.png') }}" alt="Serinity logo" class="ac-auth-logo">
+            <h1>Your Journey to Mental Wellness</h1>
+            <p>A comprehensive platform dedicated to psychotherapy and personal development, designed for individuals and mental health professionals.</p>
+            <ul>
+                <li><span class="material-symbols-outlined">neurology</span> AI-powered emotional analysis & insights</li>
+                <li><span class="material-symbols-outlined">bedtime</span> Sleep tracking & dream journaling</li>
+                <li><span class="material-symbols-outlined">mood</span> Mood tracking & guided exercises</li>
+                <li><span class="material-symbols-outlined">calendar_month</span> Professional therapy appointments</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="ac-auth-panel-wrap">
+        <div class="ac-auth-tabs" role="tablist" aria-label="Authentication mode">
+            <button 
+                class="ac-tab-btn {{ authMode == 'signin' ? 'is-active' : '' }}" 
+                role="tab"
+                aria-selected="{{ authMode == 'signin' ? 'true' : 'false' }}"
+                aria-controls="signin-panel"
+                data-auth-switcher-target="signinTab"
+                data-action="click->auth-switcher#showSignin"
+                type="button">
+                Sign in
+            </button>
+            <button 
+                class="ac-tab-btn {{ authMode == 'signup' ? 'is-active' : '' }}"
+                role="tab"
+                aria-selected="{{ authMode == 'signup' ? 'true' : 'false' }}"
+                aria-controls="signup-panel"
+                data-auth-switcher-target="signupTab"
+                data-action="click->auth-switcher#showSignup"
+                type="button">
+                Sign up
+            </button>
+        </div>
+
+        <p class="ac-inline-error" data-auth-form-target="error" hidden></p>
+
+        <section 
+            id="signin-panel"
+            class="ac-auth-panel {{ authMode == 'signin' ? 'is-active' : '' }}" 
+            role="tabpanel"
+            aria-labelledby="signin-tab"
+            data-auth-switcher-target="signin"
+            style="{{ authMode == 'signup' ? 'display: none;' : '' }}">
+            <h2>Welcome back</h2>
+            <form class="ac-form" data-action="submit->auth-form#submit" method="post" action="{{ path('api_auth_login') }}">
+                <label>
+                    <span class="ac-label">Email or username</span>
+                    <input class="ac-input" type="text" name="usernameOrEmail" required autocomplete="username">
+                </label>
+                <label>
+                    <span class="ac-label">Password</span>
+                    <div class="ac-password-wrap">
+                        <input class="ac-input" type="password" name="password" required autocomplete="current-password" data-password-toggle-target="input">
+                        <button class="ac-password-toggle" type="button" data-action="password-toggle#toggle" aria-label="Toggle password visibility">
+                            <span class="material-symbols-outlined" data-password-toggle-target="icon">visibility</span>
+                        </button>
+                    </div>
+                </label>
+                <label class="ac-check"><input type="checkbox" name="rememberMe" value="1"> Remember me</label>
+                <button class="ac-btn ac-btn-primary" type="submit">
+                    <span class="ac-btn-content">
+                        <span class="ac-btn-text">Sign in</span>
+                        <span class="ac-btn-spinner" hidden>
+                            <span class="material-symbols-outlined ac-spin">progress_activity</span>
+                        </span>
+                    </span>
+                </button>
+            </form>
+            <a class="ac-link-btn" href="{{ path('ac_ui_reset_password') }}">Forgot password?</a>
+        </section>
+
+        <section 
+            id="signup-panel"
+            class="ac-auth-panel {{ authMode == 'signup' ? 'is-active' : '' }}"
+            role="tabpanel"
+            aria-labelledby="signup-tab"
+            data-auth-switcher-target="signup"
+            style="{{ authMode == 'signin' ? 'display: none;' : '' }}">
+            <h2>Create account</h2>
+            <form class="ac-form" data-action="submit->auth-form#submit" method="post" action="{{ path('api_auth_register') }}">
+                <label>
+                    <span class="ac-label">Email</span>
+                    <input class="ac-input" type="email" name="email" required autocomplete="email">
+                </label>
+                <label>
+                    <span class="ac-label">Password</span>
+                    <div class="ac-password-wrap">
+                        <input class="ac-input" type="password" name="password" required minlength="8" autocomplete="new-password" data-password-toggle-target="input">
+                        <button class="ac-password-toggle" type="button" data-action="password-toggle#toggle" aria-label="Toggle password visibility">
+                            <span class="material-symbols-outlined" data-password-toggle-target="icon">visibility</span>
+                        </button>
+                    </div>
+                </label>
+                <label>
+                    <span class="ac-label">Confirm password</span>
+                    <input class="ac-input" type="password" name="confirmPassword" required minlength="8" autocomplete="new-password">
+                </label>
+                <label>
+                    <span class="ac-label">Role</span>
+                    <select class="ac-input" name="role">
+                        <option value="PATIENT">Patient</option>
+                        <option value="THERAPIST">Therapist</option>
+                        <option value="ADMIN">Admin</option>
+                    </select>
+                </label>
+                <button class="ac-btn ac-btn-primary" type="submit">
+                    <span class="ac-btn-content">
+                        <span class="ac-btn-text">Sign up</span>
+                        <span class="ac-btn-spinner" hidden>
+                            <span class="material-symbols-outlined ac-spin">progress_activity</span>
+                        </span>
+                    </span>
+                </button>
+            </form>
+        </section>
+    </section>
+</main>
+{% endblock %}

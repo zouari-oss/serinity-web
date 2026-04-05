@@ -1,0 +1,25 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Dashboard | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Dashboard', subtitle: 'Activity overview', username: userName } %}
+        <section class="ac-cards">
+            <article class="ac-stat-card"><h3>Total Users</h3><p>{{ stats.users }}</p></article>
+            <article class="ac-stat-card"><h3>Active Sessions</h3><p>{{ stats.sessions }}</p></article>
+            <article class="ac-stat-card"><h3>Audit Events</h3><p>{{ stats.audits }}</p></article>
+            <article class="ac-stat-card"><h3>Profiles Complete</h3><p>{{ stats.profileCompletion }}%</p></article>
+        </section>
+        <section class="ac-card">
+            <h3>Recent activity</h3>
+            {% include 'access_control/components/_table.html.twig' with {
+                columns: ['Time', 'User', 'Action', 'Status'],
+                rows: recentActivity,
+                searchable: true
+            } %}
+        </section>
+    </div>
+</div>
+{% endblock %}

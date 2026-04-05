@@ -1,0 +1,19 @@
+<aside class="ac-sidebar">
+    <div class="ac-brand">
+        <div class="ac-brand-badge">S</div>
+        <div>
+            <p class="ac-brand-name">Serinity</p>
+            <p class="ac-brand-sub">Access Control</p>
+        </div>
+    </div>
+
+    <nav class="ac-nav" aria-label="Primary">
+        {% for item in items %}
+            <a class="ac-nav-link {{ item.active ? 'is-active' : '' }}" href="{{ path(item.route) }}">{{ item.label }}</a>
+        {% endfor %}
+    </nav>
+
+    <div class="ac-sidebar-footer">
+        <button type="button" class="ac-ghost-btn" data-action="ui-theme#toggle">Toggle theme</button>
+    </div>
+</aside>

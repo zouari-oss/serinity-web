@@ -1,0 +1,18 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Sessions | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Sessions', subtitle: 'Monitor and revoke active sessions', username: userName } %}
+        <section class="ac-card">
+            {% include 'access_control/components/_table.html.twig' with {
+                columns: ['User', 'Created at', 'Expires at', 'Revoked'],
+                rows: sessions,
+                searchable: true
+            } %}
+        </section>
+    </div>
+</div>
+{% endblock %}

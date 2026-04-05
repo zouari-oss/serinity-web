@@ -1,0 +1,22 @@
+<div class="ac-table-wrap" data-controller="table-filter">
+    {% if searchable|default(false) %}
+        <label class="sr-only" for="table-search">Search</label>
+        <input id="table-search" class="ac-input" type="search" placeholder="Search..." data-action="input->table-filter#filter" data-table-filter-target="input">
+    {% endif %}
+    <table class="ac-table" data-table-filter-target="table">
+        <thead>
+            <tr>
+                {% for col in columns %}<th scope="col">{{ col }}</th>{% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+                <tr>
+                    {% for value in row %}<td>{{ value }}</td>{% endfor %}
+                </tr>
+            {% else %}
+                <tr><td colspan="{{ columns|length }}">No records found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

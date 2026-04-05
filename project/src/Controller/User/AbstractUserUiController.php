@@ -1,0 +1,51 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Controller\User;
+
+use App\Entity\User;
+use App\Enum\AccountStatus;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
+abstract class AbstractUserUiController extends AbstractController
+{
+    protected function currentUser(): User
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if (!in_array($user->getRole(), ['PATIENT', 'THERAPIST'], true)) {
+            throw $this->createAccessDeniedException();
+        }
+        if ($user->getAccountStatus() === AccountStatus::DISABLED->value) {
+            throw $this->createAccessDeniedException('Your account is disabled.');
+        }
+
+        return $user;
+    }
+
+    /**
+     * @return list<array{label:string,route:string,icon:string,section:string,active:bool}>
+     */
+    protected function buildNav(string $activeRoute): array
+    {
+        $items = [
+            ['label' => 'Dashboard', 'route' => 'user_ui_dashboard', 'icon' => 'dashboard', 'section' => 'home'],
+            ['label' => 'Profile', 'route' => 'user_ui_profile', 'icon' => 'person', 'section' => 'home'],
+            ['label' => 'Settings', 'route' => 'user_ui_settings', 'icon' => 'settings', 'section' => 'home'],
+            ['label' => 'Consultations', 'route' => 'user_ui_consultations', 'icon' => 'medical_services', 'section' => 'modules'],
+            ['label' => 'Exercises', 'route' => 'user_ui_exercises', 'icon' => 'fitness_center', 'section' => 'modules'],
+            ['label' => 'Forum', 'route' => 'user_ui_forum', 'icon' => 'forum', 'section' => 'modules'],
+            ['label' => 'Mood', 'route' => 'user_ui_mood', 'icon' => 'mood', 'section' => 'modules'],
+            ['label' => 'Sleep', 'route' => 'user_ui_sleep', 'icon' => 'bedtime', 'section' => 'modules'],
+        ];
+
+        return array_map(static fn(array $item): array => [
+            ...$item,
+            'active' => $item['route'] === $activeRoute,
+        ], $items);
+    }
+}

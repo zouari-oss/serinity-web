@@ -1,0 +1,55 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}My Profile | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'My Profile', subtitle: 'Manage your personal details', username: userName } %}
+        <div data-controller="flash-toast">
+            {% for message in app.flashes('success') %}
+                <span data-flash-toast-target="message" data-type="success" hidden>{{ message }}</span>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <span data-flash-toast-target="message" data-type="error" hidden>{{ message }}</span>
+            {% endfor %}
+        </div>
+        <section class="ac-card">
+            <div class="ac-row-between">
+                <strong>Account status</strong>
+                <span class="ac-badge ac-badge-{{ accountStatus == 'ACTIVE' ? 'success' : 'danger' }}">{{ accountStatus }}</span>
+            </div>
+            <div class="ac-row-between">
+                <strong>Presence</strong>
+                <span class="ac-badge ac-badge-{{ presenceStatus == 'ONLINE' ? 'success' : 'secondary' }}">{{ presenceStatus }}</span>
+            </div>
+            <div class="ac-row-between">
+                <strong>Role</strong>
+                <span class="ac-badge ac-badge-{{ userRole|lower }}">{{ userRole }}</span>
+            </div>
+        </section>
+        <section class="ac-card">
+            <form class="ac-form ac-grid-two" method="post" action="{{ path('user_ui_profile') }}" enctype="multipart/form-data">
+                <label class="ac-col-span-2">Profile image
+                    {% if profile.profileImageUrl %}
+                        <div style="margin-bottom: .6rem;">
+                            <img src="{{ profile.profileImageUrl }}" alt="Profile image" style="max-width: 120px; max-height: 120px; border-radius: 12px; border: 1px solid var(--border);">
+                        </div>
+                    {% endif %}
+                    <input class="ac-input" name="profileImage" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+                </label>
+                <label>Email<input class="ac-input" name="email" type="email" value="{{ profile.email }}" required></label>
+                <label>Username<input class="ac-input" name="username" type="text" value="{{ profile.username }}"></label>
+                <label>First name<input class="ac-input" name="firstName" type="text" value="{{ profile.firstName }}"></label>
+                <label>Last name<input class="ac-input" name="lastName" type="text" value="{{ profile.lastName }}"></label>
+                <label>Country<input class="ac-input" name="country" type="text" value="{{ profile.country }}"></label>
+                <label>State<input class="ac-input" name="state" type="text" value="{{ profile.state }}"></label>
+                <label class="ac-col-span-2">About
+                    <textarea class="ac-input" name="aboutMe" rows="4">{{ profile.aboutMe }}</textarea>
+                </label>
+                <div class="ac-row-end ac-col-span-2"><button class="ac-btn" type="submit">Save changes</button></div>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

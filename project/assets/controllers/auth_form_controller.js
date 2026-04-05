@@ -62,9 +62,12 @@ export default class extends Controller {
         btnSpinner.innerHTML = '<span class="material-symbols-outlined">check_circle</span>';
       }
       
+      const role = String(payload?.data?.user?.role || '').toUpperCase();
+      const redirectPath = role === 'ADMIN' ? '/admin/dashboard' : '/user/dashboard';
+
       // Redirect after animation
       setTimeout(() => {
-        window.location.href = '/admin/dashboard';
+        window.location.href = redirectPath;
       }, 800);
       
     } catch (e) {

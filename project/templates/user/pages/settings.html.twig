@@ -1,0 +1,72 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Settings | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Settings', subtitle: 'Personal preferences', username: userName } %}
+        <div data-controller="flash-toast">
+            {% for message in app.flashes('success') %}
+                <span data-flash-toast-target="message" data-type="success" hidden>{{ message }}</span>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <span data-flash-toast-target="message" data-type="error" hidden>{{ message }}</span>
+            {% endfor %}
+        </div>
+        <section class="ac-card">
+            <form class="ac-form" method="post" action="{{ path('user_ui_settings') }}">
+                <label>
+                    <span class="ac-label">Theme</span>
+                    <select class="ac-input" name="theme">
+                        <option value="system" {{ settings.theme == 'system' ? 'selected' : '' }}>System</option>
+                        <option value="light" {{ settings.theme == 'light' ? 'selected' : '' }}>Light</option>
+                        <option value="dark" {{ settings.theme == 'dark' ? 'selected' : '' }}>Dark</option>
+                    </select>
+                </label>
+                <label class="ac-check"><input type="checkbox" name="notifications" value="1" {{ settings.notifications ? 'checked' : '' }}> Enable notifications</label>
+                <label class="ac-check"><input type="checkbox" name="compactView" value="1" {{ settings.compactView ? 'checked' : '' }}> Compact module view</label>
+                <div class="ac-row-end"><button class="ac-btn" type="submit">Save settings</button></div>
+            </form>
+        </section>
+        <section class="ac-card">
+            <h3>Security</h3>
+            <p style="color: var(--muted);">Change your password securely.</p>
+            <form class="ac-form" method="post" action="{{ path('user_ui_settings_change_password') }}">
+                <label>
+                    <span class="ac-label">Current password</span>
+                    <input class="ac-input" type="password" name="currentPassword" required autocomplete="current-password">
+                </label>
+                <label>
+                    <span class="ac-label">New password</span>
+                    <input class="ac-input" type="password" name="newPassword" required minlength="8" autocomplete="new-password">
+                </label>
+                <label>
+                    <span class="ac-label">Confirm new password</span>
+                    <input class="ac-input" type="password" name="confirmPassword" required minlength="8" autocomplete="new-password">
+                </label>
+                <div class="ac-row-end">
+                    <button class="ac-btn" type="submit">Change password</button>
+                </div>
+            </form>
+        </section>
+        <section class="ac-card">
+            <h3>Delete account</h3>
+            <p style="color: var(--muted);">Delete your account permanently. This action cannot be undone.</p>
+            <form class="ac-form" method="post" action="{{ path('user_ui_settings_delete_account') }}">
+                <label>
+                    <span class="ac-label">Current password</span>
+                    <input class="ac-input" type="password" name="currentPassword" required autocomplete="current-password">
+                </label>
+                <label>
+                    <span class="ac-label">Type DELETE to confirm</span>
+                    <input class="ac-input" type="text" name="confirmDelete" required placeholder="DELETE">
+                </label>
+                <div class="ac-row-end">
+                    <button class="ac-btn" style="background: var(--danger); color: #fff;" type="submit">Delete account</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

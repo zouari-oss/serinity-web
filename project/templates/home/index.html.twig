@@ -12,18 +12,38 @@
                     <img src="{{ asset('assets/logo/serinity-logo-without-bg-and-app-name.png') }}" alt="Serinity" class="navbar-logo">
                     <span class="navbar-title">Serinity</span>
                 </div>
-                <div class="navbar-links">
+                <div class="navbar-links" data-controller="home-session">
                     <a href="#features" class="nav-link">Features</a>
                     <a href="#about" class="nav-link">About</a>
                     <a href="#download" class="nav-link">Download</a>
-                    <a href="{{ path('ac_ui_login') }}" class="nav-link-btn">Sign In</a>
+                    {% set hasAdminSession = (app.user and is_granted('ROLE_ADMIN')) or app.request.cookies.get('access_token') %}
+                    {% if hasAdminSession %}
+                        <div class="nav-dropdown">
+                            <button type="button" class="nav-link-btn nav-dropdown-trigger" data-action="click->home-session#toggleMenu">
+                                <span class="material-symbols-outlined">account_circle</span>
+                                <span class="material-symbols-outlined">expand_more</span>
+                            </button>
+                            <div class="nav-dropdown-menu" data-home-session-target="menu" hidden>
+                                <a href="{{ path('ac_ui_dashboard') }}" class="nav-dropdown-item">
+                                    <span class="material-symbols-outlined">dashboard</span>
+                                    <span>Dashboard</span>
+                                </a>
+                                <button type="button" class="nav-dropdown-item nav-dropdown-item-danger" data-action="click->home-session#logout">
+                                    <span class="material-symbols-outlined">logout</span>
+                                    <span>Logout</span>
+                                </button>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="{{ path('ac_ui_login') }}" class="nav-link-btn">Sign In</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero-section">
+    <section class="hero-section home-reveal">
         <div class="container">
             <div class="hero-content">
                 <h1 class="hero-title">Your Journey to Mental Wellness</h1>
@@ -40,13 +60,13 @@
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="features-section">
+    <section id="features" class="features-section home-reveal">
         <div class="container">
             <h2 class="section-title">Key Features</h2>
             <p class="section-subtitle">Comprehensive tools for mental health and personal growth</p>
             
             <div class="features-grid">
-                <div class="feature-card">
+                <div class="feature-card home-reveal-card">
                     <div class="feature-icon">
                         <span class="material-symbols-outlined">psychology</span>
                     </div>
@@ -54,7 +74,7 @@
                     <p>Facial recognition authentication, NLP emotion detection, and intelligent appointment scheduling powered by advanced AI.</p>
                 </div>
                 
-                <div class="feature-card">
+                <div class="feature-card home-reveal-card">
                     <div class="feature-icon">
                         <span class="material-symbols-outlined">sentiment_satisfied</span>
                     </div>
@@ -62,7 +82,7 @@
                     <p>Daily mood tracking with guided emotional questions and personal journaling with NLP-based analysis.</p>
                 </div>
                 
-                <div class="feature-card">
+                <div class="feature-card home-reveal-card">
                     <div class="feature-icon">
                         <span class="material-symbols-outlined">bedtime</span>
                     </div>
@@ -70,7 +90,7 @@
                     <p>Analyze your sleep cycles, log dreams, and understand their emotional impact on your well-being.</p>
                 </div>
                 
-                <div class="feature-card">
+                <div class="feature-card home-reveal-card">
                     <div class="feature-icon">
                         <span class="material-symbols-outlined">self_improvement</span>
                     </div>
@@ -78,7 +98,7 @@
                     <p>Access guided relaxation, meditation exercises, and multimedia resources to support your journey.</p>
                 </div>
                 
-                <div class="feature-card">
+                <div class="feature-card home-reveal-card">
                     <div class="feature-icon">
                         <span class="material-symbols-outlined">groups</span>
                     </div>
@@ -86,7 +106,7 @@
                     <p>Connect with others in a secure community forum for peer support and shared experiences.</p>
                 </div>
                 
-                <div class="feature-card">
+                <div class="feature-card home-reveal-card">
                     <div class="feature-icon">
                         <span class="material-symbols-outlined">calendar_month</span>
                     </div>
@@ -98,7 +118,7 @@
     </section>
 
     <!-- About Section -->
-    <section id="about" class="about-section">
+    <section id="about" class="about-section home-reveal">
         <div class="container">
             <div class="about-content">
                 <h2 class="section-title">About Serinity</h2>
@@ -123,12 +143,12 @@
     </section>
 
     <!-- Download Section -->
-    <section id="download" class="download-section">
+    <section id="download" class="download-section home-reveal">
         <div class="container">
             <h2 class="section-title">Get Started Today</h2>
             <p class="section-subtitle">Available on desktop and web platforms</p>
             <div class="download-options">
-                <a href="https://github.com/zouari-oss/serinity-desktop/releases" target="_blank" class="download-card">
+                <a href="https://github.com/zouari-oss/serinity-desktop/releases" target="_blank" class="download-card home-reveal-card">
                     <div class="download-icon">
                         <span class="material-symbols-outlined">computer</span>
                     </div>
@@ -136,7 +156,7 @@
                     <p>Download for Windows, macOS, and Linux</p>
                     <span class="download-link">View Releases →</span>
                 </a>
-                <a href="{{ path('ac_ui_login', {'mode': 'signup'}) }}" class="download-card">
+                <a href="{{ path('ac_ui_login', {'mode': 'signup'}) }}" class="download-card home-reveal-card">
                     <div class="download-icon">
                         <span class="material-symbols-outlined">language</span>
                     </div>

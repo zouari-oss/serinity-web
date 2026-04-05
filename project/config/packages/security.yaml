@@ -19,6 +19,8 @@ security:
             stateless: true
             lazy: true
             provider: app_user_provider
+            user_checker: App\Security\AccountStatusUserChecker
+            entry_point: App\Security\ApiAwareEntryPoint
             custom_authenticators:
                 - App\Security\Jwt\JwtAuthenticator
 
@@ -32,6 +34,8 @@ security:
     access_control:
         - { path: ^/api/auth/(login|register|logout|refresh|reset/send|reset/confirm)$, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/me$, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/api/admin, roles: ROLE_ADMIN }
         - { path: ^/api, roles: PUBLIC_ACCESS }
 
 when@test:

@@ -7,18 +7,53 @@
     <div class="ac-main">
         {% include 'access_control/components/_topbar.html.twig' with { title: 'Dashboard', subtitle: 'Activity overview', username: userName } %}
         <section class="ac-cards">
-            <article class="ac-stat-card"><h3>Total Users</h3><p>{{ stats.users }}</p></article>
-            <article class="ac-stat-card"><h3>Active Sessions</h3><p>{{ stats.sessions }}</p></article>
-            <article class="ac-stat-card"><h3>Audit Events</h3><p>{{ stats.audits }}</p></article>
-            <article class="ac-stat-card"><h3>Profiles Complete</h3><p>{{ stats.profileCompletion }}%</p></article>
+            <article class="ac-stat-card"><h3>Total Users</h3><p>{{ stats.totalUsers }}</p></article>
+            <article class="ac-stat-card"><h3>Active Sessions</h3><p>{{ stats.activeSessions }}</p></article>
+            <article class="ac-stat-card"><h3>Audit Events (7d)</h3><p>{{ stats.recentAuditEvents }}</p></article>
+            <article class="ac-stat-card"><h3>Profiles Complete</h3><p>{{ stats.profileCompletionPercentage|number_format(0) }}%</p></article>
+        </section>
+        <section class="ac-charts">
+            <article class="ac-card">
+                <h3>Profile completion chart</h3>
+                <div class="ac-donut-chart" style="--chart-value: {{ stats.profileCompletionPercentage|number_format(0, '.', '') }};">
+                    <span>{{ stats.profileCompletionPercentage|number_format(0) }}%</span>
+                </div>
+            </article>
+            <article class="ac-card">
+                <h3>Activity chart (sessions vs audits)</h3>
+                {% set sessions = stats.activeSessions|default(0) %}
+                {% set audits = stats.recentAuditEvents|default(0) %}
+                {% set peak = max(1, sessions, audits) %}
+                <div class="ac-bar-chart">
+                    <div class="ac-bar-row">
+                        <div class="ac-bar-label">Active sessions</div>
+                        <div class="ac-bar-track"><div class="ac-bar-fill" style="width: {{ (sessions / peak * 100)|number_format(0, '.', '') }}%;"></div></div>
+                        <div class="ac-bar-value">{{ sessions }}</div>
+                    </div>
+                    <div class="ac-bar-row">
+                        <div class="ac-bar-label">Audit events (7d)</div>
+                        <div class="ac-bar-track"><div class="ac-bar-fill ac-bar-fill-alt" style="width: {{ (audits / peak * 100)|number_format(0, '.', '') }}%;"></div></div>
+                        <div class="ac-bar-value">{{ audits }}</div>
+                    </div>
+                </div>
+            </article>
         </section>
         <section class="ac-card">
             <h3>Recent activity</h3>
-            {% include 'access_control/components/_table.html.twig' with {
-                columns: ['Time', 'User', 'Action', 'Status'],
-                rows: recentActivity,
-                searchable: true
-            } %}
+            {% if recentActivity is empty %}
+                <p style="padding: 2rem; text-align: center; color: var(--ac-text-muted, #6b7280);">No recent activity</p>
+            {% else %}
+                {% include 'access_control/components/_table.html.twig' with {
+                    columns: ['Time', 'Event', 'User', 'IP Address'],
+                    rows: recentActivity|map(activity => [
+                        activity.timestamp|date('Y-m-d H:i'),
+                        activity.eventType,
+                        activity.userEmail,
+                        activity.ipAddress
+                    ]),
+                    searchable: true
+                } %}
+            {% endif %}
         </section>
     </div>
 </div>

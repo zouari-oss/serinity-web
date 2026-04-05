@@ -243,7 +243,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return ['ROLE_' . strtoupper($this->role)];
     }
 
-    public function eraseCredentials(): void
-    {
-    }
+    public function eraseCredentials(): void {}
 }

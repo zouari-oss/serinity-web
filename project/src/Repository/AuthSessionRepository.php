@@ -45,4 +45,43 @@ class AuthSessionRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    /**
+     * Count currently active (non-revoked, non-expired) sessions.
+     */
+    public function countActiveSessions(): int
+    {
+        return (int) $this->createQueryBuilder('s')
+            ->select('COUNT(s.id)')
+            ->andWhere('s.revoked = :revoked')
+            ->andWhere('s.expiresAt > :now')
+            ->setParameter('revoked', false)
+            ->setParameter('now', new \DateTimeImmutable())
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /** @return list<AuthSession> */
+    public function findRecent(int $limit = 50): array
+    {
+        return $this->createQueryBuilder('s')
+            ->leftJoin('s.user', 'u')
+            ->addSelect('u')
+            ->orderBy('s.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** @return list<AuthSession> */
+    public function findRecentForUser(User $user, int $limit = 100): array
+    {
+        return $this->createQueryBuilder('s')
+            ->andWhere('s.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('s.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

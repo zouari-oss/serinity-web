@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Service\AccessControl;
+namespace App\Service;
 
 use App\Entity\AuthSession;
 use App\Entity\User;

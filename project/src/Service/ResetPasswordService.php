@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Service\AccessControl;
+namespace App\Service;
 
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;

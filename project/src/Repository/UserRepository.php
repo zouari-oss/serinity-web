@@ -97,6 +97,18 @@ class UserRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    public function countNonAdminByAccountStatus(AccountStatus $status): int
+    {
+        return (int) $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.accountStatus = :status')
+            ->andWhere('u.role != :adminRole')
+            ->setParameter('status', $status->value)
+            ->setParameter('adminRole', UserRole::ADMIN->value)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     /**
      * Count users by role.
      */
@@ -129,5 +141,90 @@ class UserRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
 
         return (int) round(($usersWithProfiles / $totalUsers) * 100);
+    }
+
+    public function countCreatedSince(\DateTimeImmutable $since): int
+    {
+        return (int) $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.createdAt >= :since')
+            ->setParameter('since', $since)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countNonAdminCreatedSince(\DateTimeImmutable $since): int
+    {
+        return (int) $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.createdAt >= :since')
+            ->andWhere('u.role != :adminRole')
+            ->setParameter('since', $since)
+            ->setParameter('adminRole', UserRole::ADMIN->value)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Find non-admin users with pagination and optional filters.
+     *
+     * @param array{email?: string, role?: string, accountStatus?: string} $filters
+     * @return array{users: User[], total: int, page: int, limit: int, totalPages: int}
+     */
+    public function findPaginatedNonAdmin(int $page = 1, int $limit = 20, array $filters = []): array
+    {
+        $qb = $this->createQueryBuilder('u')
+            ->leftJoin('u.profile', 'p')
+            ->addSelect('p')
+            ->andWhere('u.role != :adminRole')
+            ->setParameter('adminRole', UserRole::ADMIN->value);
+
+        if (!empty($filters['email'])) {
+            $qb->andWhere('u.email LIKE :email')
+                ->setParameter('email', '%' . $filters['email'] . '%');
+        }
+
+        if (!empty($filters['role']) && in_array($filters['role'], [UserRole::PATIENT->value, UserRole::THERAPIST->value], true)) {
+            $qb->andWhere('u.role = :role')
+                ->setParameter('role', $filters['role']);
+        }
+
+        if (!empty($filters['accountStatus'])) {
+            $qb->andWhere('u.accountStatus = :accountStatus')
+                ->setParameter('accountStatus', $filters['accountStatus']);
+        }
+
+        $countQb = clone $qb;
+        $total = (int) $countQb->select('COUNT(u.id)')->getQuery()->getSingleScalarResult();
+
+        $offset = ($page - 1) * $limit;
+        $qb->setFirstResult($offset)
+            ->setMaxResults($limit)
+            ->orderBy('u.createdAt', 'DESC');
+
+        $users = $qb->getQuery()->getResult();
+        $totalPages = (int) ceil($total / $limit);
+
+        return [
+            'users' => $users,
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit,
+            'totalPages' => $totalPages,
+        ];
+    }
+
+    /**
+     * @return list<User>
+     */
+    public function findAllNonAdmin(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->leftJoin('u.profile', 'p')
+            ->addSelect('p')
+            ->where('u.role != :adminRole')
+            ->setParameter('adminRole', UserRole::ADMIN->value)
+            ->getQuery()
+            ->getResult();
     }
 }

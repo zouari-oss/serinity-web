@@ -40,7 +40,7 @@ final readonly class UserManagementService
      */
     public function getUsersPaginated(UserFilterRequest $request): array
     {
-        return $this->userRepository->findPaginated(
+        return $this->userRepository->findPaginatedNonAdmin(
             $request->page,
             $request->limit,
             $request->toFilters()

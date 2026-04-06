@@ -1,0 +1,136 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Mood | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div
+        class="ac-main"
+        data-controller="user-mood"
+        data-user-mood-create-url-value="{{ path('api_user_mood_create') }}"
+        data-user-mood-history-url-value="{{ path('api_user_mood_history') }}"
+        data-user-mood-summary-url-value="{{ path('api_user_mood_summary') }}"
+    >
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Mood', subtitle: 'Track your day and moments', username: userName } %}
+
+        <section class="ac-cards">
+            <article class="ac-stat-card">
+                <h3>Entries (7 days)</h3>
+                <p data-user-mood-target="weeklyCount">0</p>
+            </article>
+            <article class="ac-stat-card">
+                <h3>Average mood</h3>
+                <p data-user-mood-target="weeklyAverage">--</p>
+            </article>
+            <article class="ac-stat-card">
+                <h3>Most used type</h3>
+                <p data-user-mood-target="mostUsedType">No data</p>
+            </article>
+            <article class="ac-stat-card">
+                <h3>Range</h3>
+                <p data-user-mood-target="summaryRange">--</p>
+            </article>
+        </section>
+
+        <section class="ac-card ac-grid-two">
+            <div class="ac-col-span-2 ac-row-between">
+                <h3>Mood highlights</h3>
+            </div>
+            <article class="ac-mood-highlight">
+                <span class="material-symbols-outlined">sentiment_satisfied</span>
+                <div>
+                    <strong>Top emotion</strong>
+                    <p data-user-mood-target="topEmotion">No data</p>
+                </div>
+            </article>
+            <article class="ac-mood-highlight">
+                <span class="material-symbols-outlined">tactic</span>
+                <div>
+                    <strong>Top influence</strong>
+                    <p data-user-mood-target="topInfluence">No data</p>
+                </div>
+            </article>
+        </section>
+
+        <section class="ac-card">
+            <div class="ac-row-between">
+                <h3>New mood entry</h3>
+                <span class="ac-mood-form-meta">1 = very low, 5 = very high</span>
+            </div>
+            <form class="ac-form ac-grid-two" data-user-mood-target="form" data-action="submit->user-mood#submitEntry">
+                <label>
+                    <span class="ac-label">Moment / day</span>
+                    <select class="ac-input" name="momentType" required>
+                        <option value="MOMENT">Moment</option>
+                        <option value="DAY">Day</option>
+                    </select>
+                </label>
+                <label class="ac-col-span-2">
+                    <span class="ac-label">Mood level</span>
+                    <input class="ac-input" name="moodLevel" type="range" min="1" max="5" step="1" value="3" data-action="input->user-mood#updateMoodLevelLabel">
+                    <div class="ac-mood-level-scale">
+                        <span>1</span>
+                        <strong data-user-mood-target="moodLevelValue">3</strong>
+                        <span>5</span>
+                    </div>
+                </label>
+
+                <fieldset class="ac-col-span-2 ac-mood-option-grid">
+                    <legend class="ac-label">Emotions (choose at least 1)</legend>
+                    {% for emotion in emotionOptions %}
+                        <label class="ac-check">
+                            <input type="checkbox" name="emotionKeys" value="{{ emotion.key }}">
+                            {{ emotion.label }}
+                        </label>
+                    {% endfor %}
+                </fieldset>
+
+                <fieldset class="ac-col-span-2 ac-mood-option-grid">
+                    <legend class="ac-label">Influences (choose at least 1)</legend>
+                    {% for influence in influenceOptions %}
+                        <label class="ac-check">
+                            <input type="checkbox" name="influenceKeys" value="{{ influence.key }}">
+                            {{ influence.label }}
+                        </label>
+                    {% endfor %}
+                </fieldset>
+
+                <label class="ac-col-span-2">
+                    <span class="ac-label">Note (optional)</span>
+                    <textarea class="ac-input" name="note" rows="3" maxlength="1000" placeholder="What happened today?"></textarea>
+                </label>
+
+                <div class="ac-row-end ac-col-span-2">
+                    <button class="ac-btn" data-user-mood-target="submitButton" type="submit">Save entry</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="ac-card">
+            <div class="ac-row-between ac-mood-history-head">
+                <h3>History</h3>
+                <form class="ac-mood-history-filters" data-action="submit->user-mood#applyFilters">
+                    <input class="ac-input" data-user-mood-target="filterSearch" type="search" placeholder="Search note">
+                    <select class="ac-input" data-user-mood-target="filterMomentType">
+                        <option value="">All types</option>
+                        <option value="MOMENT">Moment</option>
+                        <option value="DAY">Day</option>
+                    </select>
+                    <input class="ac-input" data-user-mood-target="filterFromDate" type="date">
+                    <button class="ac-ghost-btn" type="submit">Apply</button>
+                </form>
+            </div>
+            <div class="ac-row-between ac-mood-history-meta">
+                <p data-user-mood-target="historyMeta">Loading history...</p>
+                <div class="ac-row-end">
+                    <button class="ac-ghost-btn" data-user-mood-target="prevPageButton" data-action="user-mood#prevPage" type="button">Previous</button>
+                    <span data-user-mood-target="pageLabel">Page 1</span>
+                    <button class="ac-ghost-btn" data-user-mood-target="nextPageButton" data-action="user-mood#nextPage" type="button">Next</button>
+                </div>
+            </div>
+            <div class="ac-mood-history-list" data-user-mood-target="historyList"></div>
+            <p class="ac-mood-history-empty" data-user-mood-target="historyEmpty" hidden>No mood entries yet.</p>
+        </section>
+    </div>
+</div>
+{% endblock %}

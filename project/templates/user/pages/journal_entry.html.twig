@@ -1,0 +1,121 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Journal | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main" data-controller="journal-editor">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Journal entries', subtitle: 'Capture your daily reflections', username: userName } %}
+        <div data-controller="flash-toast">
+            {% for message in app.flashes('success') %}
+                <span data-flash-toast-target="message" data-type="success" hidden>{{ message }}</span>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <span data-flash-toast-target="message" data-type="error" hidden>{{ message }}</span>
+            {% endfor %}
+        </div>
+
+        <section class="ac-cards">
+            <article class="ac-stat-card">
+                <h3>Current streak</h3>
+                <p>{{ current_streak }}</p>
+            </article>
+            <article class="ac-stat-card">
+                <h3>Longest streak</h3>
+                <p>{{ longest_streak }}</p>
+            </article>
+            <article class="ac-stat-card">
+                <h3>Best day volume</h3>
+                <p>{{ max_entries_one_day }}</p>
+            </article>
+        </section>
+
+        <section class="ac-card">
+            <div class="ac-row-between">
+                <h3>New journal entry</h3>
+            </div>
+            <form class="ac-form ac-grid-two" method="post" action="{{ path('user_ui_journal_entry_new') }}">
+                <label class="ac-col-span-2">
+                    <span class="ac-label">Title</span>
+                    <input class="ac-input" name="title" type="text" maxlength="255" required>
+                </label>
+                <label class="ac-col-span-2">
+                    <span class="ac-label">Content</span>
+                    <textarea class="ac-input" name="content" rows="5" minlength="10" required></textarea>
+                </label>
+                <div class="ac-row-end ac-col-span-2">
+                    <button class="ac-btn" type="submit">Save entry</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="ac-card">
+            <div class="ac-row-between">
+                <h3>History</h3>
+                <form method="get" class="ac-journal-search">
+                    <input class="ac-input" type="search" name="q" value="{{ search }}" placeholder="Search title or content">
+                </form>
+            </div>
+
+            {% if grouped_entries is empty %}
+                <p class="ac-muted">No journal entries yet.</p>
+            {% else %}
+                {% for group in grouped_entries %}
+                    <article class="ac-journal-group">
+                        <h4>{{ group.label }}</h4>
+                        <div class="ac-journal-list">
+                            {% for journal_entry in group.entries %}
+                                <div class="ac-journal-card">
+                                    <div class="ac-row-between">
+                                        <h5>{{ journal_entry.title }}</h5>
+                                        <small>{{ journal_entry.createdAt|date('H:i') }}</small>
+                                    </div>
+                                    <p>{{ journal_entry.content|length > 220 ? journal_entry.content|slice(0, 220) ~ '...' : journal_entry.content }}</p>
+                                    <div class="ac-journal-actions">
+                                        <button
+                                            class="ac-ghost-btn"
+                                            type="button"
+                                            data-action="journal-editor#open"
+                                            data-edit-url="{{ path('user_ui_journal_entry_edit', {'id': journal_entry.id}) }}"
+                                            data-entry-title="{{ journal_entry.title|e('html_attr') }}"
+                                            data-entry-content="{{ journal_entry.content|e('html_attr') }}"
+                                            data-csrf="{{ csrf_token('journal_edit_' ~ journal_entry.id) }}"
+                                        >Edit</button>
+                                        <form method="post" action="{{ path('user_ui_journal_entry_delete', {'id': journal_entry.id}) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('journal_delete_' ~ journal_entry.id) }}">
+                                            <button class="ac-ghost-btn" type="submit">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </article>
+                {% endfor %}
+            {% endif %}
+        </section>
+
+        <div class="ac-modal" data-journal-editor-target="modal" data-action="click->journal-editor#closeOnBackdrop" hidden>
+            <div class="ac-modal-content">
+                <div class="ac-row-between">
+                    <h3>Edit journal entry</h3>
+                    <button type="button" class="ac-ghost-btn" data-action="journal-editor#close">Close</button>
+                </div>
+                <form class="ac-form" method="post" data-journal-editor-target="form">
+                    <input type="hidden" name="_token" data-journal-editor-target="token">
+                    <label>
+                        <span class="ac-label">Title</span>
+                        <input class="ac-input" type="text" name="title" maxlength="255" required data-journal-editor-target="title">
+                    </label>
+                    <label>
+                        <span class="ac-label">Content</span>
+                        <textarea class="ac-input" name="content" rows="6" minlength="10" required data-journal-editor-target="content"></textarea>
+                    </label>
+                    <div class="ac-row-end">
+                        <button class="ac-btn" type="submit">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

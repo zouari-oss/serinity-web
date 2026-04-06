@@ -28,7 +28,14 @@ abstract class AbstractUserUiController extends AbstractController
     }
 
     /**
-     * @return list<array{label:string,route:string,icon:string,section:string,active:bool}>
+     * @return list<array{
+     *     label:string,
+     *     route:string,
+     *     icon:string,
+     *     section:string,
+     *     active:bool,
+     *     children?:list<array{label:string,route:string,icon:string,active:bool}>
+     * }>
      */
     protected function buildNav(string $activeRoute): array
     {
@@ -39,13 +46,35 @@ abstract class AbstractUserUiController extends AbstractController
             ['label' => 'Consultations', 'route' => 'user_ui_consultations', 'icon' => 'medical_services', 'section' => 'modules'],
             ['label' => 'Exercises', 'route' => 'user_ui_exercises', 'icon' => 'fitness_center', 'section' => 'modules'],
             ['label' => 'Forum', 'route' => 'user_ui_forum', 'icon' => 'forum', 'section' => 'modules'],
-            ['label' => 'Mood', 'route' => 'user_ui_mood', 'icon' => 'mood', 'section' => 'modules'],
+            [
+                'label' => 'Mood',
+                'route' => 'user_ui_mood',
+                'icon' => 'mood',
+                'section' => 'modules',
+                'children' => [
+                    ['label' => 'Mood entries', 'route' => 'user_ui_mood', 'icon' => 'list'],
+                    ['label' => 'Journal', 'route' => 'user_ui_journal_entry', 'icon' => 'edit_note'],
+                ],
+            ],
             ['label' => 'Sleep', 'route' => 'user_ui_sleep', 'icon' => 'bedtime', 'section' => 'modules'],
         ];
 
-        return array_map(static fn(array $item): array => [
-            ...$item,
-            'active' => $item['route'] === $activeRoute,
-        ], $items);
+        return array_map(static function (array $item) use ($activeRoute): array {
+            $children = $item['children'] ?? [];
+            $mappedChildren = array_map(
+                static fn(array $child): array => [
+                    ...$child,
+                    'active' => $child['route'] === $activeRoute,
+                ],
+                $children,
+            );
+
+            return [
+                ...$item,
+                'children' => $mappedChildren,
+                'active' => $item['route'] === $activeRoute
+                    || array_any($mappedChildren, static fn(array $child): bool => $child['active']),
+            ];
+        }, $items);
     }
 }

@@ -1,0 +1,69 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Influence management | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Influence management', subtitle: 'Manage available influences', username: userName } %}
+        {% for message in app.flashes('success') %}
+            <section class="ac-card"><p style="color: var(--success);">{{ message }}</p></section>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <section class="ac-card"><p style="color: var(--danger);">{{ message }}</p></section>
+        {% endfor %}
+
+        <section class="ac-card">
+            <div class="ac-row-between ac-mood-history-head">
+                <h3>Add influence</h3>
+                <a class="ac-ghost-btn" href="{{ path('ac_ui_mood') }}">Back to mood analytics</a>
+            </div>
+            <form method="post" class="ac-form ac-inline-form">
+                <input type="hidden" name="_token" value="{{ csrf_token('influence_create') }}">
+                <label>
+                    <span class="ac-label">Name</span>
+                    <input class="ac-input" type="text" name="name" maxlength="60" required placeholder="e.g. Work/Study">
+                </label>
+                <button class="ac-btn ac-btn-primary" type="submit">Add influence</button>
+            </form>
+        </section>
+
+        <section class="ac-card">
+            <h3>Influences</h3>
+            <div class="ac-table-container">
+                <table class="ac-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for influence in influences %}
+                            <tr>
+                                <td>{{ influence.id }}</td>
+                                <td>
+                                    <form method="post" action="{{ path('ac_ui_influence_edit', { id: influence.id }) }}" class="ac-inline-form">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('influence_edit_' ~ influence.id) }}">
+                                        <input class="ac-input" type="text" name="name" maxlength="60" value="{{ influence.name }}" required>
+                                        <button class="ac-ghost-btn" type="submit">Save</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form method="post" action="{{ path('ac_ui_influence_delete', { id: influence.id }) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('influence_delete_' ~ influence.id) }}">
+                                        <button class="ac-danger-btn" type="submit">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="3">No influences found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

@@ -16,10 +16,28 @@
                 {% endif %}
                 {% set currentSection = item.section %}
             {% endif %}
-            <a class="ac-nav-link {{ item.active ? 'is-active' : '' }}" href="{{ path(item.route) }}">
-                <span class="material-symbols-outlined">{{ item.icon|default('chevron_right') }}</span>
-                <span>{{ item.label }}</span>
-            </a>
+            {% if item.children is defined and item.children is not empty %}
+                <details class="ac-nav-group" {{ item.active ? 'open' : '' }}>
+                    <summary class="ac-nav-link {{ item.active ? 'is-active' : '' }}">
+                        <span class="material-symbols-outlined">{{ item.icon|default('chevron_right') }}</span>
+                        <span>{{ item.label }}</span>
+                        <span class="material-symbols-outlined ac-nav-group-caret">expand_more</span>
+                    </summary>
+                    <div class="ac-nav-submenu">
+                        {% for child in item.children %}
+                            <a class="ac-nav-sublink {{ child.active ? 'is-active' : '' }}" href="{{ path(child.route) }}">
+                                <span class="material-symbols-outlined">{{ child.icon|default('chevron_right') }}</span>
+                                <span>{{ child.label }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </details>
+            {% else %}
+                <a class="ac-nav-link {{ item.active ? 'is-active' : '' }}" href="{{ path(item.route) }}">
+                    <span class="material-symbols-outlined">{{ item.icon|default('chevron_right') }}</span>
+                    <span>{{ item.label }}</span>
+                </a>
+            {% endif %}
         {% endfor %}
     </nav>
 </aside>

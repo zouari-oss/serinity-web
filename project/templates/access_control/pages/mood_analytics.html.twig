@@ -1,0 +1,107 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Mood analytics | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main" data-controller="mood-analytics" data-mood-analytics-summary-url-value="{{ path('api_admin_mood_summary') }}" data-mood-analytics-history-url-value="{{ path('api_admin_mood_history') }}">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Mood analytics', subtitle: 'Population trends and filtered history', username: userName } %}
+
+        <section class="ac-card">
+            <form class="ac-form ac-mood-filter-grid" data-mood-analytics-target="filterForm" data-action="submit->mood-analytics#applyFilters">
+                <label>
+                    <span class="ac-label">From date</span>
+                    <input class="ac-input" type="date" name="fromDate" data-mood-analytics-target="fromDate">
+                </label>
+                <label>
+                    <span class="ac-label">To date</span>
+                    <input class="ac-input" type="date" name="toDate" data-mood-analytics-target="toDate">
+                </label>
+                <label>
+                    <span class="ac-label">Moment type</span>
+                    <select class="ac-input" name="momentType" data-mood-analytics-target="momentType">
+                        <option value="">All</option>
+                        <option value="DAY">DAY</option>
+                        <option value="MOMENT">MOMENT</option>
+                    </select>
+                </label>
+                <label>
+                    <span class="ac-label">Mood level</span>
+                    <select class="ac-input" name="level" data-mood-analytics-target="level">
+                        <option value="">All levels</option>
+                        {% for moodLevel in 1..5 %}
+                            <option value="{{ moodLevel }}">{{ moodLevel }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    <span class="ac-label">Rows per page</span>
+                    <select class="ac-input" name="limit" data-mood-analytics-target="limit">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                    </select>
+                </label>
+                <div class="ac-mood-filter-actions">
+                    <button class="ac-btn ac-btn-primary" type="submit">Apply filters</button>
+                    <button class="ac-ghost-btn" type="button" data-action="click->mood-analytics#resetFilters">Reset</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="ac-cards ac-mood-summary-cards">
+            <article class="ac-stat-card">
+                <h3>Total entries</h3>
+                <p data-mood-analytics-target="entriesMetric">—</p>
+            </article>
+            <article class="ac-stat-card">
+                <h3>Average mood</h3>
+                <p data-mood-analytics-target="averageMetric">—</p>
+            </article>
+            <article class="ac-stat-card">
+                <h3>Most used type</h3>
+                <p data-mood-analytics-target="typeMetric">—</p>
+            </article>
+            <article class="ac-stat-card">
+                <h3>Top emotion</h3>
+                <p data-mood-analytics-target="emotionMetric">—</p>
+            </article>
+            <article class="ac-stat-card">
+                <h3>Top influence</h3>
+                <p data-mood-analytics-target="influenceMetric">—</p>
+            </article>
+            <article class="ac-stat-card">
+                <h3>Date range</h3>
+                <p data-mood-analytics-target="rangeMetric">—</p>
+            </article>
+        </section>
+
+        <section class="ac-card">
+            <div class="ac-row-between ac-mood-history-head">
+                <h3>History</h3>
+                <span class="ac-mood-history-meta" data-mood-analytics-target="historyMeta">Loading…</span>
+            </div>
+            <div class="ac-table-container">
+                <table class="ac-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>User role</th>
+                            <th>Moment type</th>
+                            <th>Mood level</th>
+                        </tr>
+                    </thead>
+                    <tbody data-mood-analytics-target="historyBody">
+                        <tr><td colspan="4">Loading…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="ac-row-between ac-mood-pagination">
+                <button class="ac-ghost-btn" type="button" data-action="click->mood-analytics#previousPage" data-mood-analytics-target="prevButton">Previous</button>
+                <span data-mood-analytics-target="pageLabel">Page 1 of 1</span>
+                <button class="ac-ghost-btn" type="button" data-action="click->mood-analytics#nextPage" data-mood-analytics-target="nextButton">Next</button>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

@@ -56,10 +56,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserFace::class, orphanRemoval: true)]
     private Collection $userFaces;
 
+    /** @var Collection<int, MoodEntry> */
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: MoodEntry::class, orphanRemoval: true)]
+    private Collection $moodEntries;
+
     public function __construct()
     {
         $this->authSessions = new ArrayCollection();
         $this->userFaces = new ArrayCollection();
+        $this->moodEntries = new ArrayCollection();
     }
 
     public function getId(): string
@@ -228,6 +233,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeUserFace(UserFace $userFace): self
     {
         $this->userFaces->removeElement($userFace);
+
+        return $this;
+    }
+
+    /** @return Collection<int, MoodEntry> */
+    public function getMoodEntries(): Collection
+    {
+        return $this->moodEntries;
+    }
+
+    public function addMoodEntry(MoodEntry $moodEntry): self
+    {
+        if (!$this->moodEntries->contains($moodEntry)) {
+            $this->moodEntries->add($moodEntry);
+            $moodEntry->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMoodEntry(MoodEntry $moodEntry): self
+    {
+        $this->moodEntries->removeElement($moodEntry);
 
         return $this;
     }

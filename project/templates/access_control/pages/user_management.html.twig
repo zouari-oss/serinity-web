@@ -6,43 +6,34 @@
     {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
     <div class="ac-main" data-controller="user-actions edit-user modal">
         {% include 'access_control/components/_topbar.html.twig' with { title: 'User management', subtitle: 'Manage roles and accounts', username: userName } %}
-        
-        {# Filters section #}
-        <section class="ac-card" style="margin-bottom: 1.5rem;">
-            <form method="get" action="{{ path('ac_ui_users') }}" class="ac-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <section class="ac-card">
+            <div class="ac-row-between" style="margin-bottom: 1rem;">
+                <h3>Users ({{ pagination.total }} total)</h3>
+                <button class="ac-btn" data-action="click->modal#open" data-modal-id-param="create-user-modal">Add user</button>
+            </div>
+            <form method="get" action="{{ path('ac_ui_users') }}" class="ac-form" data-controller="user-filters" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <input type="hidden" name="page" value="1">
                 <label style="display: flex; flex-direction: column; gap: 0.5rem;">
                     <span style="font-size: 0.875rem; font-weight: 500;">Email</span>
-                    <input class="ac-input" name="email" type="text" placeholder="Search by email..." value="{{ filters.email ?? '' }}">
+                    <input class="ac-input" name="email" type="text" placeholder="Search by email..." value="{{ filters.email ?? '' }}" data-action="input->user-filters#onInput">
                 </label>
                 <label style="display: flex; flex-direction: column; gap: 0.5rem;">
                     <span style="font-size: 0.875rem; font-weight: 500;">Role</span>
-                    <select class="ac-input" name="role">
+                    <select class="ac-input" name="role" data-action="change->user-filters#onChange">
                         <option value="">All roles</option>
-                        <option value="ADMIN" {{ filters.role == 'ADMIN' ? 'selected' : '' }}>Admin</option>
                         <option value="THERAPIST" {{ filters.role == 'THERAPIST' ? 'selected' : '' }}>Therapist</option>
                         <option value="PATIENT" {{ filters.role == 'PATIENT' ? 'selected' : '' }}>Patient</option>
                     </select>
                 </label>
                 <label style="display: flex; flex-direction: column; gap: 0.5rem;">
                     <span style="font-size: 0.875rem; font-weight: 500;">Status</span>
-                    <select class="ac-input" name="accountStatus">
+                    <select class="ac-input" name="accountStatus" data-action="change->user-filters#onChange">
                         <option value="">All statuses</option>
                         <option value="ACTIVE" {{ filters.accountStatus == 'ACTIVE' ? 'selected' : '' }}>Active</option>
                         <option value="DISABLED" {{ filters.accountStatus == 'DISABLED' ? 'selected' : '' }}>Disabled</option>
                     </select>
                 </label>
-                <div style="display: flex; gap: 0.5rem; align-items: flex-end;">
-                    <button class="ac-btn" type="submit" style="flex: 1;">Filter</button>
-                    <a href="{{ path('ac_ui_users') }}" class="ac-ghost-btn" style="text-decoration: none; text-align: center; flex: 1;">Clear</a>
-                </div>
             </form>
-        </section>
-
-        <section class="ac-card">
-            <div class="ac-row-between" style="margin-bottom: 1rem;">
-                <h3>Users ({{ pagination.total }} total)</h3>
-                <button class="ac-btn" data-action="click->modal#open" data-modal-id-param="create-user-modal">Add user</button>
-            </div>
             
             {% if users is empty %}
                 <p style="padding: 2rem; text-align: center; color: var(--ac-text-muted, #6b7280);">No users found</p>
@@ -180,7 +171,6 @@
                     <label>
                         <span class="ac-label">Role</span>
                         <select class="ac-input" name="role" data-edit-user-target="role" required>
-                            <option value="ADMIN">Admin</option>
                             <option value="THERAPIST">Therapist</option>
                             <option value="PATIENT">Patient</option>
                         </select>

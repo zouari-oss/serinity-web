@@ -13,6 +13,10 @@ import SidebarToggleController from './controllers/sidebar_toggle_controller.js'
 import HomeSessionController from './controllers/home_session_controller.js';
 import NavbarMenuController from './controllers/navbar_menu_controller.js';
 import FlashToastController from './controllers/flash_toast_controller.js';
+import MoodAnalyticsController from './controllers/mood_analytics_controller.js';
+import UserMoodController from './controllers/user_mood_controller.js';
+import JournalEditorController from './controllers/journal_editor_controller.js';
+import UserFiltersController from './controllers/user_filters_controller.js';
 
 const app = startStimulusApp();
 
@@ -30,3 +34,7 @@ app.register('sidebar-toggle', SidebarToggleController);
 app.register('home-session', HomeSessionController);
 app.register('navbar-menu', NavbarMenuController);
 app.register('flash-toast', FlashToastController);
+app.register('mood-analytics', MoodAnalyticsController);
+app.register('user-mood', UserMoodController);
+app.register('journal-editor', JournalEditorController);
+app.register('user-filters', UserFiltersController);

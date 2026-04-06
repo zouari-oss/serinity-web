@@ -1,0 +1,69 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Emotion management | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Emotion management', subtitle: 'Manage available emotions', username: userName } %}
+        {% for message in app.flashes('success') %}
+            <section class="ac-card"><p style="color: var(--success);">{{ message }}</p></section>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <section class="ac-card"><p style="color: var(--danger);">{{ message }}</p></section>
+        {% endfor %}
+
+        <section class="ac-card">
+            <div class="ac-row-between ac-mood-history-head">
+                <h3>Add emotion</h3>
+                <a class="ac-ghost-btn" href="{{ path('ac_ui_mood') }}">Back to mood analytics</a>
+            </div>
+            <form method="post" class="ac-form ac-inline-form">
+                <input type="hidden" name="_token" value="{{ csrf_token('emotion_create') }}">
+                <label>
+                    <span class="ac-label">Name</span>
+                    <input class="ac-input" type="text" name="name" maxlength="40" required placeholder="e.g. Happy">
+                </label>
+                <button class="ac-btn ac-btn-primary" type="submit">Add emotion</button>
+            </form>
+        </section>
+
+        <section class="ac-card">
+            <h3>Emotions</h3>
+            <div class="ac-table-container">
+                <table class="ac-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for emotion in emotions %}
+                            <tr>
+                                <td>{{ emotion.id }}</td>
+                                <td>
+                                    <form method="post" action="{{ path('ac_ui_emotion_edit', { id: emotion.id }) }}" class="ac-inline-form">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('emotion_edit_' ~ emotion.id) }}">
+                                        <input class="ac-input" type="text" name="name" maxlength="40" value="{{ emotion.name }}" required>
+                                        <button class="ac-ghost-btn" type="submit">Save</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form method="post" action="{{ path('ac_ui_emotion_delete', { id: emotion.id }) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('emotion_delete_' ~ emotion.id) }}">
+                                        <button class="ac-danger-btn" type="submit">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="3">No emotions found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

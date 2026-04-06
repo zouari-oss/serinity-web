@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace App\Controller\Web;
 
 use App\Dto\Admin\UserFilterRequest;
+use App\Entity\MoodEmotion;
+use App\Entity\MoodInfluence;
 use App\Entity\Profile;
 use App\Entity\User;
 use App\Repository\AuditLogRepository;
 use App\Repository\AuthSessionRepository;
+use App\Repository\MoodEmotionRepository;
+use App\Repository\MoodInfluenceRepository;
 use App\Repository\ProfileRepository;
 use App\Repository\UserRepository;
 use App\Service\ImageUploadService;
@@ -32,6 +36,8 @@ final class AccessControlUiController extends AbstractController
         private readonly ProfileRepository $profileRepository,
         private readonly AuthSessionRepository $authSessionRepository,
         private readonly AuditLogRepository $auditLogRepository,
+        private readonly MoodEmotionRepository $moodEmotionRepository,
+        private readonly MoodInfluenceRepository $moodInfluenceRepository,
         private readonly ImageUploadService $imageUploadService,
         private readonly EntityManagerInterface $entityManager,
     ) {
@@ -88,7 +94,7 @@ final class AccessControlUiController extends AbstractController
             return $this->redirectToRoute('user_ui_dashboard');
         }
 
-        $stats = $this->dashboardService->getStatistics();
+        $stats = $this->dashboardService->getStatistics($user);
         $recentActivity = $this->dashboardService->getRecentActivity(10);
 
         return $this->render('access_control/pages/dashboard.html.twig', [
@@ -143,7 +149,7 @@ final class AccessControlUiController extends AbstractController
             'pagination' => [
                 'page' => $result['page'],
                 'totalPages' => $result['totalPages'],
-                'total' => max(0, $result['total'] - ($currentUser instanceof User ? 1 : 0)),
+                'total' => $result['total'],
             ],
             'filters' => [
                 'email' => $filterRequest->email,
@@ -390,12 +396,230 @@ final class AccessControlUiController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function mood(): Response
     {
-        return $this->render('access_control/pages/coming_soon.html.twig', [
+        return $this->render('access_control/pages/mood_analytics.html.twig', [
             'nav' => $this->buildNav('ac_ui_mood'),
             'userName' => $this->getUser()?->getEmail() ?? 'Admin',
-            'title' => 'Mood Tracking',
-            'subtitle' => 'Population mood analytics and trends will be added soon.',
         ]);
+    }
+
+    #[Route('/admin/emotion', name: 'ac_ui_emotion', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function emotionManagement(Request $request): Response
+    {
+        if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('emotion_create', (string) $request->request->get('_token'))) {
+                $this->addFlash('error', 'Invalid create token.');
+            } else {
+                $name = trim((string) $request->request->get('name', ''));
+                $error = $this->validateEmotionName($name);
+                if ($error !== null) {
+                    $this->addFlash('error', $error);
+                } else {
+                    $exists = $this->moodEmotionRepository->createQueryBuilder('emotion')
+                        ->select('COUNT(emotion.id)')
+                        ->andWhere('LOWER(emotion.name) = :name')
+                        ->setParameter('name', mb_strtolower($name))
+                        ->getQuery()
+                        ->getSingleScalarResult();
+
+                    if ((int) $exists > 0) {
+                        $this->addFlash('error', 'This emotion already exists.');
+                    } else {
+                        $emotion = (new MoodEmotion())->setName($name);
+                        $this->entityManager->persist($emotion);
+                        $this->entityManager->flush();
+                        $this->addFlash('success', 'Emotion created successfully.');
+                    }
+                }
+            }
+
+            return $this->redirectToRoute('ac_ui_emotion');
+        }
+
+        return $this->render('access_control/pages/emotion_management.html.twig', [
+            'nav' => $this->buildNav('ac_ui_emotion'),
+            'userName' => $this->getUser()?->getEmail() ?? 'Admin',
+            'emotions' => $this->moodEmotionRepository->createQueryBuilder('emotion')->orderBy('emotion.name', 'ASC')->getQuery()->getResult(),
+        ]);
+    }
+
+    #[Route('/admin/emotion/{id}/edit', name: 'ac_ui_emotion_edit', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function emotionEdit(Request $request, int $id): Response
+    {
+        $emotion = $this->moodEmotionRepository->find($id);
+        if (!$emotion instanceof MoodEmotion) {
+            $this->addFlash('error', 'Emotion not found.');
+
+            return $this->redirectToRoute('ac_ui_emotion');
+        }
+        if (!$this->isCsrfTokenValid('emotion_edit_' . $emotion->getId(), (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid edit token.');
+
+            return $this->redirectToRoute('ac_ui_emotion');
+        }
+
+        $name = trim((string) $request->request->get('name', ''));
+        $error = $this->validateEmotionName($name);
+        if ($error !== null) {
+            $this->addFlash('error', $error);
+
+            return $this->redirectToRoute('ac_ui_emotion');
+        }
+
+        $exists = $this->moodEmotionRepository->createQueryBuilder('emotion')
+            ->select('COUNT(emotion.id)')
+            ->andWhere('LOWER(emotion.name) = :name')
+            ->andWhere('emotion.id != :id')
+            ->setParameter('name', mb_strtolower($name))
+            ->setParameter('id', $emotion->getId())
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        if ((int) $exists > 0) {
+            $this->addFlash('error', 'This emotion already exists.');
+
+            return $this->redirectToRoute('ac_ui_emotion');
+        }
+
+        $emotion->setName($name);
+        $this->entityManager->flush();
+        $this->addFlash('success', 'Emotion updated successfully.');
+
+        return $this->redirectToRoute('ac_ui_emotion');
+    }
+
+    #[Route('/admin/emotion/{id}/delete', name: 'ac_ui_emotion_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function emotionDelete(Request $request, int $id): Response
+    {
+        $emotion = $this->moodEmotionRepository->find($id);
+        if (!$emotion instanceof MoodEmotion) {
+            $this->addFlash('error', 'Emotion not found.');
+
+            return $this->redirectToRoute('ac_ui_emotion');
+        }
+        if (!$this->isCsrfTokenValid('emotion_delete_' . $emotion->getId(), (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid delete token.');
+
+            return $this->redirectToRoute('ac_ui_emotion');
+        }
+
+        $this->entityManager->remove($emotion);
+        $this->entityManager->flush();
+        $this->addFlash('success', 'Emotion deleted successfully.');
+
+        return $this->redirectToRoute('ac_ui_emotion');
+    }
+
+    #[Route('/admin/influence', name: 'ac_ui_influence', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function influenceManagement(Request $request): Response
+    {
+        if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('influence_create', (string) $request->request->get('_token'))) {
+                $this->addFlash('error', 'Invalid create token.');
+            } else {
+                $name = trim((string) $request->request->get('name', ''));
+                $error = $this->validateInfluenceName($name);
+                if ($error !== null) {
+                    $this->addFlash('error', $error);
+                } else {
+                    $exists = $this->moodInfluenceRepository->createQueryBuilder('influence')
+                        ->select('COUNT(influence.id)')
+                        ->andWhere('LOWER(influence.name) = :name')
+                        ->setParameter('name', mb_strtolower($name))
+                        ->getQuery()
+                        ->getSingleScalarResult();
+
+                    if ((int) $exists > 0) {
+                        $this->addFlash('error', 'This influence already exists.');
+                    } else {
+                        $influence = (new MoodInfluence())->setName($name);
+                        $this->entityManager->persist($influence);
+                        $this->entityManager->flush();
+                        $this->addFlash('success', 'Influence created successfully.');
+                    }
+                }
+            }
+
+            return $this->redirectToRoute('ac_ui_influence');
+        }
+
+        return $this->render('access_control/pages/influence_management.html.twig', [
+            'nav' => $this->buildNav('ac_ui_influence'),
+            'userName' => $this->getUser()?->getEmail() ?? 'Admin',
+            'influences' => $this->moodInfluenceRepository->createQueryBuilder('influence')->orderBy('influence.name', 'ASC')->getQuery()->getResult(),
+        ]);
+    }
+
+    #[Route('/admin/influence/{id}/edit', name: 'ac_ui_influence_edit', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function influenceEdit(Request $request, int $id): Response
+    {
+        $influence = $this->moodInfluenceRepository->find($id);
+        if (!$influence instanceof MoodInfluence) {
+            $this->addFlash('error', 'Influence not found.');
+
+            return $this->redirectToRoute('ac_ui_influence');
+        }
+        if (!$this->isCsrfTokenValid('influence_edit_' . $influence->getId(), (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid edit token.');
+
+            return $this->redirectToRoute('ac_ui_influence');
+        }
+
+        $name = trim((string) $request->request->get('name', ''));
+        $error = $this->validateInfluenceName($name);
+        if ($error !== null) {
+            $this->addFlash('error', $error);
+
+            return $this->redirectToRoute('ac_ui_influence');
+        }
+
+        $exists = $this->moodInfluenceRepository->createQueryBuilder('influence')
+            ->select('COUNT(influence.id)')
+            ->andWhere('LOWER(influence.name) = :name')
+            ->andWhere('influence.id != :id')
+            ->setParameter('name', mb_strtolower($name))
+            ->setParameter('id', $influence->getId())
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        if ((int) $exists > 0) {
+            $this->addFlash('error', 'This influence already exists.');
+
+            return $this->redirectToRoute('ac_ui_influence');
+        }
+
+        $influence->setName($name);
+        $this->entityManager->flush();
+        $this->addFlash('success', 'Influence updated successfully.');
+
+        return $this->redirectToRoute('ac_ui_influence');
+    }
+
+    #[Route('/admin/influence/{id}/delete', name: 'ac_ui_influence_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function influenceDelete(Request $request, int $id): Response
+    {
+        $influence = $this->moodInfluenceRepository->find($id);
+        if (!$influence instanceof MoodInfluence) {
+            $this->addFlash('error', 'Influence not found.');
+
+            return $this->redirectToRoute('ac_ui_influence');
+        }
+        if (!$this->isCsrfTokenValid('influence_delete_' . $influence->getId(), (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid delete token.');
+
+            return $this->redirectToRoute('ac_ui_influence');
+        }
+
+        $this->entityManager->remove($influence);
+        $this->entityManager->flush();
+        $this->addFlash('success', 'Influence deleted successfully.');
+
+        return $this->redirectToRoute('ac_ui_influence');
     }
 
     #[Route('/admin/sleep', name: 'ac_ui_sleep', methods: ['GET'])]
@@ -410,9 +634,10 @@ final class AccessControlUiController extends AbstractController
         ]);
     }
 
-    /** @return list<array{section: string, label: string, route: string, icon: string, active: bool}> */
+    /** @return list<array{section: string, label: string, route: string, icon: string, active: bool, children?: list<array{label: string, route: string, icon: string, active: bool}>}> */
     private function buildNav(string $activeRoute): array
     {
+        $moodChildRoutes = ['ac_ui_mood', 'ac_ui_emotion', 'ac_ui_influence'];
         $items = [
             ['section' => 'Admin self-management', 'label' => 'Dashboard', 'route' => 'ac_ui_dashboard', 'icon' => 'dashboard'],
             ['section' => 'Admin self-management', 'label' => 'Profile', 'route' => 'ac_ui_profile', 'icon' => 'person'],
@@ -422,19 +647,86 @@ final class AccessControlUiController extends AbstractController
             ['section' => 'Users management', 'label' => 'Consultations', 'route' => 'ac_ui_consultations', 'icon' => 'medical_services'],
             ['section' => 'Users management', 'label' => 'Exercises', 'route' => 'ac_ui_exercises', 'icon' => 'self_improvement'],
             ['section' => 'Users management', 'label' => 'Forum', 'route' => 'ac_ui_forum', 'icon' => 'forum'],
-            ['section' => 'Users management', 'label' => 'Mood', 'route' => 'ac_ui_mood', 'icon' => 'mood'],
+            [
+                'section' => 'Users management',
+                'label' => 'Mood',
+                'route' => 'ac_ui_mood',
+                'icon' => 'mood',
+                'children' => [
+                    ['label' => 'Mood analytics', 'route' => 'ac_ui_mood', 'icon' => 'analytics'],
+                    ['label' => 'Emotion management', 'route' => 'ac_ui_emotion', 'icon' => 'sentiment_satisfied'],
+                    ['label' => 'Influence management', 'route' => 'ac_ui_influence', 'icon' => 'tune'],
+                ],
+            ],
             ['section' => 'Users management', 'label' => 'Sleep', 'route' => 'ac_ui_sleep', 'icon' => 'hotel'],
         ];
 
         return array_map(
-            static fn(array $item): array => [
-                'section' => $item['section'],
-                'label' => $item['label'],
-                'route' => $item['route'],
-                'icon' => $item['icon'],
-                'active' => $item['route'] === $activeRoute,
-            ],
+            static function (array $item) use ($activeRoute, $moodChildRoutes): array {
+                $isMoodGroup = $item['route'] === 'ac_ui_mood' && isset($item['children']);
+                $active = $isMoodGroup ? in_array($activeRoute, $moodChildRoutes, true) : $item['route'] === $activeRoute;
+
+                if (!$isMoodGroup) {
+                    return [
+                        'section' => $item['section'],
+                        'label' => $item['label'],
+                        'route' => $item['route'],
+                        'icon' => $item['icon'],
+                        'active' => $active,
+                    ];
+                }
+
+                return [
+                    'section' => $item['section'],
+                    'label' => $item['label'],
+                    'route' => $item['route'],
+                    'icon' => $item['icon'],
+                    'active' => $active,
+                    'children' => array_map(
+                        static fn(array $child): array => [
+                            'label' => $child['label'],
+                            'route' => $child['route'],
+                            'icon' => $child['icon'],
+                            'active' => $child['route'] === $activeRoute,
+                        ],
+                        $item['children'],
+                    ),
+                ];
+            },
             $items,
         );
+    }
+
+    private function validateEmotionName(string $name): ?string
+    {
+        if ($name === '') {
+            return 'Emotion name is required.';
+        }
+        if (mb_strlen($name) < 3) {
+            return 'Emotion name must contain at least 3 characters.';
+        }
+        if (mb_strlen($name) > 40) {
+            return 'Emotion name cannot exceed 40 characters.';
+        }
+        if (preg_match('/^[A-Za-z ]+$/', $name) !== 1) {
+            return 'Emotion name can contain only letters and spaces.';
+        }
+
+        return null;
+    }
+
+    private function validateInfluenceName(string $name): ?string
+    {
+        if ($name === '') {
+            return 'Influence name is required.';
+        }
+        if (mb_strlen($name) > 60) {
+            return 'Influence name cannot exceed 60 characters.';
+        }
+        if (preg_match('/^[A-Za-z\/ ]+$/', $name) !== 1) {
+            return 'Influence name can contain only letters, spaces, and /.';
+        }
+
+        return null;
     }
 }

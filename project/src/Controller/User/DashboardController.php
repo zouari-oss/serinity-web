@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\User;
 
 use App\Service\User\UserDashboardService;
+use App\Service\User\UserMoodService;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -15,6 +16,7 @@ final class DashboardController extends AbstractUserUiController
 {
     public function __construct(
         private readonly UserDashboardService $userDashboardService,
+        private readonly UserMoodService $userMoodService,
     ) {
     }
 
@@ -74,11 +76,11 @@ final class DashboardController extends AbstractUserUiController
     {
         $user = $this->currentUser();
 
-        return $this->render('access_control/pages/coming_soon.html.twig', [
+        return $this->render('user/pages/mood.html.twig', [
             'nav' => $this->buildNav('user_ui_mood'),
             'userName' => $user->getEmail(),
-            'title' => 'Mood',
-            'subtitle' => 'Mood tracking module will be available soon.',
+            'emotionOptions' => $this->userMoodService->getEmotionOptions(),
+            'influenceOptions' => $this->userMoodService->getInfluenceOptions(),
         ]);
     }
 

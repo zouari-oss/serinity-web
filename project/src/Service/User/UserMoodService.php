@@ -1,0 +1,398 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Service\User;
+
+use App\Dto\Common\ServiceResult;
+use App\Dto\Mood\MoodCreateRequest;
+use App\Dto\Mood\MoodHistoryFilterRequest;
+use App\Dto\Mood\MoodSummaryRequest;
+use App\Entity\MoodEmotion;
+use App\Entity\MoodEntry;
+use App\Entity\MoodInfluence;
+use App\Entity\User;
+use App\Repository\MoodEmotionRepository;
+use App\Repository\MoodEntryRepository;
+use App\Repository\MoodInfluenceRepository;
+use Doctrine\ORM\EntityManagerInterface;
+
+final readonly class UserMoodService
+{
+    public function __construct(
+        private MoodEntryRepository $moodEntryRepository,
+        private MoodEmotionRepository $moodEmotionRepository,
+        private MoodInfluenceRepository $moodInfluenceRepository,
+        private EntityManagerInterface $entityManager,
+    ) {
+    }
+
+    public function create(User $user, MoodCreateRequest $request): ServiceResult
+    {
+        $rawEntryDate = $this->nullable($request->entryDate);
+        $entryDate = $rawEntryDate === null
+            ? new \DateTimeImmutable('today')
+            : $this->parseDate($rawEntryDate);
+
+        if ($entryDate === null) {
+            return ServiceResult::failure('Invalid entry date.');
+        }
+
+        $momentType = strtoupper(trim($request->momentType));
+        if ($momentType === 'DAY' && $this->moodEntryRepository->hasDayEntryForDate($user, $entryDate)) {
+            return ServiceResult::failure('Only one DAY entry is allowed per day.');
+        }
+
+        $emotions = $this->resolveEmotions($request->emotionKeys);
+        if ($emotions === null) {
+            return ServiceResult::failure('One or more emotion keys are invalid.');
+        }
+
+        $influences = $this->resolveInfluences($request->influenceKeys);
+        if ($influences === null) {
+            return ServiceResult::failure('One or more influence keys are invalid.');
+        }
+
+        $now = new \DateTimeImmutable();
+
+        $entry = (new MoodEntry())
+            ->setUser($user)
+            ->setEntryDate($entryDate)
+            ->setMomentType($momentType)
+            ->setMoodLevel($request->moodLevel)
+            ->setUpdatedAt($now);
+
+        foreach ($emotions as $emotion) {
+            $entry->addEmotion($emotion);
+        }
+
+        foreach ($influences as $influence) {
+            $entry->addInfluence($influence);
+        }
+
+        $this->entityManager->persist($entry);
+        $this->entityManager->flush();
+
+        return ServiceResult::success('Mood entry created successfully.', $this->toArray($entry));
+    }
+
+    /**
+     * @return list<array{key:string,label:string}>
+     */
+    public function getEmotionOptions(): array
+    {
+        $rows = [];
+        $emotions = $this->moodEmotionRepository->createQueryBuilder('emotion')
+            ->orderBy('emotion.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        foreach ($emotions as $emotion) {
+            $rows[] = [
+                'key' => self::toKey($emotion->getName()),
+                'label' => $emotion->getName(),
+            ];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * @return list<array{key:string,label:string}>
+     */
+    public function getInfluenceOptions(): array
+    {
+        $rows = [];
+        $influences = $this->moodInfluenceRepository->createQueryBuilder('influence')
+            ->orderBy('influence.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        foreach ($influences as $influence) {
+            $rows[] = [
+                'key' => self::toKey($influence->getName()),
+                'label' => $influence->getName(),
+            ];
+        }
+
+        return $rows;
+    }
+
+    public function history(User $user, MoodHistoryFilterRequest $request): ServiceResult
+    {
+        $fromDate = $this->parseDate($request->fromDate);
+        $toDate = $this->parseDate($request->toDate);
+
+        if ($fromDate !== null && $toDate !== null && $fromDate > $toDate) {
+            return ServiceResult::failure('fromDate must be earlier than or equal to toDate.');
+        }
+
+        return ServiceResult::success('Mood history fetched successfully.', $this->getGroupedHistory($user, $request));
+    }
+
+    public function summary(User $user, MoodSummaryRequest $request): ServiceResult
+    {
+        $fromDate = $this->parseDate($request->fromDate);
+        $toDate = $this->parseDate($request->toDate);
+
+        if ($fromDate !== null && $toDate !== null && $fromDate > $toDate) {
+            return ServiceResult::failure('fromDate must be earlier than or equal to toDate.');
+        }
+
+        return ServiceResult::success('Mood summary fetched successfully.', $this->getSummary($user, $request));
+    }
+
+    /**
+     * @return array{groups:array<string,array{label:string,entries:list<array<string,mixed>>}>,pagination:array{total:int,page:int,limit:int,totalPages:int}}
+     */
+    public function getGroupedHistory(User $user, MoodHistoryFilterRequest $request): array
+    {
+        $page = max(1, $request->page);
+        $limit = min(100, max(1, $request->limit));
+        $offset = ($page - 1) * $limit;
+
+        $entries = $this->moodEntryRepository->findHistory(
+            user: $user,
+            search: $this->nullable($request->search),
+            momentType: $request->momentType,
+            fromDate: $this->parseDate($request->fromDate),
+            toDate: $this->parseDate($request->toDate),
+            limit: $limit,
+            offset: $offset,
+        );
+
+        $total = $this->moodEntryRepository->countHistory(
+            user: $user,
+            search: $this->nullable($request->search),
+            momentType: $request->momentType,
+            fromDate: $this->parseDate($request->fromDate),
+            toDate: $this->parseDate($request->toDate),
+        );
+
+        $today = new \DateTimeImmutable('today');
+        $yesterday = $today->modify('-1 day');
+        $groups = [];
+
+        foreach ($entries as $entry) {
+            $entryDay = $entry->getEntryDate()->setTime(0, 0);
+
+            if ($entryDay == $today) {
+                $groupKey = 'today';
+                $groupLabel = 'Today';
+            } elseif ($entryDay == $yesterday) {
+                $groupKey = 'yesterday';
+                $groupLabel = 'Yesterday';
+            } else {
+                $groupKey = $entryDay->format('Y-m-d');
+                $groupLabel = $entryDay->format('Y-m-d');
+            }
+
+            if (!isset($groups[$groupKey])) {
+                $groups[$groupKey] = [
+                    'label' => $groupLabel,
+                    'entries' => [],
+                ];
+            }
+
+            $groups[$groupKey]['entries'][] = $this->toArray($entry);
+        }
+
+        return [
+            'groups' => $groups,
+            'pagination' => [
+                'total' => $total,
+                'page' => $page,
+                'limit' => $limit,
+                'totalPages' => (int) ceil($total / max(1, $limit)),
+            ],
+        ];
+    }
+
+    /**
+     * @return array{
+     *     weeklyCount:int,
+     *     weeklyAverageMood:float|null,
+     *     mostUsedType:string,
+     *     topEmotion:array{label:string,usageCount:int},
+     *     topInfluence:array{label:string,usageCount:int},
+     *     fromDate:string,
+     *     toDate:string
+     * }
+     */
+    public function getSummary(User $user, MoodSummaryRequest $request): array
+    {
+        [$fromDate, $toDate] = $this->resolveRange($request);
+
+        $weeklyEntries = $this->moodEntryRepository->findWithinDateRange($user, $fromDate, $toDate);
+        $weeklyCount = count($weeklyEntries);
+        $weeklyAverageMood = null;
+
+        if ($weeklyCount > 0) {
+            $totalMood = 0;
+            foreach ($weeklyEntries as $entry) {
+                $totalMood += $entry->getMoodLevel();
+            }
+
+            $weeklyAverageMood = round($totalMood / $weeklyCount, 1);
+        }
+
+        $dayCount = $this->moodEntryRepository->countTypeWithinRange($user, $fromDate, $toDate, 'DAY');
+        $momentCount = $this->moodEntryRepository->countTypeWithinRange($user, $fromDate, $toDate, 'MOMENT');
+        $mostUsedType = $dayCount === 0 && $momentCount === 0
+            ? 'No data'
+            : ($dayCount >= $momentCount ? 'DAY' : 'MOMENT');
+
+        $topEmotion = $this->moodEntryRepository->findTopEmotionWithinRange($user, $fromDate, $toDate) ?? [
+            'label' => 'No data',
+            'usageCount' => 0,
+        ];
+
+        $topInfluence = $this->moodEntryRepository->findTopInfluenceWithinRange($user, $fromDate, $toDate) ?? [
+            'label' => 'No data',
+            'usageCount' => 0,
+        ];
+
+        return [
+            'weeklyCount' => $weeklyCount,
+            'weeklyAverageMood' => $weeklyAverageMood,
+            'mostUsedType' => $mostUsedType,
+            'topEmotion' => $topEmotion,
+            'topInfluence' => $topInfluence,
+            'fromDate' => $fromDate->format('Y-m-d'),
+            'toDate' => $toDate->format('Y-m-d'),
+        ];
+    }
+
+    /** @return list<MoodEmotion>|null */
+    private function resolveEmotions(array $keys): ?array
+    {
+        $normalized = $this->normalizeNames($keys, []);
+        $emotions = $this->moodEmotionRepository->findByNames($normalized);
+
+        return count($emotions) === count($normalized) ? $emotions : null;
+    }
+
+    /** @return list<MoodInfluence>|null */
+    private function resolveInfluences(array $keys): ?array
+    {
+        $normalized = $this->normalizeNames($keys, [
+            'work' => 'school/work',
+            'school_work' => 'school/work',
+            'social' => 'social media',
+        ]);
+        $influences = $this->moodInfluenceRepository->findByNames($normalized);
+
+        return count($influences) === count($normalized) ? $influences : null;
+    }
+
+    /**
+     * @param list<mixed> $values
+     * @param array<string, string> $aliases
+     * @return list<string>
+     */
+    private function normalizeNames(array $values, array $aliases): array
+    {
+        $normalized = [];
+
+        foreach ($values as $value) {
+            $candidate = mb_strtolower(trim((string) $value));
+            $candidate = str_replace('_', ' ', $candidate);
+            $candidate = $aliases[$candidate] ?? $candidate;
+
+            if ($candidate !== '') {
+                $normalized[] = $candidate;
+            }
+        }
+
+        return array_values(array_unique($normalized));
+    }
+
+    private function nullable(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $trimmed = trim($value);
+
+        return $trimmed === '' ? null : $trimmed;
+    }
+
+    private function parseDate(?string $value): ?\DateTimeImmutable
+    {
+        if ($value === null || trim($value) === '') {
+            return null;
+        }
+
+        try {
+            return new \DateTimeImmutable($value);
+        } catch (\Exception) {
+            return null;
+        }
+    }
+
+    /**
+     * @return array{\DateTimeImmutable,\DateTimeImmutable}
+     */
+    private function resolveRange(MoodSummaryRequest $request): array
+    {
+        $toDate = $this->parseDate($request->toDate)?->setTime(0, 0) ?? new \DateTimeImmutable('today');
+
+        if ($request->fromDate !== null) {
+            $fromDate = $this->parseDate($request->fromDate)?->setTime(0, 0);
+            if ($fromDate !== null) {
+                return [$fromDate, $toDate];
+            }
+        }
+
+        $fromDate = $toDate->modify(sprintf('-%d days', max(0, $request->days - 1)));
+
+        return [$fromDate, $toDate];
+    }
+
+    /**
+     * @return array{
+     *     id:string|int,
+     *     entryDate:string,
+     *     momentType:string,
+     *     moodLevel:int,
+     *     note:?string,
+     *     emotions:list<array{key:string,label:string}>,
+     *     influences:list<array{key:string,label:string}>,
+     *     createdAt:string,
+     *     updatedAt:string
+     * }
+     */
+    private function toArray(MoodEntry $entry): array
+    {
+        $emotions = array_map(static fn (MoodEmotion $emotion) => [
+            'key' => self::toKey($emotion->getName()),
+            'label' => $emotion->getName(),
+        ], $entry->getEmotions()->toArray());
+
+        $influences = array_map(static fn (MoodInfluence $influence) => [
+            'key' => self::toKey($influence->getName()),
+            'label' => $influence->getName(),
+        ], $entry->getInfluences()->toArray());
+
+        return [
+            'id' => $entry->getId(),
+            'entryDate' => $entry->getEntryDate()->format('Y-m-d H:i:s'),
+            'momentType' => $entry->getMomentType(),
+            'moodLevel' => $entry->getMoodLevel(),
+            'note' => null,
+            'emotions' => $emotions,
+            'influences' => $influences,
+            'createdAt' => $entry->getUpdatedAt()->format('c'),
+            'updatedAt' => $entry->getUpdatedAt()->format('c'),
+        ];
+    }
+
+    private static function toKey(string $name): string
+    {
+        $key = mb_strtolower(trim($name));
+        $key = preg_replace('/[^a-z0-9]+/u', '_', $key) ?? $key;
+
+        return trim($key, '_');
+    }
+}

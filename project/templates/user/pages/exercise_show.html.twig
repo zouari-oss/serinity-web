@@ -1,0 +1,57 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Exercise detail | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: item.exercice.title, subtitle: 'Exercise details', username: userName } %}
+
+        {% for message in app.flashes('success') %}
+            <section class="ac-card"><p style="color: var(--success);">{{ message }}</p></section>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <section class="ac-card"><p style="color: var(--danger);">{{ message }}</p></section>
+        {% endfor %}
+
+        <section class="ac-card ac-grid-two">
+            <article>
+                <h3 style="margin-top:0;">{{ item.exercice.title }}</h3>
+                <p class="ac-muted">{{ item.exercice.description ?: 'No description available.' }}</p>
+                <div style="display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.75rem;">
+                    <span class="ac-badge ac-badge-secondary">{{ item.exercice.type }}</span>
+                    <span class="ac-badge ac-badge-secondary">Level {{ item.exercice.level }}</span>
+                    <span class="ac-badge ac-badge-secondary">{{ item.exercice.durationMinutes }} min</span>
+                    <span class="ac-badge {{ item.status == 'COMPLETED' ? 'ac-badge-success' : (item.status == 'NOT_STARTED' ? 'ac-badge-secondary' : 'ac-badge-warning') }}">{{ item.statusMessage ?? item.status }}</span>
+                </div>
+            </article>
+
+            <aside>
+                <h4 style="margin-top:0;">Resources</h4>
+                {% if item.exercice.resources is empty %}
+                    <p class="ac-muted">No resources available yet.</p>
+                {% else %}
+                    <ul style="margin:0; padding-left: 1rem;">
+                        {% for resource in item.exercice.resources %}
+                            <li>
+                                <a href="{{ resource.resourceUrl }}" target="_blank" rel="noopener noreferrer">{{ resource.title }}</a>
+                                <span class="ac-muted">({{ resource.resourceType }})</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </aside>
+        </section>
+
+        <section class="ac-card">
+            <div class="ac-row-end" style="gap:.5rem;">
+                <a class="ac-ghost-btn" href="{{ path('user_ui_exercises') }}">Back to catalogue</a>
+                <a class="ac-ghost-btn" href="{{ path('user_ui_exercises_sessions') }}">My sessions</a>
+                <a class="ac-btn ac-btn-primary" href="{{ path('user_ui_exercises_session_start', { id: item.exercice.id }) }}">
+                    {{ item.status == 'COMPLETED' ? 'Start new session' : 'Start session' }}
+                </a>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

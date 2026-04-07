@@ -1,0 +1,149 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Exercises | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main" data-controller="modal flash-toast">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Exercises', subtitle: 'Catalog and resources', username: userName } %}
+
+        {% for message in app.flashes('success') %}
+            <span data-flash-toast-target="message" data-type="success" hidden>{{ message }}</span>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <span data-flash-toast-target="message" data-type="error" hidden>{{ message }}</span>
+        {% endfor %}
+
+        <section class="ac-cards">
+            <article class="ac-stat-card"><h3>Total exercices</h3><p>{{ summary.totalExercices|default(0) }}</p></article>
+            <article class="ac-stat-card"><h3>Active</h3><p>{{ summary.activeExercices|default(0) }}</p></article>
+            <article class="ac-stat-card"><h3>Assignments</h3><p>{{ summary.totalAssignments|default(0) }}</p></article>
+            <article class="ac-stat-card"><h3>Completion rate</h3><p>{{ summary.completionRate|default(0) }}%</p></article>
+        </section>
+
+        <section class="ac-card">
+            <h3>Create exercice</h3>
+            <form method="post" action="{{ path('ac_ui_exercises_create') }}" class="ac-form ac-grid-two">
+                <input type="hidden" name="_token" value="{{ csrf_token('exercice_create') }}">
+                <label>Title<input class="ac-input" name="title"></label>
+                <label>Type<input class="ac-input" name="type"></label>
+                <label>Level<input class="ac-input" name="level" type="number" value="1"></label>
+                <label>Duration (minutes)<input class="ac-input" name="durationMinutes" type="number" value="10"></label>
+                <label class="ac-col-span-2">Description<textarea class="ac-input" name="description" rows="3"></textarea></label>
+                <label class="ac-col-span-2">
+                    <span class="ac-label">Active</span>
+                    <input type="checkbox" name="isActive" value="1" checked>
+                </label>
+                <div class="ac-row-end ac-col-span-2"><button class="ac-btn ac-btn-primary" type="submit">Create</button></div>
+            </form>
+        </section>
+
+        <section class="ac-card">
+            <h3>Exercice catalog</h3>
+            <div class="ac-table-container">
+                <table class="ac-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>Level</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                            <th>Resources</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ex in exercices %}
+                            <tr>
+                                <td>{{ ex.title }}</td>
+                                <td>{{ ex.type }}</td>
+                                <td>{{ ex.level }}</td>
+                                <td>{{ ex.durationMinutes }} min</td>
+                                <td>{{ ex.isActive ? 'ACTIVE' : 'INACTIVE' }}</td>
+                                <td>
+                                    {% if ex.resources is empty %}
+                                        <button class="ac-ghost-btn" type="button" data-action="modal#open" data-modal-id-param="add-resource-modal-{{ ex.id }}">
+                                            Add resource
+                                        </button>
+                                    {% else %}
+                                        {{ ex.resources|length }} resource{{ ex.resources|length > 1 ? 's' : '' }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="ac-row-end" style="gap:.35rem;">
+                                        <button class="ac-icon-btn" type="button" title="Preview" data-action="modal#open" data-modal-id-param="preview-exercice-modal-{{ ex.id }}">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                        <button class="ac-icon-btn" type="button" title="Add resource" data-action="modal#open" data-modal-id-param="add-resource-modal-{{ ex.id }}">
+                                            <span class="material-symbols-outlined">add_circle</span>
+                                        </button>
+                                        <form method="post" action="{{ path('ac_ui_exercises_delete', { id: ex.id }) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('exercice_delete_' ~ ex.id) }}">
+                                            <button class="ac-icon-btn ac-danger" type="submit" title="Delete">
+                                                <span class="material-symbols-outlined">delete</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="7" style="background: var(--surface-soft);">
+                                    {% if ex.resources is empty %}
+                                        <span class="ac-muted">No resources yet.</span>
+                                    {% else %}
+                                        <strong>Resources:</strong>
+                                        {% for resource in ex.resources %}
+                                            <span style="margin-left:.5rem;">{{ resource.title }} ({{ resource.resourceType }})</span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="7">No exercices found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        {% for ex in exercices %}
+            <div class="ac-modal" id="preview-exercice-modal-{{ ex.id }}" hidden>
+                <div class="ac-modal-content">
+                    <h3>Exercice preview</h3>
+                    <div class="ac-form">
+                        <label>Title<input class="ac-input" type="text" value="{{ ex.title }}" readonly></label>
+                        <label>Type<input class="ac-input" type="text" value="{{ ex.type }}" readonly></label>
+                        <label>Level<input class="ac-input" type="text" value="{{ ex.level }}" readonly></label>
+                        <label>Duration<input class="ac-input" type="text" value="{{ ex.durationMinutes }} min" readonly></label>
+                        <label>Description<textarea class="ac-input" rows="3" readonly>{{ ex.description }}</textarea></label>
+                        <label>Resources
+                            <textarea class="ac-input" rows="4" readonly>{% if ex.resources is empty %}No resources{% else %}{% for resource in ex.resources %}{{ resource.title }} ({{ resource.resourceType }}) - {{ resource.resourceUrl }}{% if not loop.last %}\n{% endif %}{% endfor %}{% endif %}</textarea>
+                        </label>
+                        <div class="ac-row-end">
+                            <button class="ac-ghost-btn" type="button" data-action="modal#close">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ac-modal" id="add-resource-modal-{{ ex.id }}" hidden>
+                <div class="ac-modal-content">
+                    <h3>Add resource</h3>
+                    <form method="post" action="{{ path('ac_ui_exercises_add_resource', { id: ex.id }) }}" class="ac-form">
+                        <input type="hidden" name="_token" value="{{ csrf_token('exercice_resource_' ~ ex.id) }}">
+                         <label>Title<input class="ac-input" name="title"></label>
+                         <label>Resource type<input class="ac-input" name="resourceType" placeholder="AUDIO / VIDEO / DOCUMENT"></label>
+                         <label>Resource URL<input class="ac-input" name="resourceUrl"></label>
+                        <div class="ac-row-end">
+                            <button class="ac-ghost-btn" type="button" data-action="modal#close">Cancel</button>
+                            <button class="ac-btn ac-btn-primary" type="submit">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

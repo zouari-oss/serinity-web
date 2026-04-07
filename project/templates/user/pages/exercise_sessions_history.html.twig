@@ -1,0 +1,60 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}My exercise sessions | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'My sessions', subtitle: 'Exercise session history', username: userName } %}
+
+        {% for message in app.flashes('success') %}
+            <section class="ac-card"><p style="color: var(--success);">{{ message }}</p></section>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <section class="ac-card"><p style="color: var(--danger);">{{ message }}</p></section>
+        {% endfor %}
+
+        <section class="ac-cards">
+            <article class="ac-stat-card"><h3>Total</h3><p>{{ summary.total|default(0) }}</p></article>
+            <article class="ac-stat-card"><h3>In progress</h3><p>{{ summary.inProgress|default(0) }}</p></article>
+            <article class="ac-stat-card"><h3>Completed</h3><p>{{ summary.completed|default(0) }}</p></article>
+            <article class="ac-stat-card"><h3>Completion rate</h3><p>{{ summary.completionRate|default(0) }}%</p></article>
+        </section>
+
+        <section class="ac-card">
+            <div class="ac-row-between" style="margin-bottom: 1rem;">
+                <h3>Session history</h3>
+                <a class="ac-ghost-btn" href="{{ path('user_ui_exercises') }}">Back to catalogue</a>
+            </div>
+            {% if history is empty %}
+                <p class="ac-muted">No sessions yet.</p>
+            {% else %}
+                <div class="ac-table-container">
+                    <table class="ac-table">
+                        <thead>
+                            <tr>
+                                <th>Exercise</th>
+                                <th>Status</th>
+                                <th>Started</th>
+                                <th>Completed</th>
+                                <th>Active seconds</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for item in history %}
+                            <tr>
+                                <td>{{ item.exercice.title }}</td>
+                                <td>{{ item.statusMessage ?? item.status }}</td>
+                                <td>{{ item.startedAt ? item.startedAt|date('Y-m-d H:i') : '-' }}</td>
+                                <td>{{ item.completedAt ? item.completedAt|date('Y-m-d H:i') : '-' }}</td>
+                                <td>{{ item.activeSeconds }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}

@@ -76,6 +76,86 @@ final readonly class UserMoodService
         return ServiceResult::success('Mood entry created successfully.', $this->toArray($entry));
     }
 
+    public function update(User $user, string $entryId, MoodCreateRequest $request): ServiceResult
+    {
+        $entry = $this->moodEntryRepository->findOneBy([
+            'id' => $entryId,
+            'user' => $user,
+        ]);
+
+        if (!$entry instanceof MoodEntry) {
+            return ServiceResult::failure('Mood entry not found.');
+        }
+
+        $rawEntryDate = $this->nullable($request->entryDate);
+        $entryDate = $rawEntryDate === null
+            ? $entry->getEntryDate()
+            : $this->parseDate($rawEntryDate);
+
+        if ($entryDate === null) {
+            return ServiceResult::failure('Invalid entry date.');
+        }
+
+        $momentType = strtoupper(trim($request->momentType));
+        if (
+            $momentType === 'DAY'
+            && $this->moodEntryRepository->hasDayEntryForDate($user, $entryDate, $entry->getId())
+        ) {
+            return ServiceResult::failure('Only one DAY entry is allowed per day.');
+        }
+
+        $emotions = $this->resolveEmotions($request->emotionKeys);
+        if ($emotions === null) {
+            return ServiceResult::failure('One or more emotion keys are invalid.');
+        }
+
+        $influences = $this->resolveInfluences($request->influenceKeys);
+        if ($influences === null) {
+            return ServiceResult::failure('One or more influence keys are invalid.');
+        }
+
+        $entry
+            ->setEntryDate($entryDate)
+            ->setMomentType($momentType)
+            ->setMoodLevel($request->moodLevel)
+            ->setUpdatedAt(new \DateTimeImmutable());
+
+        foreach ($entry->getEmotions()->toArray() as $emotion) {
+            $entry->removeEmotion($emotion);
+        }
+        foreach ($emotions as $emotion) {
+            $entry->addEmotion($emotion);
+        }
+
+        foreach ($entry->getInfluences()->toArray() as $influence) {
+            $entry->removeInfluence($influence);
+        }
+        foreach ($influences as $influence) {
+            $entry->addInfluence($influence);
+        }
+
+        $this->entityManager->flush();
+
+        return ServiceResult::success('Mood entry updated successfully.', $this->toArray($entry));
+    }
+
+    public function delete(User $user, string $entryId): ServiceResult
+    {
+        $entry = $this->moodEntryRepository->findOneBy([
+            'id' => $entryId,
+            'user' => $user,
+        ]);
+
+        if (!$entry instanceof MoodEntry) {
+            return ServiceResult::failure('Mood entry not found.');
+        }
+
+        $this->entityManager->remove($entry);
+        $this->entityManager->flush();
+
+        return ServiceResult::success('Mood entry deleted successfully.');
+    }
+
     /**
      * @return list<array{key:string,label:string}>
      */

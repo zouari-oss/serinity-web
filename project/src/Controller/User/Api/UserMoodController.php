@@ -76,6 +76,44 @@ final class UserMoodController extends AbstractApiController
         return $this->json($result->toArray(), $result->success ? 200 : 400);
     }
 
+    #[Route('/{id}', name: 'update', methods: ['PUT'])]
+    public function update(string $id, Request $request, ValidatorInterface $validator): JsonResponse
+    {
+        $guard = $this->guard();
+        if ($guard instanceof JsonResponse) {
+            return $guard;
+        }
+
+        $dto = new MoodCreateRequest();
+        try {
+            $this->hydrate($request, $dto);
+        } catch (\JsonException) {
+            return $this->json(['success' => false, 'message' => 'Malformed JSON payload.'], 400);
+        }
+        $dto->momentType = $this->normalizeMomentType($dto->momentType) ?? '';
+
+        if (($errors = $this->validateDto($validator, $dto)) !== null) {
+            return $errors;
+        }
+
+        $result = $this->userMoodService->update($guard, $id, $dto);
+
+        return $this->json($result->toArray(), $result->success ? 200 : 400);
+    }
+
+    #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
+    public function delete(string $id): JsonResponse
+    {
+        $guard = $this->guard();
+        if ($guard instanceof JsonResponse) {
+            return $guard;
+        }
+
+        $result = $this->userMoodService->delete($guard, $id);
+
+        return $this->json($result->toArray(), $result->success ? 200 : 400);
+    }
+
     #[Route('/summary', name: 'summary', methods: ['GET'])]
     public function summary(Request $request, ValidatorInterface $validator): JsonResponse
     {

@@ -1417,6 +1417,31 @@ h1,h2,h3,p { margin: 0; }
     box-shadow: 0 8px 20px rgba(47, 111, 109, .08);
     border-color: #88BDBC;
 }
+.ac-mood-row-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .45rem;
+}
+.ac-mood-row-actions .ac-ghost-btn {
+    width: 2.2rem;
+    height: 2.2rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.ac-mood-row-actions .ac-ghost-btn .material-symbols-outlined {
+    font-size: 1.15rem;
+}
+.ac-mood-row-actions .ac-ghost-btn.ac-btn-danger {
+    color: #b42318;
+    border-color: #f4b2ad;
+}
+.ac-mood-row-actions .ac-ghost-btn.ac-btn-danger:hover {
+    color: #fff;
+    border-color: #b42318;
+    background: #b42318;
+}
 .ac-mood-level-pill {
     color: #2F6F6D;
     font-weight: 700;
@@ -1449,6 +1474,13 @@ h1,h2,h3,p { margin: 0; }
 .ac-mood-history-empty {
     margin: 0;
     color: #5b7473;
+}
+.ac-mood-edit-modal .ac-modal-content {
+    width: min(760px, 96vw);
+}
+.ac-mood-edit-modal {
+    background: rgba(5, 10, 20, .35);
+    backdrop-filter: blur(2px);
 }
 
 [data-theme="dark"] .ac-mood-kpi-card,
@@ -1492,6 +1524,15 @@ h1,h2,h3,p { margin: 0; }
 [data-theme="dark"] .ac-journal-card {
     background: #0f2c3b;
     border-color: #1e4f62;
+}
+[data-theme="dark"] .ac-mood-row-actions .ac-ghost-btn.ac-btn-danger {
+    color: #ff9388;
+    border-color: #7b2f2f;
+}
+[data-theme="dark"] .ac-mood-row-actions .ac-ghost-btn.ac-btn-danger:hover {
+    color: #fff;
+    border-color: #c64545;
+    background: #c64545;
 }
 [data-theme="dark"] .ac-mood-entry-card .ac-input,
 [data-theme="dark"] .ac-mood-history-filters .ac-input,

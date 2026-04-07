@@ -1,0 +1,121 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Sommeil | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main" data-controller="flash-toast">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Sommeil', subtitle: 'Suivi des nuits', username: userName } %}
+
+        {% for message in app.flashes('success') %}
+            <span data-flash-toast-target="message" data-type="success" hidden>{{ message }}</span>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <span data-flash-toast-target="message" data-type="error" hidden>{{ message }}</span>
+        {% endfor %}
+
+        <section class="ac-cards">
+            <article class="ac-stat-card"><h3>Total nuits</h3><p>{{ stats.total }}</p></article>
+            <article class="ac-stat-card"><h3>Durée moyenne</h3><p>{{ stats.avgDuration }} h</p></article>
+            <article class="ac-stat-card"><h3>Qualité moyenne</h3><p>{{ stats.avgQuality }}%</p></article>
+            <article class="ac-stat-card"><h3>Sommeil insuffisant</h3><p>{{ stats.insufficient }}</p></article>
+        </section>
+
+        <section class="ac-card">
+            <div class="ac-row-between" style="margin-bottom: 1rem;">
+                <h3>Mes nuits</h3>
+                <div class="ac-row-end" style="gap:.5rem;">
+                    <a class="ac-ghost-btn" href="{{ path('user_ui_sommeil_export_csv', app.request.query.all) }}">Exporter CSV</a>
+                    <a class="ac-ghost-btn" href="{{ path('user_ui_sommeil_export_pdf', app.request.query.all) }}">Exporter PDF</a>
+                    <a class="ac-btn ac-btn-primary" href="{{ path('user_ui_sommeil_new') }}">Ajouter une nuit</a>
+                </div>
+            </div>
+
+            <form method="get" class="ac-form" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap: 1rem; margin-bottom: 1rem;">
+                <label>Recherche
+                    <input class="ac-input" type="search" name="q" value="{{ filters.q ?? '' }}" placeholder="Commentaire, qualité, humeur">
+                </label>
+                <label>Qualité
+                    <select class="ac-input" name="quality">
+                        <option value="">Toutes</option>
+                        {% for option in ['Excellente', 'Bonne', 'Moyenne', 'Mauvaise'] %}
+                            <option value="{{ option }}" {{ filters.quality == option ? 'selected' : '' }}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Sommeil insuffisant
+                    <select class="ac-input" name="insufficient">
+                        <option value="">Tous</option>
+                        <option value="1" {{ filters.insufficient == '1' ? 'selected' : '' }}>Seulement insuffisant</option>
+                    </select>
+                </label>
+                <label>Tri
+                    <select class="ac-input" name="sort">
+                        <option value="date" {{ filters.sort == 'date' ? 'selected' : '' }}>Date</option>
+                        <option value="duration" {{ filters.sort == 'duration' ? 'selected' : '' }}>Durée</option>
+                        <option value="quality" {{ filters.sort == 'quality' ? 'selected' : '' }}>Qualité</option>
+                    </select>
+                </label>
+                <label>Direction
+                    <select class="ac-input" name="direction">
+                        <option value="DESC" {{ filters.direction == 'DESC' ? 'selected' : '' }}>Desc</option>
+                        <option value="ASC" {{ filters.direction == 'ASC' ? 'selected' : '' }}>Asc</option>
+                    </select>
+                </label>
+                <div class="ac-row-end" style="align-items:flex-end; gap:.5rem;">
+                    <button class="ac-btn ac-btn-primary" type="submit">Filtrer</button>
+                    <a class="ac-ghost-btn" href="{{ path('user_ui_sommeil_list') }}">Reset</a>
+                </div>
+            </form>
+
+            <div class="ac-table-container">
+                <table class="ac-table">
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Coucher</th>
+                        <th>Réveil</th>
+                        <th>Durée</th>
+                        <th>Qualité</th>
+                        <th>Humeur</th>
+                        <th>Interruptions</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for sommeil in sommeils %}
+                        <tr>
+                            <td>{{ sommeil.sleepDate }}</td>
+                            <td>{{ sommeil.bedTime }}</td>
+                            <td>{{ sommeil.wakeTime }}</td>
+                            <td>{{ sommeil.sleepDuration is not null ? sommeil.sleepDuration ~ 'h' : '—' }}</td>
+                            <td>{{ sommeil.quality ?? '—' }}</td>
+                            <td>{{ sommeil.humeur_reveil ?? '—' }}</td>
+                            <td>{{ sommeil.interruptions ?? '—' }}</td>
+                            <td>
+                                <span class="ac-badge {{ sommeil.insufficient ? 'ac-badge-warning' : 'ac-badge-success' }}">
+                                    {{ sommeil.insufficient ? 'Sommeil insuffisant' : 'Normal' }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="ac-row-end" style="gap:.35rem;">
+                                    <a class="ac-ghost-btn" href="{{ path('user_ui_sommeil_show', {id: sommeil.id}) }}">Voir</a>
+                                    <a class="ac-ghost-btn" href="{{ path('user_ui_sommeil_edit', {id: sommeil.id}) }}">Modifier</a>
+                                    <form method="post" action="{{ path('user_ui_sommeil_delete', {id: sommeil.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_sommeil_' ~ sommeil.id) }}">
+                                        <button class="ac-ghost-btn" type="submit">Supprimer</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="9">Aucune nuit enregistrée.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

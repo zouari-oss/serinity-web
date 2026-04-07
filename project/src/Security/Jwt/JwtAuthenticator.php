@@ -40,6 +40,8 @@ final class JwtAuthenticator extends AbstractAuthenticator
                 str_starts_with($path, '/api/')
                 || str_starts_with($path, '/admin')
                 || str_starts_with($path, '/user')
+                || str_starts_with($path, '/sommeil')
+                || str_starts_with($path, '/reve')
                 || $path === '/dashboard'
             );
     }
@@ -77,6 +79,8 @@ final class JwtAuthenticator extends AbstractAuthenticator
         if (
             str_starts_with($request->getPathInfo(), '/admin')
             || str_starts_with($request->getPathInfo(), '/user')
+            || str_starts_with($request->getPathInfo(), '/sommeil')
+            || str_starts_with($request->getPathInfo(), '/reve')
             || $request->getPathInfo() === '/dashboard'
         ) {
             $response = new RedirectResponse($this->router->generate('ac_ui_login'));

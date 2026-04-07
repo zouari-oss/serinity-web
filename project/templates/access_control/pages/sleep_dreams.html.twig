@@ -1,0 +1,130 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Admin Reves | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Reves management', subtitle: 'Monitoring admin', username: userName } %}
+
+        <section class="ac-cards">
+            <article class="ac-stat-card"><h3>Total rêves</h3><p>{{ summary.totalDreams }}</p></article>
+            <article class="ac-stat-card"><h3>Cauchemars</h3><p>{{ summary.nightmares }}</p></article>
+            <article class="ac-stat-card"><h3>Types</h3><p>{{ summary.dreamTypeBreakdown|length }}</p></article>
+            <article class="ac-stat-card"><h3>Sessions sommeil</h3><p>{{ summary.totalSessions }}</p></article>
+        </section>
+
+        <section class="ac-card">
+            <h3>Répartition types de rêves</h3>
+            <div class="ac-row-between" style="flex-wrap:wrap; gap:.5rem;">
+                {% for label, value in summary.dreamTypeBreakdown %}
+                    <span class="ac-badge ac-badge-secondary">{{ label }}: {{ value }}</span>
+                {% endfor %}
+            </div>
+        </section>
+
+        {% set dreamPeak = 1 %}
+        {% for _, value in summary.dreamTypeBreakdown %}
+            {% set dreamPeak = value > dreamPeak ? value : dreamPeak %}
+        {% endfor %}
+        {% set nightmareShare = summary.totalDreams > 0 ? ((summary.nightmares / summary.totalDreams) * 100)|round(0, 'floor') : 0 %}
+        <section class="ac-charts">
+            <article class="ac-card">
+                <h3>Chart types de rêves</h3>
+                <div class="ac-bar-chart">
+                    {% for label, value in summary.dreamTypeBreakdown %}
+                        <div class="ac-bar-row">
+                            <div class="ac-bar-label">{{ label }}</div>
+                            <div class="ac-bar-track"><div class="ac-bar-fill ac-bar-fill-alt" style="width: {{ (value / dreamPeak * 100)|number_format(0, '.', '') }}%;"></div></div>
+                            <div class="ac-bar-value">{{ value }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </article>
+            <article class="ac-card">
+                <h3>Part des cauchemars</h3>
+                <div class="ac-dashboard-split">
+                    <div class="ac-pie-chart" style="--slice-a: {{ nightmareShare }}; --color-a: var(--danger); --color-b: var(--surface-soft);">
+                        <span>{{ nightmareShare }}%</span>
+                    </div>
+                    <div class="ac-kpi-grid">
+                        <div>
+                            <strong>{{ summary.nightmares }}</strong>
+                            <span>Cauchemars</span>
+                        </div>
+                        <div>
+                            <strong>{{ summary.totalDreams }}</strong>
+                            <span>Total rêves</span>
+                        </div>
+                        <div>
+                            <strong>{{ summary.totalSessions }}</strong>
+                            <span>Sessions sommeil liées</span>
+                        </div>
+                        <div>
+                            <strong>{{ summary.dreamTypeBreakdown|length }}</strong>
+                            <span>Types suivis</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <section class="ac-card">
+            <div class="ac-row-between" style="margin-bottom: 1rem;">
+                <h3>Tableau rêves</h3>
+                <a class="ac-ghost-btn" href="{{ path('ac_ui_sleep') }}">Voir sommeil</a>
+            </div>
+            <form method="get" class="ac-form" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin-bottom: 1rem;">
+                <label>Recherche<input class="ac-input" name="q" value="{{ app.request.query.get('q', '') }}"></label>
+                <label>Type
+                    <select class="ac-input" name="type">
+                        <option value="">Tous</option>
+                        {% for type in dreamTypes %}
+                            <option value="{{ type }}" {{ app.request.query.get('type') == type ? 'selected' : '' }}>{{ type }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <div class="ac-row-end" style="align-items:flex-end;">
+                    <button class="ac-btn ac-btn-primary" type="submit">Filtrer</button>
+                </div>
+            </form>
+            <div class="ac-table-container">
+                <table class="ac-table">
+                    <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Role</th>
+                        <th>Date</th>
+                        <th>Titre</th>
+                        <th>Type</th>
+                        <th>Humeur</th>
+                        <th>Intensité</th>
+                        <th>Récurrent</th>
+                        <th>Couleur</th>
+                        <th>Description</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in dreams %}
+                        <tr>
+                            <td>{{ row.userEmail }}</td>
+                            <td>{{ row.userRole }}</td>
+                            <td>{{ row.sleepDate ?? '—' }}</td>
+                            <td>{{ row.title }}</td>
+                            <td>{{ row.dreamType ?? '—' }}</td>
+                            <td>{{ row.mood ?? '—' }}</td>
+                            <td>{{ row.intensity ?? '—' }}</td>
+                            <td>{{ row.isRecurring ? 'Oui' : 'Non' }}</td>
+                            <td>{{ row.isColor ? 'Oui' : 'Non' }}</td>
+                            <td>{{ row.description ?? '—' }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="10">Aucun rêve.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

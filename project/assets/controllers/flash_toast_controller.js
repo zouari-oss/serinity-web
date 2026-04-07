@@ -15,7 +15,9 @@ export default class extends Controller {
     showToast(message, type = 'success', index = 0) {
         const toast = document.createElement('div');
         toast.className = `ac-toast ac-toast-${type}`;
-        toast.textContent = message;
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        toast.textContent = `Status: ${message}`;
         toast.style.bottom = `${2 + index * 4}rem`;
 
         document.body.appendChild(toast);

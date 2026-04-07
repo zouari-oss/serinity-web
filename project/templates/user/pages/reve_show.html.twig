@@ -1,0 +1,33 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Détail rêve | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Détail rêve', subtitle: dream.title ?? '', username: userName } %}
+        <section class="ac-card">
+            <div class="ac-grid-two">
+                <div><strong>Titre:</strong> {{ dream.title }}</div>
+                <div><strong>Type:</strong> {{ dream.dreamType ?? '—' }}</div>
+                <div><strong>Date:</strong> {{ dream.sleepDate ?? (dream.createdAt|date('Y-m-d')) }}</div>
+                <div><strong>Humeur:</strong> {{ dream.humeur ?? '—' }}</div>
+                <div><strong>Intensité:</strong> {{ dream.intensite ?? dream.intensity ?? '—' }}</div>
+                <div><strong>Couleur:</strong> {{ (dream.couleur ?? dream.isColor ?? false) ? 'Oui' : 'Non' }}</div>
+                <div><strong>Récurrent:</strong> {{ (dream.recurrent ?? dream.isRecurring ?? false) ? 'Oui' : 'Non' }}</div>
+            </div>
+            <div style="margin-top:1rem;">
+                <strong>Description</strong>
+                <p class="ac-muted">{{ dream.description ?: 'Aucune description.' }}</p>
+            </div>
+            <div class="ac-grid-two">
+                <div><strong>Émotions:</strong> {{ dream.emotions ?? '—' }}</div>
+                <div><strong>Symboles:</strong> {{ dream.symboles ?? '—' }}</div>
+            </div>
+            <div class="ac-row-end">
+                <a class="ac-ghost-btn" href="{{ path('user_ui_reve_index') }}">Retour</a>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

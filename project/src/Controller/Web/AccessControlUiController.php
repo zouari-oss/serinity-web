@@ -720,22 +720,11 @@ final class AccessControlUiController extends AbstractController
         return $this->redirectToRoute('ac_ui_influence');
     }
 
-    #[Route('/admin/sleep', name: 'ac_ui_sleep', methods: ['GET'])]
-    #[IsGranted('ROLE_ADMIN')]
-    public function sleep(): Response
-    {
-        return $this->render('access_control/pages/coming_soon.html.twig', [
-            'nav' => $this->buildNav('ac_ui_sleep'),
-            'userName' => $this->getUser()?->getEmail() ?? 'Admin',
-            'title' => 'Sleep',
-            'subtitle' => 'Sleep quality reporting and interventions are coming soon.',
-        ]);
-    }
-
     /** @return list<array{section: string, label: string, route: string, icon: string, active: bool, children?: list<array{label: string, route: string, icon: string, active: bool}>}> */
     private function buildNav(string $activeRoute): array
     {
         $moodChildRoutes = ['ac_ui_mood', 'ac_ui_emotion', 'ac_ui_influence'];
+        $sleepChildRoutes = ['ac_ui_sleep', 'ac_ui_sleep_reves'];
         $items = [
             ['section' => 'Admin self-management', 'label' => 'Dashboard', 'route' => 'ac_ui_dashboard', 'icon' => 'dashboard'],
             ['section' => 'Admin self-management', 'label' => 'Profile', 'route' => 'ac_ui_profile', 'icon' => 'person'],
@@ -756,15 +745,31 @@ final class AccessControlUiController extends AbstractController
                     ['label' => 'Influence management', 'route' => 'ac_ui_influence', 'icon' => 'tune'],
                 ],
             ],
-            ['section' => 'Users management', 'label' => 'Sleep', 'route' => 'ac_ui_sleep', 'icon' => 'hotel'],
+            [
+                'section' => 'Users management',
+                'label' => 'Sleep',
+                'route' => 'ac_ui_sleep',
+                'icon' => 'hotel',
+                'children' => [
+                    ['label' => 'Sommeil', 'route' => 'ac_ui_sleep', 'icon' => 'bedtime'],
+                    ['label' => 'Reves management', 'route' => 'ac_ui_sleep_reves', 'icon' => 'nights_stay'],
+                ],
+            ],
         ];
 
         return array_map(
-            static function (array $item) use ($activeRoute, $moodChildRoutes): array {
+            static function (array $item) use ($activeRoute, $moodChildRoutes, $sleepChildRoutes): array {
                 $isMoodGroup = $item['route'] === 'ac_ui_mood' && isset($item['children']);
-                $active = $isMoodGroup ? in_array($activeRoute, $moodChildRoutes, true) : $item['route'] === $activeRoute;
+                $isSleepGroup = $item['route'] === 'ac_ui_sleep' && isset($item['children']);
+                $active = $item['route'] === $activeRoute;
 
-                if (!$isMoodGroup) {
+                if ($isMoodGroup) {
+                    $active = in_array($activeRoute, $moodChildRoutes, true);
+                } elseif ($isSleepGroup) {
+                    $active = in_array($activeRoute, $sleepChildRoutes, true);
+                }
+
+                if (!$isMoodGroup && !$isSleepGroup) {
                     return [
                         'section' => $item['section'],
                         'label' => $item['label'],

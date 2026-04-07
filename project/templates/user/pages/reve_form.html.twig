@@ -1,0 +1,70 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}{{ mode == 'edit' ? 'Modifier rêve' : 'Nouveau rêve' }} | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main" data-controller="flash-toast">
+        {% include 'access_control/components/_topbar.html.twig' with { title: mode == 'edit' ? 'Modifier rêve' : 'Nouveau rêve', subtitle: 'Reves management', username: userName } %}
+
+        {% for message in app.flashes('success') %}
+            <span data-flash-toast-target="message" data-type="success" hidden>{{ message }}</span>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <span data-flash-toast-target="message" data-type="error" hidden>{{ message }}</span>
+        {% endfor %}
+
+        <section class="ac-card">
+            <form method="post" class="ac-form ac-grid-two">
+                <label>Nuit associée
+                    <select class="ac-input" name="sommeil_id">
+                        <option value="">Choisir</option>
+                        {% for session in sessions %}
+                            <option value="{{ session.id }}" {{ dream is not null and (dream.sommeil_id ?? dream.sleepSessionId) == session.id ? 'selected' : '' }}>
+                                {{ session.date_nuit ?? session.sleepDate }} ({{ session.heure_coucher ?? session.bedTime }} - {{ session.heure_reveil ?? session.wakeTime }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Titre<input class="ac-input" name="titre" value="{{ dream.titre ?? dream.title ?? '' }}"></label>
+                <label>Type
+                    <select class="ac-input" name="type_reve">
+                        <option value="">Choisir</option>
+                        {% for type in dreamTypes %}
+                            <option value="{{ type }}" {{ dream is not null and (dream.type_reve ?? dream.dreamType) == type ? 'selected' : '' }}>{{ type }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Humeur
+                    <select class="ac-input" name="humeur">
+                        <option value="">Choisir</option>
+                        {% for mood in ['😄 Joyeux', '😢 Triste', '😨 Effrayé', '😌 Serein', '😐 Neutre'] %}
+                            <option value="{{ mood }}" {{ dream is not null and dream.humeur == mood ? 'selected' : '' }}>{{ mood }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Intensité (1-10)<input class="ac-input" type="number" min="1" max="10" name="intensite" value="{{ dream.intensite ?? dream.intensity ?? '' }}"></label>
+                <label class="ac-col-span-2">Description<textarea class="ac-input" rows="4" name="description">{{ dream.description ?? '' }}</textarea></label>
+                <label>Couleur
+                    <select class="ac-input" name="couleur">
+                        <option value="0" {{ dream is null or not (dream.couleur ?? dream.isColor ?? false) ? 'selected' : '' }}>Non</option>
+                        <option value="1" {{ dream is not null and (dream.couleur ?? dream.isColor ?? false) ? 'selected' : '' }}>Oui</option>
+                    </select>
+                </label>
+                <label>Récurrent
+                    <select class="ac-input" name="recurrent">
+                        <option value="0" {{ dream is null or not (dream.recurrent ?? dream.isRecurring ?? false) ? 'selected' : '' }}>Non</option>
+                        <option value="1" {{ dream is not null and (dream.recurrent ?? dream.isRecurring ?? false) ? 'selected' : '' }}>Oui</option>
+                    </select>
+                </label>
+                <label>Émotions<input class="ac-input" name="emotions" value="{{ dream.emotions ?? '' }}"></label>
+                <label>Symboles<input class="ac-input" name="symboles" value="{{ dream.symboles ?? '' }}"></label>
+                <div class="ac-row-end ac-col-span-2" style="gap:.5rem;">
+                    <a class="ac-ghost-btn" href="{{ path('user_ui_reve_index') }}">Annuler</a>
+                    <button class="ac-btn ac-btn-primary" type="submit">{{ mode == 'edit' ? 'Mettre à jour' : 'Enregistrer' }}</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

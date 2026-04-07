@@ -1,0 +1,123 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Reves management | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main" data-controller="flash-toast">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Reves management', subtitle: 'Gestion des rêves', username: userName } %}
+
+        {% for message in app.flashes('success') %}
+            <span data-flash-toast-target="message" data-type="success" hidden>{{ message }}</span>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <span data-flash-toast-target="message" data-type="error" hidden>{{ message }}</span>
+        {% endfor %}
+
+        <section class="ac-cards">
+            <article class="ac-stat-card"><h3>Total rêves</h3><p>{{ stats.total }}</p></article>
+            <article class="ac-stat-card"><h3>Cauchemars</h3><p>{{ stats.nightmares }}</p></article>
+            <article class="ac-stat-card"><h3>Attention</h3><p>{{ stats.attention ? 'Oui' : 'Non' }}</p></article>
+        </section>
+
+        <section class="ac-card">
+            <div class="ac-row-between" style="margin-bottom: 1rem;">
+                <h3>Mes rêves</h3>
+                <div class="ac-row-end" style="gap:.5rem;">
+                    <a class="ac-ghost-btn" href="{{ path('user_ui_reve_export_csv', app.request.query.all) }}">Exporter CSV</a>
+                    <a class="ac-ghost-btn" href="{{ path('user_ui_reve_export_pdf', app.request.query.all) }}">Exporter PDF</a>
+                    <a class="ac-btn ac-btn-primary" href="{{ path('user_ui_reve_new') }}">Ajouter un rêve</a>
+                </div>
+            </div>
+
+            <form method="get" class="ac-form" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap: 1rem; margin-bottom: 1rem;">
+                <label>Recherche
+                    <input class="ac-input" type="search" name="q" value="{{ filters.q ?? '' }}" placeholder="Titre, description...">
+                </label>
+                <label>Type
+                    <select class="ac-input" name="type">
+                        <option value="">Tous</option>
+                        {% for type in dreamTypes %}
+                            <option value="{{ type }}" {{ filters.type == type ? 'selected' : '' }}>{{ type }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Humeur
+                    <select class="ac-input" name="mood">
+                        <option value="">Toutes</option>
+                        {% for mood in ['😄 Joyeux', '😢 Triste', '😨 Effrayé', '😌 Serein', '😐 Neutre'] %}
+                            <option value="{{ mood }}" {{ filters.mood == mood ? 'selected' : '' }}>{{ mood }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Récurrent
+                    <select class="ac-input" name="recurring">
+                        <option value="">Tous</option>
+                        <option value="1" {{ filters.recurring == '1' ? 'selected' : '' }}>Oui</option>
+                        <option value="0" {{ filters.recurring == '0' ? 'selected' : '' }}>Non</option>
+                    </select>
+                </label>
+                <label>Cauchemars
+                    <select class="ac-input" name="nightmares">
+                        <option value="">Tous</option>
+                        <option value="1" {{ filters.nightmares == '1' ? 'selected' : '' }}>Seulement cauchemars</option>
+                    </select>
+                </label>
+                <label>Tri
+                    <select class="ac-input" name="sort">
+                        <option value="date" {{ filters.sort == 'date' ? 'selected' : '' }}>Date</option>
+                        <option value="title" {{ filters.sort == 'title' ? 'selected' : '' }}>Titre</option>
+                        <option value="type" {{ filters.sort == 'type' ? 'selected' : '' }}>Type</option>
+                    </select>
+                </label>
+                <label>Direction
+                    <select class="ac-input" name="direction">
+                        <option value="DESC" {{ filters.direction == 'DESC' ? 'selected' : '' }}>Desc</option>
+                        <option value="ASC" {{ filters.direction == 'ASC' ? 'selected' : '' }}>Asc</option>
+                    </select>
+                </label>
+                <div class="ac-row-end" style="align-items:flex-end; gap:.5rem;">
+                    <button class="ac-btn ac-btn-primary" type="submit">Filtrer</button>
+                    <a class="ac-ghost-btn" href="{{ path('user_ui_reve_index') }}">Reset</a>
+                </div>
+            </form>
+
+            <div class="ac-table-container">
+                <table class="ac-table">
+                    <thead>
+                    <tr>
+                        <th>Titre</th>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Intensité</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for reve in reves %}
+                        <tr>
+                            <td>{{ reve.title }}</td>
+                            <td>{{ reve.sleepDate ?? (reve.createdAt|date('Y-m-d')) }}</td>
+                            <td>{{ reve.dreamType ?? '—' }}</td>
+                            <td>{{ reve.intensite ?? reve.intensity ?? '—' }}</td>
+                            <td>
+                                <div class="ac-row-end" style="gap:.35rem;">
+                                    <a class="ac-ghost-btn" href="{{ path('user_ui_reve_show', {id: reve.id}) }}">Voir</a>
+                                    <a class="ac-ghost-btn" href="{{ path('user_ui_reve_edit', {id: reve.id}) }}">Modifier</a>
+                                    <form method="post" action="{{ path('user_ui_reve_delete', {id: reve.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_reve_' ~ reve.id) }}">
+                                        <button class="ac-ghost-btn" type="submit">Supprimer</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="5">Aucun rêve enregistré.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

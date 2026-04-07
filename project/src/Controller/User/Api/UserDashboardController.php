@@ -122,7 +122,7 @@ final class UserDashboardController extends AbstractApiController
         return $response;
     }
 
-    #[Route('/{module}', name: 'module_placeholder', methods: ['GET'], requirements: ['module' => 'consultations|forum|sleep'])]
+    #[Route('/{module}', name: 'module_placeholder', methods: ['GET'], requirements: ['module' => 'consultations|forum'])]
     public function modulePlaceholder(Request $request, string $module): JsonResponse
     {
         $guard = $this->guard($request);

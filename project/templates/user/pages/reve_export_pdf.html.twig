@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reves export</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #111; }
+        h1 { font-size: 18px; margin-bottom: 12px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
+        th { background: #f3f3f3; }
+    </style>
+</head>
+<body>
+<h1>Reves</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Date</th>
+        <th>Titre</th>
+        <th>Type</th>
+        <th>Humeur</th>
+        <th>Intensité</th>
+        <th>Récurrent</th>
+        <th>Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in rows %}
+        <tr>
+            <td>{{ row.sleepDate ?? (row.createdAt|default('')) }}</td>
+            <td>{{ row.title ?? '' }}</td>
+            <td>{{ row.dreamType ?? '' }}</td>
+            <td>{{ row.humeur ?? '' }}</td>
+            <td>{{ row.intensite ?? row.intensity ?? '' }}</td>
+            <td>{{ (row.recurrent ?? row.isRecurring ?? false) ? 'Oui' : 'Non' }}</td>
+            <td>{{ row.description ?? '' }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>

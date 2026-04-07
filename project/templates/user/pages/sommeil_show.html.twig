@@ -1,0 +1,32 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Détail sommeil | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Détail sommeil', subtitle: session.sleepDate ?? '', username: userName } %}
+        <section class="ac-card">
+            <div class="ac-grid-two">
+                <div><strong>Date:</strong> {{ session.sleepDate ?? '—' }}</div>
+                <div><strong>Coucher:</strong> {{ session.bedTime ?? '—' }}</div>
+                <div><strong>Réveil:</strong> {{ session.wakeTime ?? '—' }}</div>
+                <div><strong>Durée:</strong> {{ session.sleepDuration is not null ? session.sleepDuration ~ 'h' : '—' }}</div>
+                <div><strong>Qualité:</strong> {{ session.quality ?? '—' }}</div>
+                <div><strong>Interruptions:</strong> {{ session.interruptions ?? '—' }}</div>
+                <div><strong>Humeur réveil:</strong> {{ session.humeur_reveil ?? '—' }}</div>
+                <div><strong>Environnement:</strong> {{ session.environnement ?? '—' }}</div>
+                <div><strong>Température:</strong> {{ session.temperature is not null ? session.temperature ~ '°C' : '—' }}</div>
+                <div><strong>Bruit:</strong> {{ session.bruit_niveau ?? '—' }}</div>
+            </div>
+            <div style="margin-top:1rem;">
+                <strong>Commentaire</strong>
+                <p class="ac-muted">{{ session.comment ?: 'Aucun commentaire.' }}</p>
+            </div>
+            <div class="ac-row-end">
+                <a class="ac-ghost-btn" href="{{ path('user_ui_sommeil_list') }}">Retour</a>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

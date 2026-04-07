@@ -74,13 +74,8 @@ final class DashboardController extends AbstractUserUiController
     #[Route('/sleep', name: 'user_ui_sleep', methods: ['GET'])]
     public function sleep(): Response
     {
-        $user = $this->currentUser();
+        $this->currentUser();
 
-        return $this->render('access_control/pages/coming_soon.html.twig', [
-            'nav' => $this->buildNav('user_ui_sleep'),
-            'userName' => $user->getEmail(),
-            'title' => 'Sleep',
-            'subtitle' => 'Sleep tracking module will be available soon.',
-        ]);
+        return $this->redirectToRoute('user_ui_sommeil_list');
     }
 }

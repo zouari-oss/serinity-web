@@ -1,0 +1,66 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}{{ mode == 'edit' ? 'Modifier nuit' : 'Nouvelle nuit' }} | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main" data-controller="flash-toast">
+        {% include 'access_control/components/_topbar.html.twig' with { title: mode == 'edit' ? 'Modifier nuit' : 'Nouvelle nuit', subtitle: 'Sommeil', username: userName } %}
+
+        {% for message in app.flashes('success') %}
+            <span data-flash-toast-target="message" data-type="success" hidden>{{ message }}</span>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <span data-flash-toast-target="message" data-type="error" hidden>{{ message }}</span>
+        {% endfor %}
+
+        <section class="ac-card">
+            <form method="post" class="ac-form ac-grid-two">
+                <label>Date de nuit<input class="ac-input" type="date" name="date_nuit" value="{{ session.date_nuit ?? session.sleepDate ?? '' }}"></label>
+                <label>Heure de coucher<input class="ac-input" type="time" name="heure_coucher" value="{{ session.heure_coucher ?? session.bedTime ?? '' }}"></label>
+                <label>Heure de réveil<input class="ac-input" type="time" name="heure_reveil" value="{{ session.heure_reveil ?? session.wakeTime ?? '' }}"></label>
+                <label>Qualité
+                    <select class="ac-input" name="qualite">
+                        <option value="">Choisir</option>
+                        {% for quality in qualities %}
+                            <option value="{{ quality }}" {{ session is not null and (session.qualite ?? session.quality) == quality ? 'selected' : '' }}>{{ quality }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Durée (heures)<input class="ac-input" type="number" step="0.5" min="0.5" max="24" name="duree_sommeil" value="{{ session.duree_sommeil ?? session.sleepDuration ?? '' }}"></label>
+                <label>Interruptions<input class="ac-input" type="number" min="0" name="interruptions" value="{{ session.interruptions ?? '' }}"></label>
+                <label>Humeur au réveil
+                    <select class="ac-input" name="humeur_reveil">
+                        <option value="">Choisir</option>
+                        {% for mood in ['😌 Reposé', '😄 Joyeux', '😐 Neutre', '😴 Fatigué', '⚡ Énergisé'] %}
+                            <option value="{{ mood }}" {{ session is not null and session.humeur_reveil == mood ? 'selected' : '' }}>{{ mood }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Environnement
+                    <select class="ac-input" name="environnement">
+                        <option value="">Choisir</option>
+                        {% for env in ['🏠 Normal', '🌿 Calme', '😊 Confortable'] %}
+                            <option value="{{ env }}" {{ session is not null and session.environnement == env ? 'selected' : '' }}>{{ env }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Température (°C)<input class="ac-input" type="number" step="0.1" min="10" max="40" name="temperature" value="{{ session.temperature ?? '' }}"></label>
+                <label>Niveau de bruit
+                    <select class="ac-input" name="bruit_niveau">
+                        <option value="">Choisir</option>
+                        {% for noise in ['🔇 Silencieux', '🔉 Léger', '🔉 Modéré', '🔊 Fort'] %}
+                            <option value="{{ noise }}" {{ session is not null and session.bruit_niveau == noise ? 'selected' : '' }}>{{ noise }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label class="ac-col-span-2">Commentaire<textarea class="ac-input" rows="4" name="commentaire">{{ session.commentaire ?? session.comment ?? '' }}</textarea></label>
+                <div class="ac-row-end ac-col-span-2" style="gap:.5rem;">
+                    <a class="ac-ghost-btn" href="{{ path('user_ui_sommeil_list') }}">Annuler</a>
+                    <button class="ac-btn ac-btn-primary" type="submit">{{ mode == 'edit' ? 'Mettre à jour' : 'Enregistrer' }}</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

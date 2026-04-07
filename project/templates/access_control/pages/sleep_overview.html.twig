@@ -1,0 +1,123 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Admin Sommeil | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Sommeil', subtitle: 'Monitoring admin', username: userName } %}
+
+        <section class="ac-cards">
+            <article class="ac-stat-card"><h3>Entrées sommeil</h3><p>{{ summary.totalSessions }}</p></article>
+            <article class="ac-stat-card"><h3>Rêves</h3><p>{{ summary.totalDreams }}</p></article>
+            <article class="ac-stat-card"><h3>Durée moyenne</h3><p>{{ summary.avgDuration }} h</p></article>
+            <article class="ac-stat-card"><h3>Qualité moyenne</h3><p>{{ summary.avgQuality }}%</p></article>
+        </section>
+
+        <section class="ac-card">
+            <h3>Répartition qualité</h3>
+            <div class="ac-row-between" style="flex-wrap:wrap; gap:.5rem;">
+                {% for label, value in summary.qualityBreakdown %}
+                    <span class="ac-badge ac-badge-secondary">{{ label }}: {{ value }}</span>
+                {% endfor %}
+            </div>
+        </section>
+
+        {% set qualityPeak = 1 %}
+        {% for _, value in summary.qualityBreakdown %}
+            {% set qualityPeak = value > qualityPeak ? value : qualityPeak %}
+        {% endfor %}
+        {% set durationScore = summary.avgDuration > 12 ? 100 : ((summary.avgDuration / 12) * 100)|round(0, 'floor') %}
+        <section class="ac-charts">
+            <article class="ac-card">
+                <h3>Chart qualité sommeil</h3>
+                <div class="ac-bar-chart">
+                    {% for label, value in summary.qualityBreakdown %}
+                        <div class="ac-bar-row">
+                            <div class="ac-bar-label">{{ label }}</div>
+                            <div class="ac-bar-track"><div class="ac-bar-fill" style="width: {{ (value / qualityPeak * 100)|number_format(0, '.', '') }}%;"></div></div>
+                            <div class="ac-bar-value">{{ value }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </article>
+            <article class="ac-card">
+                <h3>Indices globaux</h3>
+                <div class="ac-dashboard-split">
+                    <div class="ac-pie-chart" style="--slice-a: {{ summary.avgQuality }}; --color-a: var(--primary); --color-b: var(--surface-soft);">
+                        <span>{{ summary.avgQuality }}%</span>
+                    </div>
+                    <div class="ac-progress-chart">
+                        <div class="ac-progress-track">
+                            <div class="ac-progress-fill" style="width: {{ durationScore }}%;"></div>
+                        </div>
+                        <div class="ac-progress-meta">
+                            <span>Durée moyenne</span>
+                            <strong>{{ summary.avgDuration }} h / 12 h</strong>
+                        </div>
+                        <div class="ac-progress-meta">
+                            <span>Qualité moyenne</span>
+                            <strong>{{ summary.avgQuality }}%</strong>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <section class="ac-card">
+            <div class="ac-row-between" style="margin-bottom: 1rem;">
+                <h3>Tableau Sommeil</h3>
+                <a class="ac-ghost-btn" href="{{ path('ac_ui_sleep_reves') }}">Voir rêves</a>
+            </div>
+            <form method="get" class="ac-form" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin-bottom: 1rem;">
+                <label>Recherche<input class="ac-input" name="q" value="{{ app.request.query.get('q', '') }}"></label>
+                <label>Qualité
+                    <select class="ac-input" name="quality">
+                        <option value="">Toutes</option>
+                        {% for quality in qualities %}
+                            <option value="{{ quality }}" {{ app.request.query.get('quality') == quality ? 'selected' : '' }}>{{ quality }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <div class="ac-row-end" style="align-items:flex-end;">
+                    <button class="ac-btn ac-btn-primary" type="submit">Filtrer</button>
+                </div>
+            </form>
+            <div class="ac-table-container">
+                <table class="ac-table">
+                    <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Role</th>
+                        <th>Date</th>
+                        <th>Durée</th>
+                        <th>Qualité</th>
+                        <th>Humeur</th>
+                        <th>Interruptions</th>
+                        <th>Statut</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in sessions %}
+                        <tr>
+                            <td>{{ row.userEmail }}</td>
+                            <td>{{ row.userRole }}</td>
+                            <td>{{ row.sleepDate }}</td>
+                            <td>{{ row.sleepDuration is not null ? row.sleepDuration ~ 'h' : '—' }}</td>
+                            <td>{{ row.quality ?? '—' }}</td>
+                            <td>{{ row.humeurReveil ?? '—' }}</td>
+                            <td>{{ row.interruptions ?? '—' }}</td>
+                            <td>
+                                <span class="ac-badge {{ row.insufficient ? 'ac-badge-warning' : 'ac-badge-success' }}">{{ row.statusMessage }}</span>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="8">Aucune entrée sommeil.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

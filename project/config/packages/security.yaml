@@ -34,6 +34,7 @@ security:
     access_control:
         - { path: ^/api/auth/(login|register|logout|refresh|reset/send|reset/confirm)$, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/me$, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/(sommeil|reve), roles: [ROLE_PATIENT, ROLE_THERAPIST] }
         - { path: ^/user, roles: [ROLE_PATIENT, ROLE_THERAPIST] }
         - { path: ^/api/user, roles: [ROLE_PATIENT, ROLE_THERAPIST] }
         - { path: ^/admin/dashboard$, roles: IS_AUTHENTICATED_FULLY }

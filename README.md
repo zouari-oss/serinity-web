@@ -130,11 +130,15 @@ composer install
 
 ### 3. Configure Environment Variables
 
-Update your `.env` file (or `.env.local`) with your database configuration:
+Use environment-specific files:
 
 ```bash
-DATABASE_URL="mysql://user:password@127.0.0.1:3306/db_name"
+cp project/.env.local.dist project/.env.local
 ```
+
+For local development, update `project/.env.local` with your local database credentials.
+
+For production, use `project/.env.prod` as a template and set the same variables in your hosting platform (Vercel Environment Variables).
 
 ### 4. Create Database & Run Migrations
 
@@ -144,7 +148,7 @@ php bin/console doctrine:migrations:migrate
 ```
 
 > [!IMPORTANT]
-> MariaDB must already be installed on your system
+> Local setup defaults to PostgreSQL via `compose.yaml`.
 
 ### 5. Start the Symfony Server
 
@@ -163,6 +167,20 @@ php -S 127.0.0.1:8000 -t public
 Open your browser and go to:
 
 <http://127.0.0.1:8000>
+
+## Vercel + Supabase Deployment
+
+1. In Vercel, import this repository and set **Root Directory** to `.` (repo root).
+2. Keep `vercel.json` (already configured) so requests are routed to `project/public/index.php`.
+3. In Vercel Project Settings → Environment Variables, define at least:
+   - `APP_ENV=prod`
+   - `APP_DEBUG=0`
+   - `APP_SECRET=<strong-random-secret>`
+   - `DEFAULT_URI=https://<your-domain>`
+   - `DATABASE_URL=<your-supabase-postgres-url-with-sslmode=require>`
+   - `TRUSTED_PROXIES=REMOTE_ADDR`
+4. Use Supabase PostgreSQL connection URL (prefer non-pooling `:5432` URL for Doctrine).
+5. Deploy, then run migrations against the production database.
 
 ## Download
 

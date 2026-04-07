@@ -34,6 +34,4 @@ final class MoodCreateRequest
     ])]
     public array $influenceKeys = [];
 
-    #[Assert\Length(max: 1000)]
-    public ?string $note = null;
 }

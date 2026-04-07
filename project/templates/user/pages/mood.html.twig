@@ -10,6 +10,8 @@
         data-user-mood-create-url-value="{{ path('api_user_mood_create') }}"
         data-user-mood-history-url-value="{{ path('api_user_mood_history') }}"
         data-user-mood-summary-url-value="{{ path('api_user_mood_summary') }}"
+        data-user-mood-update-url-template-value="{{ path('api_user_mood_update', { id: '__id__' }) }}"
+        data-user-mood-delete-url-template-value="{{ path('api_user_mood_delete', { id: '__id__' }) }}"
     >
         {% include 'access_control/components/_topbar.html.twig' with { title: 'Mood', subtitle: 'Track your day and moments', username: userName } %}
 
@@ -106,14 +108,6 @@
                         </div>
                     </fieldset>
 
-                    <fieldset class="ac-col-span-2 ac-mood-form-block">
-                        <legend class="ac-label">Notes</legend>
-                        <label class="ac-col-span-2">
-                            <span class="ac-label">Note (optional)</span>
-                            <textarea class="ac-input" name="note" rows="3" maxlength="1000" placeholder="What happened today?"></textarea>
-                        </label>
-                    </fieldset>
-
                     <div class="ac-row-end ac-col-span-2">
                         <button class="ac-btn ac-btn-primary" data-user-mood-target="submitButton" type="submit">Save entry</button>
                     </div>
@@ -124,7 +118,7 @@
                 <div class="ac-row-between ac-mood-history-head">
                     <h3>History</h3>
                     <form class="ac-mood-history-filters" data-action="submit->user-mood#applyFilters">
-                        <input class="ac-input" data-user-mood-target="filterSearch" type="search" placeholder="Search note">
+                        <input class="ac-input" data-user-mood-target="filterSearch" type="search" placeholder="Search mood, emotion, influence">
                         <select class="ac-input" data-user-mood-target="filterMomentType">
                             <option value="">All types</option>
                             <option value="MOMENT">Moment</option>
@@ -145,6 +139,67 @@
                 <div class="ac-mood-history-list" data-user-mood-target="historyList"></div>
                 <p class="ac-mood-history-empty" data-user-mood-target="historyEmpty" hidden>No mood entries yet.</p>
             </section>
+        </div>
+
+        <div class="ac-modal ac-journal-modal ac-mood-edit-modal" data-user-mood-target="editModal" data-action="click->user-mood#closeEditModal" hidden>
+            <div class="ac-modal-content">
+                <div class="ac-row-between">
+                    <h3>Edit mood entry</h3>
+                    <button class="ac-ghost-btn" type="button" data-action="user-mood#closeEditModal" aria-label="Close edit dialog">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <form class="ac-form ac-grid-two" data-user-mood-target="editForm" data-action="submit->user-mood#submitEdit">
+                    <input type="hidden" name="entryId" data-user-mood-target="editEntryId">
+                    <fieldset class="ac-col-span-2 ac-mood-form-block">
+                        <legend class="ac-label">Entry type</legend>
+                        <label>
+                            <span class="ac-label">Moment / day</span>
+                            <select class="ac-input" name="momentType" required>
+                                <option value="MOMENT">Moment</option>
+                                <option value="DAY">Day</option>
+                            </select>
+                        </label>
+                    </fieldset>
+                    <fieldset class="ac-col-span-2 ac-mood-form-block">
+                        <legend class="ac-label">Mood level</legend>
+                        <label class="ac-col-span-2">
+                            <input class="ac-input ac-mood-slider" name="moodLevel" type="range" min="1" max="5" step="1" value="3" data-action="input->user-mood#updateEditMoodLevelLabel">
+                            <div class="ac-mood-level-scale">
+                                <span>1</span>
+                                <strong data-user-mood-target="editMoodLevelValue">3</strong>
+                                <span>5</span>
+                            </div>
+                        </label>
+                    </fieldset>
+                    <fieldset class="ac-col-span-2 ac-mood-form-block">
+                        <legend class="ac-label">Emotions (choose at least 1)</legend>
+                        <div class="ac-mood-chip-grid">
+                            {% for emotion in emotionOptions %}
+                                <label class="ac-check ac-mood-chip">
+                                    <input type="checkbox" name="emotionKeys" value="{{ emotion.key }}">
+                                    <span>{{ emotion.label }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </fieldset>
+                    <fieldset class="ac-col-span-2 ac-mood-form-block">
+                        <legend class="ac-label">Influences (choose at least 1)</legend>
+                        <div class="ac-mood-chip-grid">
+                            {% for influence in influenceOptions %}
+                                <label class="ac-check ac-mood-chip">
+                                    <input type="checkbox" name="influenceKeys" value="{{ influence.key }}">
+                                    <span>{{ influence.label }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </fieldset>
+                    <div class="ac-row-end ac-col-span-2">
+                        <button class="ac-ghost-btn" type="button" data-action="user-mood#closeEditModal">Cancel</button>
+                        <button class="ac-btn ac-btn-primary" data-user-mood-target="editSubmitButton" type="submit">Save changes</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>

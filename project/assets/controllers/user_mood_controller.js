@@ -20,12 +20,19 @@ export default class extends Controller {
         'filterSearch',
         'filterMomentType',
         'filterFromDate',
+        'editModal',
+        'editForm',
+        'editEntryId',
+        'editMoodLevelValue',
+        'editSubmitButton',
     ];
 
     static values = {
         createUrl: String,
         historyUrl: String,
         summaryUrl: String,
+        updateUrlTemplate: String,
+        deleteUrlTemplate: String,
     };
 
     connect() {
@@ -52,7 +59,6 @@ export default class extends Controller {
             moodLevel: Number(this.formTarget.elements.moodLevel.value),
             emotionKeys: this.selectedValues('emotionKeys'),
             influenceKeys: this.selectedValues('influenceKeys'),
-            note: this.formTarget.elements.note.value,
         };
 
         this.setSubmitState(true);
@@ -94,6 +100,14 @@ export default class extends Controller {
 
     nextPage() {
         return;
+    }
+
+    updateEditMoodLevelLabel(event) {
+        if (!this.hasEditMoodLevelValueTarget) {
+            return;
+        }
+
+        this.editMoodLevelValueTarget.textContent = `${event.currentTarget.value}`;
     }
 
     async loadSummary() {
@@ -217,13 +231,7 @@ export default class extends Controller {
                 row.appendChild(rowHead);
                 row.appendChild(this.buildTagList('Emotions', entry.emotions || []));
                 row.appendChild(this.buildTagList('Influences', entry.influences || []));
-
-                if (entry.note) {
-                    const note = document.createElement('p');
-                    note.className = 'ac-mood-note';
-                    note.textContent = entry.note;
-                    row.appendChild(note);
-                }
+                row.appendChild(this.buildRowActions(entry));
 
                 groupSection.appendChild(row);
             });
@@ -256,14 +264,129 @@ export default class extends Controller {
         return wrapper;
     }
 
-    selectedValues(name) {
-        return Array.from(this.formTarget.querySelectorAll(`input[name="${name}"]:checked`))
+    buildRowActions(entry) {
+        const actions = document.createElement('div');
+        actions.className = 'ac-mood-row-actions';
+
+        const editButton = document.createElement('button');
+        editButton.className = 'ac-ghost-btn';
+        editButton.type = 'button';
+        editButton.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">edit</span>';
+        editButton.setAttribute('aria-label', 'Edit mood entry');
+        editButton.addEventListener('click', () => this.openEditModal(entry));
+
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'ac-ghost-btn ac-btn-danger';
+        deleteButton.type = 'button';
+        deleteButton.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">delete</span>';
+        deleteButton.setAttribute('aria-label', 'Delete mood entry');
+        deleteButton.addEventListener('click', () => this.deleteEntry(entry.id));
+
+        actions.append(editButton, deleteButton);
+
+        return actions;
+    }
+
+    openEditModal(entry) {
+        this.editEntryIdTarget.value = String(entry.id);
+        this.editFormTarget.elements.momentType.value = entry.momentType || 'MOMENT';
+        this.editFormTarget.elements.moodLevel.value = String(entry.moodLevel ?? 3);
+        this.editMoodLevelValueTarget.textContent = String(entry.moodLevel ?? 3);
+
+        this.editFormTarget.querySelectorAll('input[name="emotionKeys"]').forEach((input) => {
+            input.checked = (entry.emotions || []).some((emotion) => emotion.key === input.value);
+        });
+
+        this.editFormTarget.querySelectorAll('input[name="influenceKeys"]').forEach((input) => {
+            input.checked = (entry.influences || []).some((influence) => influence.key === input.value);
+        });
+
+        this.editModalTarget.hidden = false;
+    }
+
+    closeEditModal(event = null) {
+        if (event && event.type === 'click' && event.currentTarget === this.editModalTarget && event.target !== this.editModalTarget) {
+            return;
+        }
+
+        this.editModalTarget.hidden = true;
+    }
+
+    async submitEdit(event) {
+        event.preventDefault();
+
+        const entryId = this.editEntryIdTarget.value;
+        if (!entryId) {
+            this.showToast('Mood entry not found.', 'error');
+            return;
+        }
+
+        const payload = {
+            momentType: this.editFormTarget.elements.momentType.value,
+            moodLevel: Number(this.editFormTarget.elements.moodLevel.value),
+            emotionKeys: this.selectedValues('emotionKeys', this.editFormTarget),
+            influenceKeys: this.selectedValues('influenceKeys', this.editFormTarget),
+        };
+
+        this.setEditSubmitState(true);
+
+        try {
+            const response = await fetch(this.entryUrl(this.updateUrlTemplateValue, entryId), {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            const body = await this.readJson(response);
+
+            if (!response.ok || !body?.success) {
+                throw new Error(body?.message || 'Failed to update mood entry.');
+            }
+
+            this.showToast(body.message || 'Mood entry updated successfully.', 'success');
+            this.closeEditModal();
+            await Promise.all([this.loadSummary(), this.loadHistory()]);
+        } catch (error) {
+            this.showToast(error.message || 'Failed to update mood entry.', 'error');
+        } finally {
+            this.setEditSubmitState(false);
+        }
+    }
+
+    async deleteEntry(entryId) {
+        if (!window.confirm('Delete this mood entry?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(this.entryUrl(this.deleteUrlTemplateValue, entryId), {
+                method: 'DELETE',
+            });
+            const body = await this.readJson(response);
+
+            if (!response.ok || !body?.success) {
+                throw new Error(body?.message || 'Failed to delete mood entry.');
+            }
+
+            this.showToast(body.message || 'Mood entry deleted successfully.', 'success');
+            await Promise.all([this.loadSummary(), this.loadHistory()]);
+        } catch (error) {
+            this.showToast(error.message || 'Failed to delete mood entry.', 'error');
+        }
+    }
+
+    selectedValues(name, scope = this.formTarget) {
+        return Array.from(scope.querySelectorAll(`input[name="${name}"]:checked`))
             .map((field) => field.value);
     }
 
     setSubmitState(isLoading) {
         this.submitButtonTarget.disabled = isLoading;
         this.submitButtonTarget.textContent = isLoading ? 'Saving...' : 'Save entry';
+    }
+
+    setEditSubmitState(isLoading) {
+        this.editSubmitButtonTarget.disabled = isLoading;
+        this.editSubmitButtonTarget.textContent = isLoading ? 'Saving...' : 'Save changes';
     }
 
     formatTop(item) {
@@ -303,6 +426,10 @@ export default class extends Controller {
 
             targetGroups[groupKey].entries.push(...(groupData?.entries || []));
         });
+    }
+
+    entryUrl(template, entryId) {
+        return template.replace('__id__', encodeURIComponent(String(entryId)));
     }
 
     showToast(message, type = 'success') {

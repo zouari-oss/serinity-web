@@ -30,7 +30,7 @@ export default class extends Controller {
 
     connect() {
         this.page = 1;
-        this.limit = 10;
+        this.limit = 100;
         this.loadingHistory = false;
         this.loadSummary();
         this.loadHistory();
@@ -89,21 +89,11 @@ export default class extends Controller {
     }
 
     prevPage() {
-        if (this.page <= 1 || this.loadingHistory) {
-            return;
-        }
-
-        this.page -= 1;
-        this.loadHistory();
+        return;
     }
 
     nextPage() {
-        if (this.loadingHistory) {
-            return;
-        }
-
-        this.page += 1;
-        this.loadHistory();
+        return;
     }
 
     async loadSummary() {
@@ -127,39 +117,43 @@ export default class extends Controller {
         this.prevPageButtonTarget.disabled = true;
         this.nextPageButtonTarget.disabled = true;
 
-        const query = new URLSearchParams({
-            page: String(this.page),
+        const baseQuery = new URLSearchParams({
             limit: String(this.limit),
         });
 
         const search = this.filterSearchTarget.value.trim();
         if (search !== '') {
-            query.set('search', search);
+            baseQuery.set('search', search);
         }
 
         const momentType = this.filterMomentTypeTarget.value;
         if (momentType !== '') {
-            query.set('momentType', momentType);
+            baseQuery.set('momentType', momentType);
         }
 
         const fromDate = this.filterFromDateTarget.value;
         if (fromDate !== '') {
-            query.set('fromDate', fromDate);
+            baseQuery.set('fromDate', fromDate);
         }
 
         try {
-            const response = await fetch(`${this.historyUrlValue}?${query.toString()}`);
-            const body = await this.readJson(response);
+            const firstPageData = await this.fetchHistoryPage(baseQuery, 1);
+            const totalPages = Number(firstPageData?.pagination?.totalPages || 1);
+            const mergedData = {
+                groups: { ...(firstPageData.groups || {}) },
+                pagination: {
+                    ...(firstPageData.pagination || {}),
+                    page: 1,
+                },
+            };
 
-            if (!response.ok || !body?.success || !body.data) {
-                throw new Error(body?.message || 'Failed to load mood history.');
+            for (let page = 2; page <= totalPages; page += 1) {
+                const pageData = await this.fetchHistoryPage(baseQuery, page);
+                this.mergeHistoryGroups(mergedData.groups, pageData.groups || {});
             }
 
-            this.renderHistory(body.data);
+            this.renderHistory(mergedData);
         } catch (error) {
-            if (this.page > 1) {
-                this.page -= 1;
-            }
             this.historyMetaTarget.textContent = 'Failed to load history.';
             this.showToast(error.message || 'Failed to load mood history.', 'error');
         } finally {
@@ -180,12 +174,12 @@ export default class extends Controller {
         const groups = Object.values(data.groups ?? {});
         const pagination = data.pagination ?? { page: 1, totalPages: 1, total: 0 };
 
-        this.page = Number(pagination.page || 1);
-        this.pageLabelTarget.textContent = `Page ${pagination.page || 1}`;
+        this.page = 1;
+        this.pageLabelTarget.textContent = 'All entries';
         this.historyMetaTarget.textContent = `${pagination.total || 0} entries`;
 
-        this.prevPageButtonTarget.disabled = this.page <= 1;
-        this.nextPageButtonTarget.disabled = this.page >= Number(pagination.totalPages || 1);
+        this.prevPageButtonTarget.disabled = true;
+        this.nextPageButtonTarget.disabled = true;
 
         this.historyListTarget.replaceChildren();
         this.historyEmptyTarget.hidden = groups.length > 0;
@@ -282,6 +276,33 @@ export default class extends Controller {
 
     async readJson(response) {
         return response.json().catch(() => null);
+    }
+
+    async fetchHistoryPage(baseQuery, page) {
+        const query = new URLSearchParams(baseQuery.toString());
+        query.set('page', String(page));
+
+        const response = await fetch(`${this.historyUrlValue}?${query.toString()}`);
+        const body = await this.readJson(response);
+
+        if (!response.ok || !body?.success || !body.data) {
+            throw new Error(body?.message || 'Failed to load mood history.');
+        }
+
+        return body.data;
+    }
+
+    mergeHistoryGroups(targetGroups, sourceGroups) {
+        Object.entries(sourceGroups).forEach(([groupKey, groupData]) => {
+            if (!targetGroups[groupKey]) {
+                targetGroups[groupKey] = {
+                    label: groupData?.label || groupKey,
+                    entries: [],
+                };
+            }
+
+            targetGroups[groupKey].entries.push(...(groupData?.entries || []));
+        });
     }
 
     showToast(message, type = 'success') {

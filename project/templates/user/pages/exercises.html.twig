@@ -1,0 +1,96 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Exercises | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Exercises', subtitle: 'Catalogue and sessions', username: userName } %}
+
+        {% for message in app.flashes('success') %}
+            <section class="ac-card"><p style="color: var(--success);">{{ message }}</p></section>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <section class="ac-card"><p style="color: var(--danger);">{{ message }}</p></section>
+        {% endfor %}
+
+        <section class="ac-cards">
+            <article class="ac-stat-card"><h3>Assigned</h3><p>{{ summary.total|default(0) }}</p></article>
+            <article class="ac-stat-card"><h3>In progress</h3><p>{{ summary.inProgress|default(0) }}</p></article>
+            <article class="ac-stat-card"><h3>Completed</h3><p>{{ summary.completed|default(0) }}</p></article>
+            <article class="ac-stat-card"><h3>Completion rate</h3><p>{{ summary.completionRate|default(0) }}%</p></article>
+        </section>
+
+        <section class="ac-card">
+            <div class="ac-row-between" style="margin-bottom: 1rem;">
+                <h3>Catalogue exercices</h3>
+                <a class="ac-btn ac-btn-primary" href="{{ path('user_ui_exercises_sessions') }}">My sessions</a>
+            </div>
+            <form method="get" action="{{ path('user_ui_exercises') }}" class="ac-form" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap: 1rem; margin-bottom: 1rem;">
+                <label>Search
+                    <input id="exercise-search" class="ac-input" type="search" name="q" value="{{ filters.q }}" placeholder="Search title">
+                </label>
+                <label>Type
+                    <select class="ac-input" name="type">
+                        <option value="">All</option>
+                        {% for type in availableTypes %}
+                            <option value="{{ type }}" {{ filters.type == type ? 'selected' : '' }}>{{ type }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Level
+                    <select class="ac-input" name="level">
+                        <option value="">All</option>
+                        {% for level in availableLevels %}
+                            <option value="{{ level }}" {{ filters.level == (level ~ '') ? 'selected' : '' }}>Level {{ level }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Sort
+                    <select class="ac-input" name="sort">
+                        <option value="title_asc" {{ filters.sort == 'title_asc' ? 'selected' : '' }}>Title A-Z</option>
+                        <option value="title_desc" {{ filters.sort == 'title_desc' ? 'selected' : '' }}>Title Z-A</option>
+                        <option value="duration_asc" {{ filters.sort == 'duration_asc' ? 'selected' : '' }}>Duration asc</option>
+                        <option value="duration_desc" {{ filters.sort == 'duration_desc' ? 'selected' : '' }}>Duration desc</option>
+                        <option value="level_asc" {{ filters.sort == 'level_asc' ? 'selected' : '' }}>Level asc</option>
+                        <option value="level_desc" {{ filters.sort == 'level_desc' ? 'selected' : '' }}>Level desc</option>
+                    </select>
+                </label>
+                <div class="ac-row-end" style="align-items: flex-end; gap: .5rem;">
+                    <button class="ac-btn ac-btn-primary" type="submit">Apply</button>
+                    <a class="ac-ghost-btn" href="{{ path('user_ui_exercises') }}">Reset</a>
+                </div>
+            </form>
+
+            {% if catalog is empty %}
+                <p class="ac-muted">No exercice found with your current filters.</p>
+            {% else %}
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem;">
+                    {% for item in catalog %}
+                        <article class="ac-card" style="margin:0;">
+                            <h4 style="margin:0 0 .4rem;">{{ item.exercice.title }}</h4>
+                            <p class="ac-muted" style="margin:.25rem 0 .75rem;">
+                                {{ item.exercice.description ? (item.exercice.description|slice(0, 140) ~ (item.exercice.description|length > 140 ? '...' : '')) : 'No description available.' }}
+                            </p>
+                            <div style="display:flex; gap:.4rem; flex-wrap:wrap; margin-bottom:.8rem;">
+                                <span class="ac-badge ac-badge-secondary">{{ item.exercice.type }}</span>
+                                <span class="ac-badge ac-badge-secondary">Level {{ item.exercice.level }}</span>
+                                <span class="ac-badge ac-badge-secondary">{{ item.exercice.durationMinutes }} min</span>
+                                <span class="ac-badge {{ item.status == 'COMPLETED' ? 'ac-badge-success' : (item.status == 'NOT_STARTED' ? 'ac-badge-secondary' : 'ac-badge-warning') }}">{{ item.statusMessage ?? item.status }}</span>
+                            </div>
+                            <div class="ac-row-between">
+                                <a class="ac-ghost-btn" href="{{ path('user_ui_exercises_show', { id: item.exercice.id }) }}">See exercice</a>
+                                <form method="post" action="{{ path('user_ui_exercises_favorite') }}">
+                                    <input type="hidden" name="favoriteType" value="EXERCICE">
+                                    <input type="hidden" name="itemId" value="{{ item.exercice.id }}">
+                                    <button class="ac-ghost-btn" type="submit">{{ item.exercice.favorite ? 'Unfavorite' : 'Favorite' }}</button>
+                                </form>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}

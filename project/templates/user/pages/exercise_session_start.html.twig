@@ -1,0 +1,350 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Session started | Serinity{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .ac-breathing-card {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1rem;
+            background: var(--surface-soft);
+            margin-bottom: 1rem;
+        }
+        .ac-breathing-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: .75rem;
+            margin-bottom: .75rem;
+        }
+        .ac-breathing-stage {
+            position: relative;
+            display: grid;
+            place-items: center;
+            min-height: 220px;
+            margin-bottom: .75rem;
+        }
+        .ac-breathing-orbit {
+            position: absolute;
+            width: 170px;
+            height: 170px;
+            border-radius: 999px;
+            border: 1px dashed rgba(37, 99, 235, .35);
+            animation: acOrbitSpin 10s linear infinite;
+            pointer-events: none;
+        }
+        .ac-breathing-circle {
+            width: 138px;
+            height: 138px;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.8), rgba(37,99,235,.2));
+            box-shadow: 0 16px 36px rgba(37, 99, 235, .22);
+            transform: scale(1);
+            transition: transform .45s ease, background .45s ease, box-shadow .45s ease;
+        }
+        .ac-breathing-circle.is-inhale {
+            transform: scale(1.1);
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.92), rgba(37,99,235,.28));
+            box-shadow: 0 18px 42px rgba(37, 99, 235, .3);
+        }
+        .ac-breathing-circle.is-hold {
+            transform: scale(1.08);
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.9), rgba(96,165,250,.24));
+            box-shadow: 0 18px 42px rgba(56, 189, 248, .28);
+        }
+        .ac-breathing-circle.is-exhale {
+            transform: scale(.92);
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.9), rgba(16,185,129,.2));
+            box-shadow: 0 12px 28px rgba(16, 185, 129, .28);
+        }
+        .ac-breathing-circle.is-paused {
+            transform: scale(.96);
+            filter: grayscale(.2);
+        }
+        .ac-breathing-inner {
+            text-align: center;
+            padding: .4rem;
+        }
+        .ac-breathing-label {
+            display: block;
+            font-size: .86rem;
+            color: var(--muted);
+            margin-bottom: .2rem;
+            transition: opacity .22s ease;
+        }
+        .ac-breathing-label.is-changing {
+            opacity: .35;
+        }
+        .ac-breathing-count {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        @keyframes acOrbitSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Session active', subtitle: session.exercice.title, username: userName } %}
+
+        <section class="ac-card" data-session-root data-target-seconds="{{ (session.exercice.durationMinutes ?? 1) * 60 }}">
+            <div class="ac-row-between" style="margin-bottom: 1rem;">
+                <div>
+                    <h3 style="margin:0;">{{ session.exercice.title }}</h3>
+                    <p class="ac-muted" style="margin:.2rem 0 0;" data-session-copy>Session is running. Keep your pace.</p>
+                </div>
+                <div class="ac-badge ac-badge-warning" data-session-status>Running</div>
+            </div>
+
+            <div class="ac-cards" style="margin-bottom: 1rem;">
+                <article class="ac-stat-card">
+                    <h3>Elapsed</h3>
+                    <p data-session-timer>00:00</p>
+                </article>
+                <article class="ac-stat-card">
+                    <h3>Target</h3>
+                    <p>{{ session.exercice.durationMinutes }} min</p>
+                </article>
+                <article class="ac-stat-card">
+                    <h3>Progress</h3>
+                    <p data-session-progress>0%</p>
+                </article>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <div style="height: .5rem; width: 100%; border-radius: 999px; background: rgba(17, 24, 39, .08); overflow: hidden;">
+                    <div data-session-progress-fill style="height:100%; width:0; background: linear-gradient(90deg, var(--primary), #5b93ff); transition: width .2s ease;"></div>
+                </div>
+                <p class="ac-muted" style="margin:.5rem 0 0;" data-session-note>
+                    Session started. You can pause and resume at any moment.
+                </p>
+            </div>
+
+            <div class="ac-row-end" style="gap:.5rem; margin-bottom:1rem;">
+                <button class="ac-ghost-btn" type="button" data-session-pause>Pause</button>
+                <button class="ac-ghost-btn" type="button" data-session-resume hidden>Resume</button>
+            </div>
+
+            <div class="ac-breathing-card">
+                <div class="ac-breathing-head">
+                    <div>
+                        <p class="ac-muted" style="margin:0;">Guided breathing</p>
+                        <h4 style="margin:.2rem 0 0;">Breathing circle</h4>
+                    </div>
+                    <span class="ac-badge ac-badge-secondary" data-breath-cycle>Cycle 1</span>
+                </div>
+                <div class="ac-breathing-stage">
+                    <div class="ac-breathing-orbit" aria-hidden="true"></div>
+                    <div class="ac-breathing-circle is-inhale" data-breath-circle>
+                        <div class="ac-breathing-inner">
+                            <span class="ac-breathing-label" data-breath-label>Inhale deeply</span>
+                            <strong class="ac-breathing-count" data-breath-count>4s</strong>
+                        </div>
+                    </div>
+                </div>
+                <p class="ac-muted" style="margin:0;" data-breath-note>Inhale slowly and settle your rhythm.</p>
+            </div>
+
+            <form method="post" action="{{ path('user_ui_exercises_session_finish', { id: session.controlId }) }}" class="ac-form">
+                <input type="hidden" name="activeSeconds" value="0" data-session-active-seconds>
+                <label>Feedback (optional)
+                    <textarea class="ac-input" name="feedback" rows="3" placeholder="How did the session go?"></textarea>
+                </label>
+                <div class="ac-row-end" style="gap:.5rem;">
+                    <a class="ac-ghost-btn" href="{{ path('user_ui_exercises_sessions') }}">See my sessions</a>
+                    <button class="ac-btn ac-btn-primary" type="submit">Finish session</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        (() => {
+            const initSessionPage = () => {
+            const root = document.querySelector('[data-session-root]');
+                if (!root || root.dataset.sessionInitialized === '1') {
+                return;
+            }
+                root.dataset.sessionInitialized = '1';
+
+            const timerNode = root.querySelector('[data-session-timer]');
+            const progressNode = root.querySelector('[data-session-progress]');
+            const progressFillNode = root.querySelector('[data-session-progress-fill]');
+            const statusNode = root.querySelector('[data-session-status]');
+            const copyNode = root.querySelector('[data-session-copy]');
+            const noteNode = root.querySelector('[data-session-note]');
+            const activeSecondsField = root.querySelector('[data-session-active-seconds]');
+            const pauseButton = root.querySelector('[data-session-pause]');
+            const resumeButton = root.querySelector('[data-session-resume]');
+            const breathCircleNode = root.querySelector('[data-breath-circle]');
+            const breathLabelNode = root.querySelector('[data-breath-label]');
+            const breathCountNode = root.querySelector('[data-breath-count]');
+            const breathNoteNode = root.querySelector('[data-breath-note]');
+            const breathCycleNode = root.querySelector('[data-breath-cycle]');
+            const target = parseInt(root.getAttribute('data-target-seconds') || '0', 10);
+            let seconds = 0;
+            let running = true;
+            let breathElapsed = 0;
+                let timerIntervalId = null;
+                let breathIntervalId = null;
+            const breathingStages = [
+                { key: 'inhale', className: 'is-inhale', label: 'Inhale deeply', note: 'Inhale slowly and settle your rhythm.', duration: 4 },
+                { key: 'hold', className: 'is-hold', label: 'Hold gently', note: 'Keep still for a short pause.', duration: 2 },
+                { key: 'exhale', className: 'is-exhale', label: 'Exhale softly', note: 'Release tension and relax your shoulders.', duration: 4 },
+            ];
+
+            const getBreathingStage = () => {
+                const cycleDuration = breathingStages.reduce((sum, stage) => sum + stage.duration, 0);
+                const cyclePosition = breathElapsed % cycleDuration;
+                let accumulated = 0;
+                for (const stage of breathingStages) {
+                    accumulated += stage.duration;
+                    if (cyclePosition < accumulated) {
+                        return stage;
+                    }
+                }
+
+                return breathingStages[0];
+            };
+
+            const updateBreathingUI = () => {
+                if (!breathCircleNode) {
+                    return;
+                }
+                const stage = getBreathingStage();
+                breathCircleNode.classList.remove('is-inhale', 'is-hold', 'is-exhale');
+                if (running) {
+                    breathCircleNode.classList.add(stage.className);
+                } else {
+                    breathCircleNode.classList.add('is-paused');
+                }
+                breathCircleNode.classList.toggle('is-paused', !running);
+
+                if (breathLabelNode) {
+                    breathLabelNode.classList.add('is-changing');
+                    window.clearTimeout(breathLabelNode._fadeTimer);
+                    window.setTimeout(() => {
+                        breathLabelNode.textContent = running ? stage.label : 'Paused';
+                    }, 110);
+                    breathLabelNode._fadeTimer = window.setTimeout(() => {
+                        breathLabelNode.classList.remove('is-changing');
+                    }, 280);
+                }
+                if (breathCountNode) {
+                    breathCountNode.textContent = running ? `${stage.duration}s` : '--';
+                }
+                if (breathNoteNode) {
+                    breathNoteNode.textContent = running ? stage.note : 'Breathing pause. Resume when ready.';
+                }
+                if (breathCycleNode) {
+                    const cycleDuration = breathingStages.reduce((sum, stageItem) => sum + stageItem.duration, 0);
+                    const cycle = Math.floor(breathElapsed / cycleDuration) + 1;
+                    breathCycleNode.textContent = `Cycle ${cycle}`;
+                }
+            };
+
+            const render = () => {
+                const minutes = Math.floor(seconds / 60);
+                const remain = seconds % 60;
+                const mm = String(minutes).padStart(2, '0');
+                const ss = String(remain).padStart(2, '0');
+                if (timerNode) {
+                    timerNode.textContent = `${mm}:${ss}`;
+                }
+                if (activeSecondsField) {
+                    activeSecondsField.value = String(seconds);
+                }
+                if (progressNode) {
+                    const pct = target > 0 ? Math.min(100, Math.round((seconds / target) * 100)) : 0;
+                    progressNode.textContent = `${pct}%`;
+                    if (progressFillNode) {
+                        progressFillNode.style.width = `${pct}%`;
+                    }
+                    if (noteNode) {
+                        noteNode.textContent = !running
+                            ? 'Session paused. Resume when you are ready.'
+                            : (pct >= 100 ? 'Target reached. You can finish the session.' : 'Session in progress.');
+                    }
+                }
+                if (statusNode) {
+                    statusNode.textContent = running ? 'Running' : 'Paused';
+                    statusNode.className = `ac-badge ${running ? 'ac-badge-warning' : 'ac-badge-secondary'}`;
+                }
+                if (copyNode) {
+                    copyNode.textContent = running ? 'Session is running. Keep your pace.' : 'Session paused.';
+                }
+
+                updateBreathingUI();
+            };
+
+            render();
+            if (pauseButton) {
+                pauseButton.addEventListener('click', () => {
+                    running = false;
+                    pauseButton.hidden = true;
+                    if (resumeButton) {
+                        resumeButton.hidden = false;
+                    }
+                    render();
+                });
+            }
+            if (resumeButton) {
+                resumeButton.addEventListener('click', () => {
+                    running = true;
+                    resumeButton.hidden = true;
+                    if (pauseButton) {
+                        pauseButton.hidden = false;
+                    }
+                    render();
+                });
+            }
+
+                timerIntervalId = window.setInterval(() => {
+                if (running) {
+                    seconds += 1;
+                }
+                render();
+            }, 1000);
+
+            breathIntervalId = window.setInterval(() => {
+                if (running) {
+                    breathElapsed += 1;
+                    updateBreathingUI();
+                }
+            }, 1000);
+
+                const cleanup = () => {
+                    if (timerIntervalId !== null) {
+                        window.clearInterval(timerIntervalId);
+                    }
+                    if (breathIntervalId !== null) {
+                        window.clearInterval(breathIntervalId);
+                    }
+                    root.dataset.sessionInitialized = '0';
+                };
+
+                document.addEventListener('turbo:before-cache', cleanup, { once: true });
+                window.addEventListener('pagehide', cleanup, { once: true });
+            };
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initSessionPage, { once: true });
+            } else {
+                initSessionPage();
+            }
+            document.addEventListener('turbo:load', initSessionPage);
+        })();
+    </script>
+{% endblock %}

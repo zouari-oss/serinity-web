@@ -31,7 +31,7 @@ final class JwtAuthenticator extends AbstractAuthenticator
     public function supports(Request $request): ?bool
     {
         $path = $request->getPathInfo();
-        if (preg_match('#^/api/auth/(login|signin|register|signup|refresh|logout|reset/send|reset/confirm)$#', $path) === 1) {
+        if (preg_match('#^/api/auth/(login|signin|register|signup|refresh|logout|forgot-password|verify-reset-code|reset-password|reset/send|reset/confirm)$#', $path) === 1) {
             return false;
         }
 

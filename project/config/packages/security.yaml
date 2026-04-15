@@ -32,7 +32,7 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
-        - { path: ^/api/auth/(login|register|logout|refresh|reset/send|reset/confirm)$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/(login|register|logout|refresh|forgot-password|verify-reset-code|reset-password|reset/send|reset/confirm)$, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/me$, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/(sommeil|reve), roles: [ROLE_PATIENT, ROLE_THERAPIST] }
         - { path: ^/user, roles: [ROLE_PATIENT, ROLE_THERAPIST] }

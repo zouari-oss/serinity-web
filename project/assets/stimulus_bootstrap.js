@@ -17,6 +17,7 @@ import MoodAnalyticsController from './controllers/mood_analytics_controller.js'
 import UserMoodController from './controllers/user_mood_controller.js';
 import JournalEditorController from './controllers/journal_editor_controller.js';
 import UserFiltersController from './controllers/user_filters_controller.js';
+import PasswordResetController from './controllers/password_reset_controller.js';
 
 const app = startStimulusApp();
 
@@ -38,3 +39,4 @@ app.register('mood-analytics', MoodAnalyticsController);
 app.register('user-mood', UserMoodController);
 app.register('journal-editor', JournalEditorController);
 app.register('user-filters', UserFiltersController);
+app.register('password-reset', PasswordResetController);

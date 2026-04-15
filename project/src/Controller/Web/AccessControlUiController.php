@@ -62,9 +62,16 @@ final class AccessControlUiController extends AbstractController
     }
 
     #[Route('/reset-password', name: 'ac_ui_reset_password', methods: ['GET'])]
-    public function resetPassword(): Response
+    public function resetPassword(Request $request): Response
     {
-        return $this->render('access_control/pages/reset_password.html.twig');
+        $step = (string) $request->query->get('step', 'request');
+        if (!in_array($step, ['request', 'verify', 'new'], true)) {
+            $step = 'request';
+        }
+
+        return $this->render('access_control/pages/reset_password.html.twig', [
+            'step' => $step,
+        ]);
     }
 
     #[Route('/dashboard', name: 'ac_ui_dashboard_legacy', methods: ['GET'])]

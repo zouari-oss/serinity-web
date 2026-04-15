@@ -13,7 +13,7 @@ final class ResetPasswordConfirmRequest
     public string $email = '';
 
     #[Assert\NotBlank]
-    #[Assert\Length(min: 6, max: 32)]
+    #[Assert\Regex(pattern: '/^\d{6}$/')]
     public string $code = '';
 
     #[Assert\NotBlank]

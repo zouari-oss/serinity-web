@@ -7,8 +7,6 @@ namespace App\Controller\Api;
 use App\Dto\Auth\LoginRequest;
 use App\Dto\Auth\RefreshRequest;
 use App\Dto\Auth\RegisterRequest;
-use App\Dto\Auth\ResetPasswordConfirmRequest;
-use App\Dto\Auth\ResetPasswordSendRequest;
 use App\Service\AccessControlService;
 use App\Service\AuthenticationService;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -124,46 +122,6 @@ final class AuthController extends AbstractApiController
             'success' => true,
             'data' => $this->authenticationService->me($user),
         ]);
-    }
-
-    #[Route('/reset/send', name: 'api_auth_reset_send', methods: ['POST'])]
-    public function sendReset(Request $request, ValidatorInterface $validator): JsonResponse
-    {
-        $dto = new ResetPasswordSendRequest();
-
-        try {
-            $this->hydrate($request, $dto);
-        } catch (\JsonException) {
-            throw new BadRequestHttpException('Malformed JSON payload.');
-        }
-
-        if (($errors = $this->validateDto($validator, $dto)) !== null) {
-            return $errors;
-        }
-
-        $result = $this->accessControlService->sendResetCode($dto);
-
-        return $this->json($result->toArray(), $result->success ? 200 : 400);
-    }
-
-    #[Route('/reset/confirm', name: 'api_auth_reset_confirm', methods: ['POST'])]
-    public function confirmReset(Request $request, ValidatorInterface $validator): JsonResponse
-    {
-        $dto = new ResetPasswordConfirmRequest();
-
-        try {
-            $this->hydrate($request, $dto);
-        } catch (\JsonException) {
-            throw new BadRequestHttpException('Malformed JSON payload.');
-        }
-
-        if (($errors = $this->validateDto($validator, $dto)) !== null) {
-            return $errors;
-        }
-
-        $result = $this->accessControlService->confirmResetCode($dto);
-
-        return $this->json($result->toArray(), $result->success ? 200 : 400);
     }
 
     private function withRefreshCookie(JsonResponse $response, ?string $refreshToken, int $maxAge): JsonResponse

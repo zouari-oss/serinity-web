@@ -1,4 +1,4 @@
-<aside class="ac-sidebar">
+<aside class="ac-sidebar" data-controller="home-session">
     <div class="ac-brand">
         <div class="ac-brand-badge">S</div>
         <div>
@@ -40,4 +40,11 @@
             {% endif %}
         {% endfor %}
     </nav>
+
+    <div class="ac-sidebar-footer">
+        <button type="button" class="ac-nav-link ac-nav-link-danger" data-action="click->home-session#logout">
+            <span class="material-symbols-outlined">logout</span>
+            <span>Logout</span>
+        </button>
+    </div>
 </aside>

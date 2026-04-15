@@ -46,8 +46,9 @@ abstract class AbstractApiController extends AbstractController
         }
 
         foreach ($payload as $key => $value) {
-            if (property_exists($dto, (string) $key)) {
-                $dto->{$key} = $this->coerceValue($dto, (string) $key, $value);
+            $property = $this->resolveProperty($dto, (string) $key);
+            if ($property !== null) {
+                $dto->{$property} = $this->coerceValue($dto, $property, $value);
             }
         }
 
@@ -77,6 +78,18 @@ abstract class AbstractApiController extends AbstractController
             'string' => (string) $value,
             default => $value,
         };
+    }
+
+    private function resolveProperty(object $dto, string $property): ?string
+    {
+        if (property_exists($dto, $property)) {
+            return $property;
+        }
+
+        $normalized = str_replace(['-', '_'], ' ', $property);
+        $camelCase = lcfirst(str_replace(' ', '', ucwords($normalized)));
+
+        return property_exists($dto, $camelCase) ? $camelCase : null;
     }
 
     protected function bearerToken(Request $request): ?string

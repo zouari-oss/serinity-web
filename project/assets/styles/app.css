@@ -52,6 +52,16 @@ h1,h2,h3,p { margin: 0; }
 .ac-nav-link { text-decoration: none; color: var(--text); padding: .7rem .85rem; border-radius: 10px; transition: all var(--transition-fast); display: flex; align-items: center; gap: .6rem; }
 .ac-nav-link .material-symbols-outlined { font-size: 20px; }
 .ac-nav-link:hover, .ac-nav-link.is-active { background: var(--primary-soft); color: var(--primary); transform: translateX(2px); }
+.ac-nav-link-danger {
+    width: 100%;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--danger);
+}
+.ac-nav-link-danger:hover {
+    background: color-mix(in srgb, var(--danger), transparent 90%);
+    color: color-mix(in srgb, var(--danger), black 8%);
+}
 .ac-nav-group { margin: 0; }
 .ac-nav-group > summary { list-style: none; cursor: pointer; }
 .ac-nav-group > summary::-webkit-details-marker { display: none; }
@@ -596,6 +606,133 @@ h1,h2,h3,p { margin: 0; }
     background: color-mix(in srgb, var(--danger), transparent 85%);
     border-color: color-mix(in srgb, var(--danger), transparent 60%);
     color: #ffb3c1;
+}
+.ac-inline-success {
+    background: color-mix(in srgb, var(--success), white 86%);
+    color: color-mix(in srgb, var(--success), black 24%);
+    border: 1px solid color-mix(in srgb, var(--success), white 58%);
+    padding: .75rem 1rem;
+    border-radius: 10px;
+    font-size: .9rem;
+    font-weight: 500;
+}
+[data-theme="dark"] .ac-inline-success {
+    background: color-mix(in srgb, var(--success), transparent 84%);
+    border-color: color-mix(in srgb, var(--success), transparent 62%);
+    color: #9af5d3;
+}
+
+.ac-reset-card {
+    width: min(640px, 100%);
+    gap: 1.2rem;
+    padding: 1.2rem;
+}
+.ac-reset-head {
+    display: grid;
+    gap: .5rem;
+}
+.ac-reset-kicker {
+    color: var(--primary);
+    font-weight: 700;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    font-size: .75rem;
+}
+.ac-reset-head h2 {
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    letter-spacing: -.01em;
+}
+.ac-reset-head p {
+    color: var(--muted);
+}
+.ac-reset-steps {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .65rem;
+    margin: 0;
+    padding: 0;
+}
+.ac-reset-step {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: .55rem .65rem;
+    color: var(--muted);
+    background: var(--surface-soft);
+    font-size: .86rem;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+}
+.ac-reset-step .material-symbols-outlined {
+    font-size: 18px;
+}
+.ac-reset-step.is-active {
+    color: var(--primary);
+    border-color: color-mix(in srgb, var(--primary), transparent 40%);
+    background: color-mix(in srgb, var(--primary-soft), var(--surface) 35%);
+}
+.ac-reset-step.is-done {
+    color: var(--success);
+    border-color: color-mix(in srgb, var(--success), transparent 48%);
+}
+.ac-reset-block {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: .95rem;
+    background: var(--surface-soft);
+    gap: .75rem;
+}
+.ac-reset-block.is-entering {
+    animation: slide-in-up 240ms ease-out both;
+}
+.ac-reset-block.is-leaving {
+    animation: fade-out 180ms ease-in both;
+}
+.ac-reset-block h3 {
+    font-size: 1rem;
+}
+.ac-reset-note,
+.ac-reset-countdown {
+    color: var(--muted);
+    font-size: .88rem;
+    margin: 0;
+}
+.ac-reset-screen {
+    width: min(720px, 100%);
+    padding: 1.6rem;
+    gap: 1rem;
+    animation: fade-in 220ms ease-out;
+}
+.ac-reset-screen h2 {
+    font-size: clamp(2rem, 3vw, 2.6rem);
+    letter-spacing: -.02em;
+}
+.ac-reset-subtitle {
+    color: var(--muted);
+    font-size: 1rem;
+    max-width: 56ch;
+}
+.ac-reset-status {
+    width: min(720px, 100%);
+    margin-bottom: .75rem;
+}
+.ac-reset-password-box {
+    border-top: 1px solid var(--border);
+    padding-top: .9rem;
+}
+.ac-otp-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: .55rem;
+}
+.ac-otp-input {
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    padding: .85rem .3rem;
 }
 
 .ac-center-page { min-height: 100vh; display: grid; place-items: center; padding: 1rem; }
@@ -1618,6 +1755,16 @@ h1,h2,h3,p { margin: 0; }
     .ac-cards,
     .ac-cards-two {
         grid-template-columns: 1fr;
+    }
+    .ac-reset-steps {
+        grid-template-columns: 1fr;
+    }
+    .ac-otp-grid {
+        gap: .4rem;
+    }
+    .ac-otp-input {
+        font-size: 1.1rem;
+        padding: .7rem .2rem;
     }
     .ac-dashboard-split {
         grid-template-columns: 1fr;

@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Dto\Auth\RefreshRequest;
-use App\Dto\Auth\ResetPasswordConfirmRequest;
-use App\Dto\Auth\ResetPasswordSendRequest;
 use App\Dto\Auth\SignInRequest;
 use App\Dto\Auth\SignUpRequest;
 use App\Dto\Common\ServiceResult;
@@ -20,8 +18,6 @@ use App\Repository\AuthSessionRepository;
 use App\Repository\ProfileRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Uid\Uuid;
 
@@ -34,9 +30,7 @@ final readonly class AccessControlService
         private AuthSessionRepository $authSessionRepository,
         private SessionService $sessionService,
         private AuditLogService $auditLogService,
-        private ResetPasswordService $resetPasswordService,
         private UserPasswordHasherInterface $passwordHasher,
-        private MailerInterface $mailer,
     ) {
     }
 
@@ -140,48 +134,6 @@ final readonly class AccessControlService
         $this->entityManager->flush();
 
         return ServiceResult::success('Logged out successfully.');
-    }
-
-    public function sendResetCode(ResetPasswordSendRequest $request): ServiceResult
-    {
-        $user = $this->userRepository->findByEmail($request->email);
-        if ($user === null) {
-            return ServiceResult::failure('User does not exist.');
-        }
-
-        $profile = $this->profileRepository->findOneBy(['user' => $user]);
-        $code = $this->resetPasswordService->issueCode($user->getEmail());
-
-        $mail = (new Email())
-            ->to($user->getEmail())
-            ->subject('Serinity reset code')
-            ->text(sprintf('Hello %s, your reset code is: %s', $profile?->getUsername() ?? 'user', $code));
-
-        $this->mailer->send($mail);
-
-        return ServiceResult::success('Reset code sent successfully.');
-    }
-
-    public function confirmResetCode(ResetPasswordConfirmRequest $request): ServiceResult
-    {
-        if (!$this->resetPasswordService->matches($request->email, $request->code)) {
-            return ServiceResult::failure('Code expired or invalid.');
-        }
-
-        $user = $this->userRepository->findByEmail($request->email);
-        if ($user === null) {
-            return ServiceResult::failure('User does not exist.');
-        }
-
-        $user->setPassword($this->passwordHasher->hashPassword($user, $request->newPassword));
-        $user->setUpdatedAt(new \DateTimeImmutable());
-        $this->resetPasswordService->clear($request->email);
-
-        $session = $this->sessionService->createSession($user);
-        $this->auditLogService->log($session, AuditAction::PASSWORD_CHANGED);
-        $this->entityManager->flush();
-
-        return ServiceResult::success('Password updated successfully.');
     }
 
     private function sessionPayload(User $user, ?Profile $profile, string $refreshToken): array

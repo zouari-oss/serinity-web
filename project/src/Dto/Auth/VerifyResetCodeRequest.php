@@ -6,11 +6,13 @@ namespace App\Dto\Auth;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-final class ResetPasswordSendRequest
+final class VerifyResetCodeRequest
 {
     #[Assert\NotBlank]
     #[Assert\Email]
     public string $email = '';
 
-    public bool $resend = false;
+    #[Assert\NotBlank]
+    #[Assert\Regex(pattern: '/^\d{6}$/')]
+    public string $code = '';
 }

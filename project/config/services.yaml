@@ -10,6 +10,17 @@ parameters:
     app.jwt_secret: '%env(APP_SECRET)%'
     app.image_request_url: '%env(IMAGE_REQUEST_URL)%'
     app.image_api_key: '%env(IMAGE_API_KEY)%'
+    app.phpmailer_host: '%env(string:PHPMAILER_HOST)%'
+    app.phpmailer_port: '%env(int:PHPMAILER_PORT)%'
+    app.phpmailer_username: '%env(string:PHPMAILER_USERNAME)%'
+    app.phpmailer_password: '%env(string:PHPMAILER_PASSWORD)%'
+    app.phpmailer_encryption: '%env(string:PHPMAILER_ENCRYPTION)%'
+    app.phpmailer_from_email: '%env(string:PHPMAILER_FROM_EMAIL)%'
+    app.phpmailer_from_name: '%env(string:PHPMAILER_FROM_NAME)%'
+    app.password_reset_code_ttl_minutes: '%env(int:PASSWORD_RESET_CODE_TTL_MINUTES)%'
+    app.password_reset_rate_limit_attempts: '%env(int:PASSWORD_RESET_RATE_LIMIT_ATTEMPTS)%'
+    app.password_reset_rate_limit_window_seconds: '%env(int:PASSWORD_RESET_RATE_LIMIT_WINDOW_SECONDS)%'
+    app.password_reset_max_resends: '%env(int:PASSWORD_RESET_MAX_RESENDS)%'
 
 services:
     # default configuration for services in *this* file
@@ -30,6 +41,23 @@ services:
         arguments:
             $imageRequestUrl: '%app.image_request_url%'
             $imageApiKey: '%app.image_api_key%'
+
+    App\Service\MailerService:
+        arguments:
+            $host: '%app.phpmailer_host%'
+            $port: '%app.phpmailer_port%'
+            $username: '%app.phpmailer_username%'
+            $password: '%app.phpmailer_password%'
+            $encryption: '%app.phpmailer_encryption%'
+            $fromEmail: '%app.phpmailer_from_email%'
+            $fromName: '%app.phpmailer_from_name%'
+
+    App\Service\PasswordResetService:
+        arguments:
+            $codeTtlMinutes: '%app.password_reset_code_ttl_minutes%'
+            $rateLimitAttempts: '%app.password_reset_rate_limit_attempts%'
+            $rateLimitWindowSeconds: '%app.password_reset_rate_limit_window_seconds%'
+            $maxResendAttempts: '%app.password_reset_max_resends%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

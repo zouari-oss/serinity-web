@@ -4,8 +4,52 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ef22cf8dc3011096a4d9eb7c432f748b",
+    "content-hash": "a82a9ade96977f10cc3bf681af2df0be",
     "packages": [
+        {
+            "name": "ankane/onnxruntime",
+            "version": "v0.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ankane/onnxruntime-php.git",
+                "reference": "49f439e6ba3280306d315facb7d7e00b9d822289"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ankane/onnxruntime-php/zipball/49f439e6ba3280306d315facb7d7e00b9d822289",
+                "reference": "49f439e6ba3280306d315facb7d7e00b9d822289",
+                "shasum": ""
+            },
+            "require": {
+                "ext-ffi": ">= 8.2",
+                "php": ">= 8.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^11"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "OnnxRuntime\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Andrew Kane",
+                    "email": "andrew@ankane.org"
+                }
+            ],
+            "description": "Run ONNX models in PHP",
+            "support": {
+                "issues": "https://github.com/ankane/onnxruntime-php/issues",
+                "source": "https://github.com/ankane/onnxruntime-php"
+            },
+            "time": "2026-03-05T20:22:09+00:00"
+        },
         {
             "name": "composer/semver",
             "version": "3.4.4",

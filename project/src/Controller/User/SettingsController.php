@@ -57,6 +57,7 @@ final class SettingsController extends AbstractUserUiController
             'nav' => $this->buildNav('user_ui_settings'),
             'userName' => $user->getEmail(),
             'settings' => $current,
+            'faceRecognitionEnabled' => $user->isFaceRecognitionEnabled(),
         ]);
     }
 

@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+MODELS_URL="https://github.com/deepinsight/insightface/releases/download/v0.7/antelopev2.zip"
+MODELS_DIR="${PROJECT_DIR}/public/antelopev2"
+TMP_DIR="$(mktemp -d)"
+
+cleanup() {
+    rm -rf "${TMP_DIR}"
+}
+trap cleanup EXIT
+
+require_cmd() {
+    if ! command -v "$1" >/dev/null 2>&1; then
+        echo "Missing required command: $1" >&2
+        exit 1
+    fi
+}
+
+require_cmd composer
+require_cmd curl
+require_cmd unzip
+
+cd "${PROJECT_DIR}"
+echo "[face-setup] Installing PHP dependencies..."
+composer install --no-interaction --prefer-dist
+composer exec -- php -r "require 'vendor/autoload.php'; OnnxRuntime\\Vendor::check();"
+
+ONNX_RUNTIME_LIBRARY_PATH="$(find "${PROJECT_DIR}/vendor/ankane/onnxruntime/lib" -type f -name "libonnxruntime.so*" -size +0c | sort | tail -n 1)"
+if [[ -z "${ONNX_RUNTIME_LIBRARY_PATH}" ]]; then
+  echo "Unable to locate a valid ONNX runtime shared library." >&2
+  exit 1
+fi
+ONNX_RUNTIME_LIBRARY_PATH="${ONNX_RUNTIME_LIBRARY_PATH#${PROJECT_DIR}/}"
+echo "[face-setup] Using ONNX runtime library: ${ONNX_RUNTIME_LIBRARY_PATH}"
+
+if [[ ! -f "${PROJECT_DIR}/.env.local" ]]; then
+  cp "${PROJECT_DIR}/.env.local.dist" "${PROJECT_DIR}/.env.local"
+fi
+if grep -q '^FACE_AUTH_ONNX_RUNTIME_LIBRARY_PATH=' "${PROJECT_DIR}/.env.local"; then
+  sed -i "s|^FACE_AUTH_ONNX_RUNTIME_LIBRARY_PATH=.*|FACE_AUTH_ONNX_RUNTIME_LIBRARY_PATH=${ONNX_RUNTIME_LIBRARY_PATH}|" "${PROJECT_DIR}/.env.local"
+else
+  printf '\nFACE_AUTH_ONNX_RUNTIME_LIBRARY_PATH=%s\n' "${ONNX_RUNTIME_LIBRARY_PATH}" >> "${PROJECT_DIR}/.env.local"
+fi
+
+echo "[face-setup] Downloading antelopev2 models..."
+curl -fL "${MODELS_URL}" -o "${TMP_DIR}/antelopev2.zip"
+
+echo "[face-setup] Extracting models..."
+unzip -q "${TMP_DIR}/antelopev2.zip" -d "${TMP_DIR}"
+mkdir -p "${MODELS_DIR}"
+
+if [[ -d "${TMP_DIR}/antelopev2" ]]; then
+    cp -f "${TMP_DIR}/antelopev2/"*.onnx "${MODELS_DIR}/"
+else
+    find "${TMP_DIR}" -type f -name "*.onnx" -exec cp -f {} "${MODELS_DIR}/" \;
+fi
+
+if [[ ! -f "${MODELS_DIR}/glintr100.onnx" ]]; then
+    echo "glintr100.onnx is missing after extraction." >&2
+    exit 1
+fi
+
+if [[ ! -f "${MODELS_DIR}/scrfd_10g_bnkps.onnx" ]]; then
+    echo "scrfd_10g_bnkps.onnx is missing after extraction." >&2
+    exit 1
+fi
+
+echo "[face-setup] Models installed in: ${MODELS_DIR}"
+echo "[face-setup] Setup complete."

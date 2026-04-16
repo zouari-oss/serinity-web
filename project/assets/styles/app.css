@@ -621,6 +621,27 @@ h1,h2,h3,p { margin: 0; }
     border-color: color-mix(in srgb, var(--success), transparent 62%);
     color: #9af5d3;
 }
+.ac-face-auth-block {
+    display: grid;
+    gap: .65rem;
+    margin-top: .75rem;
+}
+.ac-face-auth-icon-btn {
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--primary);
+}
+.ac-face-auth-icon-btn:hover {
+    border-color: var(--primary);
+}
+.ac-face-video {
+    width: min(320px, 100%);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: #000;
+}
 
 .ac-reset-card {
     width: min(640px, 100%);

@@ -129,6 +129,7 @@ final readonly class AuthenticationService
             'username' => $profile?->getUsername(),
             'accountStatus' => $user->getAccountStatus(),
             'presenceStatus' => $user->getPresenceStatus(),
+            'faceRecognitionEnabled' => $user->isFaceRecognitionEnabled(),
         ];
     }
 

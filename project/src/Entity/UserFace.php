@@ -10,6 +10,8 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserFaceRepository::class)]
 #[ORM\Table(name: 'user_faces')]
+#[ORM\UniqueConstraint(name: 'uniq_user_faces_user', columns: ['user_id'])]
+#[ORM\Index(name: 'idx_user_faces_user', columns: ['user_id'])]
 class UserFace
 {
     #[ORM\Id]

@@ -21,6 +21,15 @@ parameters:
     app.password_reset_rate_limit_attempts: '%env(int:PASSWORD_RESET_RATE_LIMIT_ATTEMPTS)%'
     app.password_reset_rate_limit_window_seconds: '%env(int:PASSWORD_RESET_RATE_LIMIT_WINDOW_SECONDS)%'
     app.password_reset_max_resends: '%env(int:PASSWORD_RESET_MAX_RESENDS)%'
+    app.face_auth_similarity_threshold: '%env(float:FACE_AUTH_SIMILARITY_THRESHOLD)%'
+    app.face_auth_rate_limit_attempts: '%env(int:FACE_AUTH_RATE_LIMIT_ATTEMPTS)%'
+    app.face_auth_rate_limit_window_seconds: '%env(int:FACE_AUTH_RATE_LIMIT_WINDOW_SECONDS)%'
+    app.face_auth_recognition_model_path: '%env(string:FACE_AUTH_RECOGNITION_MODEL_PATH)%'
+    app.face_auth_onnx_runtime_library_path: '%env(string:FACE_AUTH_ONNX_RUNTIME_LIBRARY_PATH)%'
+    app.face_auth_python_command: '%env(string:FACE_AUTH_PYTHON_COMMAND)%'
+    app.face_auth_python_script_path: '%env(string:FACE_AUTH_PYTHON_SCRIPT_PATH)%'
+    app.face_auth_input_width: '%env(int:FACE_AUTH_INPUT_WIDTH)%'
+    app.face_auth_input_height: '%env(int:FACE_AUTH_INPUT_HEIGHT)%'
 
 services:
     # default configuration for services in *this* file
@@ -58,6 +67,23 @@ services:
             $rateLimitAttempts: '%app.password_reset_rate_limit_attempts%'
             $rateLimitWindowSeconds: '%app.password_reset_rate_limit_window_seconds%'
             $maxResendAttempts: '%app.password_reset_max_resends%'
+
+    App\Service\AI\FaceRecognitionService:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+            $recognitionModelPath: '%kernel.project_dir%/%app.face_auth_recognition_model_path%'
+            $onnxRuntimeLibraryPath: '%app.face_auth_onnx_runtime_library_path%'
+            $pythonCommand: '%app.face_auth_python_command%'
+            $pythonScriptPath: '%app.face_auth_python_script_path%'
+            $similarityThreshold: '%app.face_auth_similarity_threshold%'
+            $inputWidth: '%app.face_auth_input_width%'
+            $inputHeight: '%app.face_auth_input_height%'
+
+    App\Service\Security\FaceLoginRateLimiter:
+        arguments:
+            $cachePool: '@cache.app'
+            $maxAttempts: '%app.face_auth_rate_limit_attempts%'
+            $windowSeconds: '%app.face_auth_rate_limit_window_seconds%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

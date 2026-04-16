@@ -25,7 +25,7 @@
         </div>
     </nav>
 
-    <main class="ac-auth auth-page-main" data-controller="auth-switcher auth-form password-toggle">
+    <main class="ac-auth auth-page-main" data-controller="auth-switcher auth-form password-toggle face-login">
         <section class="ac-auth-side-brand">
             <div class="ac-brand-gradient"></div>
             <div class="ac-brand-content">
@@ -99,6 +99,13 @@
                         </span>
                     </button>
                 </form>
+                <div class="ac-face-auth-block">
+                    <button class="ac-icon-btn ac-face-auth-icon-btn" type="button" aria-label="Use face authentication" data-face-login-target="trigger" data-action="face-login#startAutoFaceAuth">
+                        <span class="material-symbols-outlined">face</span>
+                    </button>
+                    <video class="ac-face-video" data-face-login-target="video" autoplay playsinline hidden></video>
+                    <p data-face-login-target="status" hidden></p>
+                </div>
                 <a class="ac-link-btn" href="{{ path('ac_ui_reset_password') }}">Forgot password?</a>
             </section>
 

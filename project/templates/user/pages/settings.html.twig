@@ -29,6 +29,21 @@
                 <div class="ac-row-end"><button class="ac-btn" type="submit">Save settings</button></div>
             </form>
         </section>
+        <section class="ac-card" data-controller="face-settings" data-face-settings-enabled-value="{{ faceRecognitionEnabled ? 'true' : 'false' }}">
+            <h3>Face authentication</h3>
+            <div class="ac-row-between">
+                <span class="ac-label">Status</span>
+                <span class="ac-badge" data-face-settings-target="state"></span>
+            </div>
+            <div class="ac-row-end" style="gap: .5rem;">
+                <button class="ac-ghost-btn" type="button" data-action="face-settings#enable">Enable</button>
+                <button class="ac-btn" type="button" data-action="face-settings#disable">Disable</button>
+            </div>
+            <div class="ac-face-auth-block">
+                <video class="ac-face-video" data-face-settings-target="video" autoplay playsinline hidden></video>
+                <p data-face-settings-target="status" hidden></p>
+            </div>
+        </section>
         <section class="ac-card">
             <h3>Security</h3>
             <p style="color: var(--muted);">Change your password securely.</p>

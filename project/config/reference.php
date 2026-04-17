@@ -646,7 +646,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         time_based_uuid_node?: scalar|Param|null,
  *     },
  *     html_sanitizer?: bool|array{ // HtmlSanitizer configuration
- *         enabled?: bool|Param, // Default: false
+ *         enabled?: bool|Param, // Default: true
  *         sanitizers?: array<string, array{ // Default: []
  *             allow_safe_elements?: bool|Param, // Allows "safe" elements and attributes. // Default: false
  *             allow_static_elements?: bool|Param, // Allows all static elements and attributes from the W3C Sanitizer API standard. // Default: false
@@ -1455,6 +1455,59 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     generate_final_classes?: bool|Param, // Default: true
  *     generate_final_entities?: bool|Param, // Default: false
  * }
+ * @psalm-type CmenGoogleChartsConfig = array{
+ *     version?: scalar|Param|null, // Default: "current"
+ *     language?: scalar|Param|null, // Default: ""
+ * }
+ * @psalm-type TinymceConfig = array{
+ *     skin?: scalar|Param|null,
+ *     config?: scalar|Param|null,
+ *     content_css?: scalar|Param|null,
+ *     content_style?: scalar|Param|null,
+ *     plugins?: scalar|Param|null,
+ *     toolbar?: scalar|Param|null,
+ *     toolbar_mode?: scalar|Param|null,
+ *     menubar?: scalar|Param|null,
+ *     contextmenu?: scalar|Param|null,
+ *     quickbars_insert_toolbar?: scalar|Param|null,
+ *     quickbars_selection_toolbar?: scalar|Param|null,
+ *     resize?: scalar|Param|null,
+ *     icons?: scalar|Param|null,
+ *     icons_url?: scalar|Param|null,
+ *     setup?: scalar|Param|null,
+ *     images_upload_url?: scalar|Param|null,
+ *     images_upload_route?: scalar|Param|null,
+ *     images_upload_route_params?: array<mixed>,
+ *     images_upload_handler?: scalar|Param|null,
+ *     images_upload_base_path?: scalar|Param|null,
+ *     images_upload_credentials?: scalar|Param|null,
+ *     images_reuse_filename?: scalar|Param|null,
+ *     powerpaste_word_import?: scalar|Param|null,
+ *     powerpaste_html_import?: scalar|Param|null,
+ *     powerpaste_allow_local_images?: scalar|Param|null,
+ * }
+ * @psalm-type KnpPaginatorConfig = array{
+ *     default_options?: array{
+ *         sort_field_name?: scalar|Param|null, // Default: "sort"
+ *         sort_direction_name?: scalar|Param|null, // Default: "direction"
+ *         filter_field_name?: scalar|Param|null, // Default: "filterField"
+ *         filter_value_name?: scalar|Param|null, // Default: "filterValue"
+ *         page_name?: scalar|Param|null, // Default: "page"
+ *         distinct?: bool|Param, // Default: true
+ *         page_out_of_range?: scalar|Param|null, // Default: "ignore"
+ *         default_limit?: scalar|Param|null, // Default: 10
+ *     },
+ *     template?: array{
+ *         pagination?: scalar|Param|null, // Default: "@KnpPaginator/Pagination/sliding.html.twig"
+ *         rel_links?: scalar|Param|null, // Default: "@KnpPaginator/Pagination/rel_links.html.twig"
+ *         filtration?: scalar|Param|null, // Default: "@KnpPaginator/Pagination/filtration.html.twig"
+ *         sortable?: scalar|Param|null, // Default: "@KnpPaginator/Pagination/sortable_link.html.twig"
+ *     },
+ *     page_range?: scalar|Param|null, // Default: 5
+ *     page_limit?: scalar|Param|null, // Default: null
+ *     convert_exception?: bool|Param, // Default: false
+ *     remove_first_page_param?: bool|Param, // Default: false
+ * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
@@ -1468,6 +1521,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     twig_extra?: TwigExtraConfig,
  *     security?: SecurityConfig,
  *     monolog?: MonologConfig,
+ *     cmen_google_charts?: CmenGoogleChartsConfig,
+ *     tinymce?: TinymceConfig,
+ *     knp_paginator?: KnpPaginatorConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -1484,6 +1540,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         security?: SecurityConfig,
  *         monolog?: MonologConfig,
  *         maker?: MakerConfig,
+ *         cmen_google_charts?: CmenGoogleChartsConfig,
+ *         tinymce?: TinymceConfig,
+ *         knp_paginator?: KnpPaginatorConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
@@ -1498,6 +1557,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         twig_extra?: TwigExtraConfig,
  *         security?: SecurityConfig,
  *         monolog?: MonologConfig,
+ *         cmen_google_charts?: CmenGoogleChartsConfig,
+ *         tinymce?: TinymceConfig,
+ *         knp_paginator?: KnpPaginatorConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -1513,6 +1575,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         twig_extra?: TwigExtraConfig,
  *         security?: SecurityConfig,
  *         monolog?: MonologConfig,
+ *         cmen_google_charts?: CmenGoogleChartsConfig,
+ *         tinymce?: TinymceConfig,
+ *         knp_paginator?: KnpPaginatorConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,

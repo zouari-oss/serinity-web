@@ -279,6 +279,29 @@ h1,h2,h3,p { margin: 0; }
     border: 1px solid #cfe1df;
     transition: all .2s ease;
 }
+.ac-journal-entry-card tinymce-editor,
+.ac-journal-modal tinymce-editor {
+    display: block;
+    background: #fff;
+    border: 1px solid #cfe1df;
+    border-radius: 12px;
+    overflow: hidden;
+}
+.ac-journal-rich-content {
+    color: #2f3e3d;
+    line-height: 1.55;
+}
+.ac-journal-rich-content p {
+    margin: 0 0 .6rem;
+}
+.ac-journal-rich-content ul,
+.ac-journal-rich-content ol {
+    margin: 0 0 .6rem 1.2rem;
+    padding: 0;
+}
+.ac-journal-rich-content li {
+    margin-bottom: .25rem;
+}
 .ac-journal-entry-card .ac-input:focus,
 .ac-journal-modal .ac-input:focus,
 .ac-journal-search .ac-input:focus {
@@ -761,6 +784,31 @@ h1,h2,h3,p { margin: 0; }
 .ac-col-span-2 { grid-column: span 2; }
 .ac-row-end { display: flex; justify-content: flex-end; gap: .5rem; }
 .ac-row-between { display: flex; justify-content: space-between; align-items: center; }
+.ac-pagination {
+    margin-top: .85rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: .5rem;
+}
+.ac-list-controls {
+    align-items: flex-end;
+    gap: .5rem;
+}
+.ac-list-controls .ac-input {
+    min-width: 110px;
+}
+.ac-table-sort-link {
+    color: inherit;
+    text-decoration: none;
+}
+.ac-table-sort-link:hover {
+    text-decoration: underline;
+}
+.ac-ghost-btn.is-disabled {
+    opacity: .55;
+    pointer-events: none;
+}
 
 .ac-table-wrap { display: grid; gap: .6rem; }
 .ac-table { width: 100%; border-collapse: collapse; font-size: .93rem; }
@@ -1640,6 +1688,31 @@ h1,h2,h3,p { margin: 0; }
     background: rgba(5, 10, 20, .35);
     backdrop-filter: blur(2px);
 }
+.ac-mood-charts-teaser h3 {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    margin: 0;
+}
+.ac-mood-charts-modal .ac-modal-content {
+    width: min(1180px, 96vw);
+}
+.ac-mood-charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: .8rem;
+    margin-top: .8rem;
+}
+.ac-mood-chart-card {
+    padding: .7rem;
+}
+.ac-mood-chart-slot {
+    min-height: 280px;
+}
+.ac-mood-chart-empty {
+    margin: 1rem 0 0;
+    color: #5b7473;
+}
 
 [data-theme="dark"] .ac-mood-kpi-card,
 [data-theme="dark"] .ac-mood-highlights,
@@ -1664,6 +1737,7 @@ h1,h2,h3,p { margin: 0; }
 [data-theme="dark"] .ac-mood-highlight,
 [data-theme="dark"] .ac-mood-form-block,
 [data-theme="dark"] .ac-mood-history-group,
+[data-theme="dark"] .ac-mood-chart-card,
 [data-theme="dark"] .ac-journal-form-block,
 [data-theme="dark"] .ac-journal-group {
     background: #143748;
@@ -1674,6 +1748,7 @@ h1,h2,h3,p { margin: 0; }
 [data-theme="dark"] .ac-mood-history-meta,
 [data-theme="dark"] .ac-mood-tag-label,
 [data-theme="dark"] .ac-mood-history-empty,
+[data-theme="dark"] .ac-mood-chart-empty,
 [data-theme="dark"] .ac-journal-meta,
 [data-theme="dark"] .ac-journal-time {
     color: #9ac6d6;
@@ -1700,6 +1775,14 @@ h1,h2,h3,p { margin: 0; }
     background: #0b2532;
     border-color: #1e4f62;
     color: #e3f8ff;
+}
+[data-theme="dark"] .ac-journal-entry-card tinymce-editor,
+[data-theme="dark"] .ac-journal-modal tinymce-editor {
+    border-color: #1e4f62;
+    background: #fff;
+}
+[data-theme="dark"] .ac-journal-rich-content {
+    color: #d9edf5;
 }
 [data-theme="dark"] .ac-mood-chip span {
     background: #0f2c3b;

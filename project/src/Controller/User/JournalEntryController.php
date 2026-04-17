@@ -6,6 +6,8 @@ namespace App\Controller\User;
 
 use App\Entity\JournalEntry;
 use App\Repository\JournalEntryRepository;
+use App\Service\Api\CallMeBotClient;
+use App\Service\User\JournalContentSanitizer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,6 +23,8 @@ final class JournalEntryController extends AbstractUserUiController
     public function __construct(
         private readonly JournalEntryRepository $journalEntryRepository,
         private readonly EntityManagerInterface $entityManager,
+        private readonly JournalContentSanitizer $journalContentSanitizer,
+        private readonly CallMeBotClient $callMeBotClient,
     ) {
     }
 
@@ -52,7 +56,7 @@ final class JournalEntryController extends AbstractUserUiController
     {
         $user = $this->currentUser();
         $title = trim((string) $request->request->get('title', ''));
-        $content = trim((string) $request->request->get('content', ''));
+        $content = $this->journalContentSanitizer->sanitize((string) $request->request->get('content', ''));
 
         $now = new \DateTimeImmutable();
         $entry = (new JournalEntry())
@@ -71,6 +75,10 @@ final class JournalEntryController extends AbstractUserUiController
 
         $this->entityManager->persist($entry);
         $this->entityManager->flush();
+        $this->callMeBotClient->sendJournalSavedNotification(
+            $entry->getTitle() ?? '',
+            $entry->getCreatedAt(),
+        );
 
         $this->addFlash('success', 'Journal entry created successfully.');
 
@@ -97,7 +105,7 @@ final class JournalEntryController extends AbstractUserUiController
 
         $entry
             ->setTitle(trim((string) $request->request->get('title', '')))
-            ->setContent(trim((string) $request->request->get('content', '')))
+            ->setContent($this->journalContentSanitizer->sanitize((string) $request->request->get('content', '')))
             ->setUpdatedAt(new \DateTimeImmutable());
 
         $violations = $validator->validate($entry);

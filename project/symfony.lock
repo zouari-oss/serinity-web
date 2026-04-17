@@ -1,4 +1,7 @@
 {
+    "cmen/google-charts-bundle": {
+        "version": "7.1.0"
+    },
     "doctrine/deprecations": {
         "version": "1.1",
         "recipe": {
@@ -34,6 +37,12 @@
             "config/packages/doctrine_migrations.yaml",
             "migrations/.gitignore"
         ]
+    },
+    "emileperron/tinymce-bundle": {
+        "version": "v3.3.0"
+    },
+    "knplabs/knp-paginator-bundle": {
+        "version": "v6.10.0"
     },
     "phpunit/phpunit": {
         "version": "13.0",

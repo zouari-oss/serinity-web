@@ -39,4 +39,46 @@ class JournalEntryRepository extends ServiceEntityRepository
     {
         return $this->findOneBy(['id' => (string) $id, 'user' => $user]);
     }
+
+    public function countEntriesWithinRange(User $user, \DateTimeImmutable $fromDate, \DateTimeImmutable $toDate): int
+    {
+        return (int) $this->createQueryBuilder('entry')
+            ->select('COUNT(entry.id)')
+            ->andWhere('entry.user = :user')
+            ->andWhere('entry.createdAt BETWEEN :fromDate AND :toDate')
+            ->setParameter('user', $user)
+            ->setParameter('fromDate', $fromDate)
+            ->setParameter('toDate', $toDate)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countDistinctJournalDaysWithinRange(User $user, \DateTimeImmutable $fromDate, \DateTimeImmutable $toDate): int
+    {
+        /** @var list<array{createdAt:mixed}> $rows */
+        $rows = $this->createQueryBuilder('entry')
+            ->select('entry.createdAt AS createdAt')
+            ->andWhere('entry.user = :user')
+            ->andWhere('entry.createdAt BETWEEN :fromDate AND :toDate')
+            ->setParameter('user', $user)
+            ->setParameter('fromDate', $fromDate)
+            ->setParameter('toDate', $toDate)
+            ->getQuery()
+            ->getArrayResult();
+
+        $days = [];
+        foreach ($rows as $row) {
+            $createdAt = $row['createdAt'];
+            if ($createdAt instanceof \DateTimeInterface) {
+                $days[$createdAt->format('Y-m-d')] = true;
+                continue;
+            }
+
+            if (is_string($createdAt) && $createdAt !== '') {
+                $days[(new \DateTimeImmutable($createdAt))->format('Y-m-d')] = true;
+            }
+        }
+
+        return count($days);
+    }
 }

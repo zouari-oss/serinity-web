@@ -1,0 +1,14 @@
+framework:
+    html_sanitizer:
+        enabled: true
+        sanitizers:
+            journal_content:
+                allow_elements:
+                    p: []
+                    br: []
+                    strong: []
+                    em: []
+                    u: []
+                    ul: []
+                    ol: []
+                    li: []

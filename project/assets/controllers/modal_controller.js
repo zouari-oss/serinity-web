@@ -11,6 +11,7 @@ export default class extends Controller {
     modal.hidden = false;
     modal.classList.remove('ac-modal-exit');
     modal.classList.add('ac-modal-enter');
+    window.dispatchEvent(new CustomEvent('ac:modal:opened', { detail: { id } }));
   }
 
   close(event) {

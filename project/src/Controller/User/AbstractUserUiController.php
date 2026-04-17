@@ -54,6 +54,8 @@ abstract class AbstractUserUiController extends AbstractController
                 'children' => [
                     ['label' => 'Mood entries', 'route' => 'user_ui_mood', 'icon' => 'list'],
                     ['label' => 'Journal', 'route' => 'user_ui_journal_entry', 'icon' => 'edit_note'],
+                    ['label' => 'Insights', 'route' => 'user_ui_mood_insights', 'icon' => 'insights'],
+                    ['label' => 'Recovery plan', 'route' => 'user_ui_mood_recovery_plan', 'icon' => 'healing'],
                 ],
             ],
             [

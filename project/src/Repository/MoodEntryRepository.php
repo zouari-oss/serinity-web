@@ -176,6 +176,70 @@ class MoodEntryRepository extends ServiceEntityRepository
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
+    public function countDistinctMoodDaysWithinRange(User $user, \DateTimeImmutable $fromDate, \DateTimeImmutable $toDate): int
+    {
+        $days = [];
+        foreach ($this->findWithinDateRange($user, $fromDate, $toDate) as $entry) {
+            $days[$entry->getEntryDate()->format('Y-m-d')] = true;
+        }
+
+        return count($days);
+    }
+
+    /**
+     * @return list<array{label:string,usageCount:int}>
+     */
+    public function findEmotionDistributionWithinRange(User $user, \DateTimeImmutable $fromDate, \DateTimeImmutable $toDate, int $limit = 8): array
+    {
+        /** @var list<array{label:string,usageCount:string}> $rows */
+        $rows = $this->createQueryBuilder('entry')
+            ->select('emotion.name AS label, COUNT(emotion.id) AS usageCount')
+            ->join('entry.emotions', 'emotion')
+            ->andWhere('entry.user = :user')
+            ->andWhere('entry.entryDate BETWEEN :fromDate AND :toDate')
+            ->setParameter('user', $user)
+            ->setParameter('fromDate', $fromDate)
+            ->setParameter('toDate', $toDate)
+            ->groupBy('emotion.id, emotion.name')
+            ->orderBy('usageCount', 'DESC')
+            ->addOrderBy('emotion.name', 'ASC')
+            ->setMaxResults(max(1, $limit))
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_map(static fn (array $row): array => [
+            'label' => $row['label'],
+            'usageCount' => (int) $row['usageCount'],
+        ], $rows);
+    }
+
+    /**
+     * @return list<array{label:string,usageCount:int}>
+     */
+    public function findInfluenceDistributionWithinRange(User $user, \DateTimeImmutable $fromDate, \DateTimeImmutable $toDate, int $limit = 8): array
+    {
+        /** @var list<array{label:string,usageCount:string}> $rows */
+        $rows = $this->createQueryBuilder('entry')
+            ->select('influence.name AS label, COUNT(influence.id) AS usageCount')
+            ->join('entry.influences', 'influence')
+            ->andWhere('entry.user = :user')
+            ->andWhere('entry.entryDate BETWEEN :fromDate AND :toDate')
+            ->setParameter('user', $user)
+            ->setParameter('fromDate', $fromDate)
+            ->setParameter('toDate', $toDate)
+            ->groupBy('influence.id, influence.name')
+            ->orderBy('usageCount', 'DESC')
+            ->addOrderBy('influence.name', 'ASC')
+            ->setMaxResults(max(1, $limit))
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_map(static fn (array $row): array => [
+            'label' => $row['label'],
+            'usageCount' => (int) $row['usageCount'],
+        ], $rows);
+    }
+
     private function createBaseHistoryQuery(
         ?User $user,
         ?string $search,

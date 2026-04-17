@@ -1,0 +1,57 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Recovery plan | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Weekly recovery plan', subtitle: 'Mood & Journal focused actions', username: userName } %}
+
+        <div class="ac-journal-shell">
+            <section class="ac-cards ac-journal-kpis">
+                <article class="ac-stat-card ac-journal-kpi-card">
+                    <h3><span class="material-symbols-outlined">warning</span> Status</h3>
+                    <p>{{ plan.currentStatus|capitalize }}</p>
+                </article>
+                <article class="ac-stat-card ac-journal-kpi-card">
+                    <h3><span class="material-symbols-outlined">favorite</span> Resilience</h3>
+                    <p>{{ plan.resilienceScore }}/100</p>
+                </article>
+                <article class="ac-stat-card ac-journal-kpi-card">
+                    <h3><span class="material-symbols-outlined">trending_up</span> Progress</h3>
+                    <progress value="{{ plan.progress.completedObjectives }}" max="{{ plan.progress.totalObjectives }}" style="width: 100%;"></progress>
+                    <p>{{ plan.progress.percent }}% ({{ plan.progress.completedObjectives }}/{{ plan.progress.totalObjectives }})</p>
+                </article>
+            </section>
+
+            <section class="ac-card ac-journal-history-card">
+                <div class="ac-row-between ac-journal-history-head">
+                    <h3>{{ plan.title }}</h3>
+                    <small>{{ plan.weekRange.from }} → {{ plan.weekRange.to }}</small>
+                </div>
+                <p class="ac-muted">{{ plan.explanation }}</p>
+
+                <div class="ac-journal-list">
+                    {% for objective in plan.objectives %}
+                        <article class="ac-journal-card">
+                            <div class="ac-row-between">
+                                <h5><span class="material-symbols-outlined">{{ objective.icon }}</span> {{ objective.title }}</h5>
+                                <span class="ac-badge {{ objective.completed ? 'ac-badge-primary' : 'ac-badge-secondary' }}">
+                                    {{ objective.progressLabel }}
+                                </span>
+                            </div>
+                            {% if objective.detail %}
+                                <p class="ac-muted">{{ objective.detail }}</p>
+                            {% endif %}
+                        </article>
+                    {% endfor %}
+                </div>
+
+                <div class="ac-row-end">
+                    <a class="ac-btn ac-btn-primary" href="{{ path('user_ui_mood_insights') }}">Back to insights</a>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

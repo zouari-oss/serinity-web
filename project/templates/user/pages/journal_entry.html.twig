@@ -45,7 +45,22 @@
                         </label>
                         <label class="ac-col-span-2">
                             <span class="ac-label">Content</span>
-                            <textarea class="ac-input" name="content" rows="6" minlength="10" required></textarea>
+                            {% set createContentEditorAttrs = tinymce_attributes({
+                                name: 'content',
+                                placeholder: 'Write your reflection...',
+                                toolbar: 'undo redo | blocks | bold italic underline | bullist numlist | removeformat',
+                                plugins: 'autolink lists',
+                                menubar: '',
+                                contextmenu: '',
+                                quickbars_insert_toolbar: '',
+                                quickbars_selection_toolbar: '',
+                                resize: 'vertical',
+                                height: '260',
+                            }) %}
+                            <tinymce-editor
+                                {% for key, value in createContentEditorAttrs %}{{ key }}="{{ value|e('html_attr') }}" {% endfor %}
+                                src="{{ asset('bundles/tinymce/ext/tinymce/tinymce.min.js') }}"
+                            ></tinymce-editor>
                         </label>
                     </fieldset>
                     <div class="ac-row-end ac-col-span-2">
@@ -75,7 +90,7 @@
                                             <h5>{{ journal_entry.title }}</h5>
                                             <small class="ac-journal-time">{{ journal_entry.createdAt|date('H:i') }}</small>
                                         </div>
-                                        <p>{{ journal_entry.content|length > 220 ? journal_entry.content|slice(0, 220) ~ '...' : journal_entry.content }}</p>
+                                        <div class="ac-journal-rich-content">{{ journal_entry.content|sanitize_html('journal_content') }}</div>
                                         <div class="ac-journal-actions">
                                             <button
                                                 class="ac-ghost-btn"
@@ -83,7 +98,7 @@
                                                 data-action="journal-editor#open"
                                                 data-edit-url="{{ path('user_ui_journal_entry_edit', {'id': journal_entry.id}) }}"
                                                 data-entry-title="{{ journal_entry.title|e('html_attr') }}"
-                                                data-entry-content="{{ journal_entry.content|e('html_attr') }}"
+                                                data-entry-content="{{ journal_entry.content|sanitize_html('journal_content')|e('html_attr') }}"
                                                 data-csrf="{{ csrf_token('journal_edit_' ~ journal_entry.id) }}"
                                             >Edit</button>
                                             <form method="post" action="{{ path('user_ui_journal_entry_delete', {'id': journal_entry.id}) }}">
@@ -114,7 +129,23 @@
                     </label>
                     <label>
                         <span class="ac-label">Content</span>
-                        <textarea class="ac-input" name="content" rows="6" minlength="10" required data-journal-editor-target="content"></textarea>
+                        {% set editContentEditorAttrs = tinymce_attributes({
+                            name: 'content',
+                            placeholder: 'Update your reflection...',
+                            toolbar: 'undo redo | blocks | bold italic underline | bullist numlist | removeformat',
+                            plugins: 'autolink lists',
+                            menubar: '',
+                            contextmenu: '',
+                            quickbars_insert_toolbar: '',
+                            quickbars_selection_toolbar: '',
+                            resize: 'vertical',
+                            height: '260',
+                            'data-journal-editor-target': 'content',
+                        }) %}
+                        <tinymce-editor
+                            {% for key, value in editContentEditorAttrs %}{{ key }}="{{ value|e('html_attr') }}" {% endfor %}
+                            src="{{ asset('bundles/tinymce/ext/tinymce/tinymce.min.js') }}"
+                        ></tinymce-editor>
                     </label>
                     <div class="ac-row-end">
                         <button class="ac-btn ac-btn-primary" type="submit">Save changes</button>
@@ -124,4 +155,9 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ tinymce_scripts() }}
 {% endblock %}

@@ -11,6 +11,12 @@ export default class extends Controller {
         'summaryRange',
         'topEmotion',
         'topInfluence',
+        'criticalStatus',
+        'criticalReasons',
+        'resilienceScore',
+        'resilienceLabel',
+        'resilienceBreakdown',
+        'insightSummary',
         'historyList',
         'historyEmpty',
         'historyMeta',
@@ -182,6 +188,29 @@ export default class extends Controller {
         this.summaryRangeTarget.textContent = `${data.fromDate ?? '--'} → ${data.toDate ?? '--'}`;
         this.topEmotionTarget.textContent = this.formatTop(data.topEmotion);
         this.topInfluenceTarget.textContent = this.formatTop(data.topInfluence);
+
+        const criticalPeriod = data.criticalPeriod || {};
+        if (this.hasCriticalStatusTarget) {
+            this.criticalStatusTarget.textContent = (criticalPeriod.status || 'stable').toUpperCase();
+        }
+        if (this.hasCriticalReasonsTarget) {
+            this.criticalReasonsTarget.textContent = (criticalPeriod.reasons || []).join(' | ') || 'No strong risk signal detected in recent data.';
+        }
+        if (this.hasInsightSummaryTarget) {
+            this.insightSummaryTarget.textContent = criticalPeriod.summary || 'Recent indicators look stable.';
+        }
+
+        const resilience = data.resilienceScore || {};
+        const breakdown = resilience.breakdown || {};
+        if (this.hasResilienceScoreTarget) {
+            this.resilienceScoreTarget.textContent = String(resilience.score ?? 0);
+        }
+        if (this.hasResilienceLabelTarget) {
+            this.resilienceLabelTarget.textContent = resilience.label || 'Stable';
+        }
+        if (this.hasResilienceBreakdownTarget) {
+            this.resilienceBreakdownTarget.textContent = `Mood ${breakdown.mood ?? 0} + Tracking ${breakdown.tracking ?? 0} + Journaling ${breakdown.journaling ?? 0}`;
+        }
     }
 
     renderHistory(data) {

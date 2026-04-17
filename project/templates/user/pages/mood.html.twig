@@ -55,6 +55,37 @@
                 </article>
             </section>
 
+            <section class="ac-card ac-grid-two ac-mood-highlights">
+                <div class="ac-col-span-2 ac-row-between">
+                    <h3>Insights</h3>
+                    <div class="ac-row-end">
+                        <a class="ac-btn ac-btn-primary" href="{{ path('user_ui_mood_insights') }}">View insights</a>
+                        <a class="ac-btn ac-btn-primary" href="{{ path('user_ui_mood_recovery_plan') }}">View recovery plan</a>
+                    </div>
+                </div>
+                <article class="ac-mood-highlight">
+                    <span class="material-symbols-outlined">warning</span>
+                    <div>
+                        <strong>Critical status</strong>
+                        <p data-user-mood-target="criticalStatus">stable</p>
+                    </div>
+                </article>
+                <article class="ac-mood-highlight">
+                    <span class="material-symbols-outlined">monitoring</span>
+                    <div>
+                        <strong>Resilience snapshot</strong>
+                        <p><span data-user-mood-target="resilienceScore">0</span>/100 — <span data-user-mood-target="resilienceLabel">Stable</span></p>
+                    </div>
+                </article>
+                <article class="ac-col-span-2 ac-mood-highlight">
+                    <span class="material-symbols-outlined">insights</span>
+                    <div>
+                        <strong>Summary</strong>
+                        <p data-user-mood-target="insightSummary">Recent indicators look stable.</p>
+                    </div>
+                </article>
+            </section>
+
             <section class="ac-card ac-mood-entry-card">
                 <div class="ac-row-between ac-mood-entry-head">
                     <h3>New mood entry</h3>

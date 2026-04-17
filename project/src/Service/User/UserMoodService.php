@@ -24,6 +24,8 @@ final readonly class UserMoodService
         private MoodEmotionRepository $moodEmotionRepository,
         private MoodInfluenceRepository $moodInfluenceRepository,
         private EntityManagerInterface $entityManager,
+        private CriticalPeriodDetectionService $criticalPeriodDetectionService,
+        private ResilienceScoreService $resilienceScoreService,
     ) {
     }
 
@@ -296,7 +298,30 @@ final readonly class UserMoodService
      *     topEmotion:array{label:string,usageCount:int},
      *     topInfluence:array{label:string,usageCount:int},
      *     fromDate:string,
-     *     toDate:string
+     *     toDate:string,
+     *     criticalPeriod:array{
+     *         status:string,
+     *         score:int,
+     *         reasons:list<string>,
+     *         timeframe:array{days:int,from:string,to:string},
+     *         summary:string,
+     *         repeatedNegativeEmotion:?array{name:string,count:int}
+     *     },
+     *     resilienceScore:array{
+     *         score:int,
+     *         label:string,
+     *         breakdown:array{
+     *             mood:int,
+     *             tracking:int,
+     *             journaling:int,
+     *             moodAverage:float|null,
+     *             trackedMoodDays:int,
+     *             trackedJournalDays:int,
+     *             windowDays:int
+     *         },
+     *         timeframe:array{days:int,from:string,to:string},
+     *         interpretation:string
+     *     }
      * }
      */
     public function getSummary(User $user, MoodSummaryRequest $request): array
@@ -332,6 +357,9 @@ final readonly class UserMoodService
             'usageCount' => 0,
         ];
 
+        $criticalPeriod = $this->criticalPeriodDetectionService->detect($user, 7);
+        $resilienceScore = $this->resilienceScoreService->compute($user, 14);
+
         return [
             'weeklyCount' => $weeklyCount,
             'weeklyAverageMood' => $weeklyAverageMood,
@@ -340,6 +368,8 @@ final readonly class UserMoodService
             'topInfluence' => $topInfluence,
             'fromDate' => $fromDate->format('Y-m-d'),
             'toDate' => $toDate->format('Y-m-d'),
+            'criticalPeriod' => $criticalPeriod,
+            'resilienceScore' => $resilienceScore,
         ];
     }
 

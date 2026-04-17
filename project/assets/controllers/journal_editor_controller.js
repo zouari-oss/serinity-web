@@ -9,7 +9,7 @@ export default class extends Controller {
 
         this.formTarget.action = trigger.dataset.editUrl || this.formTarget.action;
         this.titleTarget.value = trigger.dataset.entryTitle || '';
-        this.contentTarget.value = trigger.dataset.entryContent || '';
+        this.setEditorContent(trigger.dataset.entryContent || '');
         this.tokenTarget.value = trigger.dataset.csrf || '';
         this.modalTarget.hidden = false;
     }
@@ -24,6 +24,18 @@ export default class extends Controller {
     closeOnBackdrop(event) {
         if (event.target === this.modalTarget) {
             this.close();
+        }
+    }
+
+    setEditorContent(content) {
+        if (!this.hasContentTarget) {
+            return;
+        }
+
+        if ('value' in this.contentTarget) {
+            this.contentTarget.value = content;
+        } else {
+            this.contentTarget.textContent = content;
         }
     }
 }

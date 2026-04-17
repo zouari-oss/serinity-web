@@ -20,6 +20,7 @@ use App\Service\Admin\AdminExerciceService;
 use App\Service\Admin\DashboardService;
 use App\Service\Admin\UserManagementService;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -44,6 +45,7 @@ final class AccessControlUiController extends AbstractController
         private readonly AdminExerciceService $adminExerciceService,
         private readonly ImageUploadService $imageUploadService,
         private readonly EntityManagerInterface $entityManager,
+        private readonly PaginatorInterface $paginator,
     ) {
     }
 
@@ -511,6 +513,8 @@ final class AccessControlUiController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function emotionManagement(Request $request): Response
     {
+        $listState = $this->resolveTaxonomyListState($request);
+
         if ($request->isMethod('POST')) {
             if (!$this->isCsrfTokenValid('emotion_create', (string) $request->request->get('_token'))) {
                 $this->addFlash('error', 'Invalid create token.');
@@ -538,13 +542,27 @@ final class AccessControlUiController extends AbstractController
                 }
             }
 
-            return $this->redirectToRoute('ac_ui_emotion');
+            return $this->redirectToRoute('ac_ui_emotion', $this->taxonomyRedirectParams($listState));
         }
+
+        $emotionQuery = $this->moodEmotionRepository->createQueryBuilder('emotion')
+            ->orderBy('emotion.id', $listState['sortDirection'])
+            ->getQuery();
+        $emotionPerPageLimit = $listState['perPage'] === 'all'
+            ? max(1, (int) $this->moodEmotionRepository->count([]))
+            : $listState['perPageLimit'];
+        $emotions = $this->paginator->paginate(
+            $emotionQuery,
+            $listState['page'],
+            $emotionPerPageLimit
+        );
 
         return $this->render('access_control/pages/emotion_management.html.twig', [
             'nav' => $this->buildNav('ac_ui_emotion'),
             'userName' => $this->getUser()?->getEmail() ?? 'Admin',
-            'emotions' => $this->moodEmotionRepository->createQueryBuilder('emotion')->orderBy('emotion.name', 'ASC')->getQuery()->getResult(),
+            'emotions' => $emotions,
+            'direction' => $listState['direction'],
+            'perPage' => $listState['perPage'],
         ]);
     }
 
@@ -556,12 +574,12 @@ final class AccessControlUiController extends AbstractController
         if (!$emotion instanceof MoodEmotion) {
             $this->addFlash('error', 'Emotion not found.');
 
-            return $this->redirectToRoute('ac_ui_emotion');
+            return $this->redirectToRoute('ac_ui_emotion', $this->taxonomyRedirectParams($this->resolveTaxonomyListState($request)));
         }
         if (!$this->isCsrfTokenValid('emotion_edit_' . $emotion->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid edit token.');
 
-            return $this->redirectToRoute('ac_ui_emotion');
+            return $this->redirectToRoute('ac_ui_emotion', $this->taxonomyRedirectParams($this->resolveTaxonomyListState($request)));
         }
 
         $name = trim((string) $request->request->get('name', ''));
@@ -569,7 +587,7 @@ final class AccessControlUiController extends AbstractController
         if ($error !== null) {
             $this->addFlash('error', $error);
 
-            return $this->redirectToRoute('ac_ui_emotion');
+            return $this->redirectToRoute('ac_ui_emotion', $this->taxonomyRedirectParams($this->resolveTaxonomyListState($request)));
         }
 
         $exists = $this->moodEmotionRepository->createQueryBuilder('emotion')
@@ -584,14 +602,14 @@ final class AccessControlUiController extends AbstractController
         if ((int) $exists > 0) {
             $this->addFlash('error', 'This emotion already exists.');
 
-            return $this->redirectToRoute('ac_ui_emotion');
+            return $this->redirectToRoute('ac_ui_emotion', $this->taxonomyRedirectParams($this->resolveTaxonomyListState($request)));
         }
 
         $emotion->setName($name);
         $this->entityManager->flush();
         $this->addFlash('success', 'Emotion updated successfully.');
 
-        return $this->redirectToRoute('ac_ui_emotion');
+        return $this->redirectToRoute('ac_ui_emotion', $this->taxonomyRedirectParams($this->resolveTaxonomyListState($request)));
     }
 
     #[Route('/admin/emotion/{id}/delete', name: 'ac_ui_emotion_delete', methods: ['POST'])]
@@ -602,25 +620,27 @@ final class AccessControlUiController extends AbstractController
         if (!$emotion instanceof MoodEmotion) {
             $this->addFlash('error', 'Emotion not found.');
 
-            return $this->redirectToRoute('ac_ui_emotion');
+            return $this->redirectToRoute('ac_ui_emotion', $this->taxonomyRedirectParams($this->resolveTaxonomyListState($request)));
         }
         if (!$this->isCsrfTokenValid('emotion_delete_' . $emotion->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid delete token.');
 
-            return $this->redirectToRoute('ac_ui_emotion');
+            return $this->redirectToRoute('ac_ui_emotion', $this->taxonomyRedirectParams($this->resolveTaxonomyListState($request)));
         }
 
         $this->entityManager->remove($emotion);
         $this->entityManager->flush();
         $this->addFlash('success', 'Emotion deleted successfully.');
 
-        return $this->redirectToRoute('ac_ui_emotion');
+        return $this->redirectToRoute('ac_ui_emotion', $this->taxonomyRedirectParams($this->resolveTaxonomyListState($request)));
     }
 
     #[Route('/admin/influence', name: 'ac_ui_influence', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function influenceManagement(Request $request): Response
     {
+        $listState = $this->resolveTaxonomyListState($request);
+
         if ($request->isMethod('POST')) {
             if (!$this->isCsrfTokenValid('influence_create', (string) $request->request->get('_token'))) {
                 $this->addFlash('error', 'Invalid create token.');
@@ -648,13 +668,27 @@ final class AccessControlUiController extends AbstractController
                 }
             }
 
-            return $this->redirectToRoute('ac_ui_influence');
+            return $this->redirectToRoute('ac_ui_influence', $this->taxonomyRedirectParams($listState));
         }
+
+        $influenceQuery = $this->moodInfluenceRepository->createQueryBuilder('influence')
+            ->orderBy('influence.id', $listState['sortDirection'])
+            ->getQuery();
+        $influencePerPageLimit = $listState['perPage'] === 'all'
+            ? max(1, (int) $this->moodInfluenceRepository->count([]))
+            : $listState['perPageLimit'];
+        $influences = $this->paginator->paginate(
+            $influenceQuery,
+            $listState['page'],
+            $influencePerPageLimit
+        );
 
         return $this->render('access_control/pages/influence_management.html.twig', [
             'nav' => $this->buildNav('ac_ui_influence'),
             'userName' => $this->getUser()?->getEmail() ?? 'Admin',
-            'influences' => $this->moodInfluenceRepository->createQueryBuilder('influence')->orderBy('influence.name', 'ASC')->getQuery()->getResult(),
+            'influences' => $influences,
+            'direction' => $listState['direction'],
+            'perPage' => $listState['perPage'],
         ]);
     }
 
@@ -666,12 +700,12 @@ final class AccessControlUiController extends AbstractController
         if (!$influence instanceof MoodInfluence) {
             $this->addFlash('error', 'Influence not found.');
 
-            return $this->redirectToRoute('ac_ui_influence');
+            return $this->redirectToRoute('ac_ui_influence', $this->taxonomyRedirectParams($this->resolveTaxonomyListState($request)));
         }
         if (!$this->isCsrfTokenValid('influence_edit_' . $influence->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid edit token.');
 
-            return $this->redirectToRoute('ac_ui_influence');
+            return $this->redirectToRoute('ac_ui_influence', $this->taxonomyRedirectParams($this->resolveTaxonomyListState($request)));
         }
 
         $name = trim((string) $request->request->get('name', ''));
@@ -679,7 +713,7 @@ final class AccessControlUiController extends AbstractController
         if ($error !== null) {
             $this->addFlash('error', $error);
 
-            return $this->redirectToRoute('ac_ui_influence');
+            return $this->redirectToRoute('ac_ui_influence', $this->taxonomyRedirectParams($this->resolveTaxonomyListState($request)));
         }
 
         $exists = $this->moodInfluenceRepository->createQueryBuilder('influence')
@@ -694,14 +728,14 @@ final class AccessControlUiController extends AbstractController
         if ((int) $exists > 0) {
             $this->addFlash('error', 'This influence already exists.');
 
-            return $this->redirectToRoute('ac_ui_influence');
+            return $this->redirectToRoute('ac_ui_influence', $this->taxonomyRedirectParams($this->resolveTaxonomyListState($request)));
         }
 
         $influence->setName($name);
         $this->entityManager->flush();
         $this->addFlash('success', 'Influence updated successfully.');
 
-        return $this->redirectToRoute('ac_ui_influence');
+        return $this->redirectToRoute('ac_ui_influence', $this->taxonomyRedirectParams($this->resolveTaxonomyListState($request)));
     }
 
     #[Route('/admin/influence/{id}/delete', name: 'ac_ui_influence_delete', methods: ['POST'])]
@@ -712,19 +746,71 @@ final class AccessControlUiController extends AbstractController
         if (!$influence instanceof MoodInfluence) {
             $this->addFlash('error', 'Influence not found.');
 
-            return $this->redirectToRoute('ac_ui_influence');
+            return $this->redirectToRoute('ac_ui_influence', $this->taxonomyRedirectParams($this->resolveTaxonomyListState($request)));
         }
         if (!$this->isCsrfTokenValid('influence_delete_' . $influence->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid delete token.');
 
-            return $this->redirectToRoute('ac_ui_influence');
+            return $this->redirectToRoute('ac_ui_influence', $this->taxonomyRedirectParams($this->resolveTaxonomyListState($request)));
         }
 
         $this->entityManager->remove($influence);
         $this->entityManager->flush();
         $this->addFlash('success', 'Influence deleted successfully.');
 
-        return $this->redirectToRoute('ac_ui_influence');
+        return $this->redirectToRoute('ac_ui_influence', $this->taxonomyRedirectParams($this->resolveTaxonomyListState($request)));
+    }
+
+    /**
+     * @return array{page:int,perPage:string,perPageLimit:int,direction:string,sortDirection:'ASC'|'DESC'}
+     */
+    private function resolveTaxonomyListState(Request $request): array
+    {
+        $allowedPerPage = ['5', '10', '20', 'all'];
+        $allowedDirection = ['asc', 'desc'];
+
+        $perPage = (string) $request->query->get('perPage', '10');
+        if (!in_array($perPage, $allowedPerPage, true)) {
+            $perPage = '10';
+        }
+
+        $direction = mb_strtolower((string) $request->query->get('direction', 'asc'));
+        if (!in_array($direction, $allowedDirection, true)) {
+            $direction = 'asc';
+        }
+
+        $page = max(1, $request->query->getInt('page', 1));
+        if ($perPage === 'all') {
+            $page = 1;
+        }
+
+        $perPageLimit = match ($perPage) {
+            '5' => 5,
+            '20' => 20,
+            'all' => 5000,
+            default => 10,
+        };
+
+        return [
+            'page' => $page,
+            'perPage' => $perPage,
+            'perPageLimit' => $perPageLimit,
+            'direction' => $direction,
+            'sortDirection' => $direction === 'desc' ? 'DESC' : 'ASC',
+        ];
+    }
+
+    /**
+     * @param array{page:int,perPage:string,direction:string} $listState
+     * @return array{page:int,perPage:string,direction:string}
+     */
+    private function taxonomyRedirectParams(array $listState): array
+    {
+        return [
+            'page' => $listState['page'],
+            'perPage' => $listState['perPage'],
+            'direction' => $listState['direction'],
+        ];
     }
 
     /** @return list<array{section: string, label: string, route: string, icon: string, active: bool, children?: list<array{label: string, route: string, icon: string, active: bool}>}> */

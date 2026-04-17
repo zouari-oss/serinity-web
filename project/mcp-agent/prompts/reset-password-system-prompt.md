@@ -80,7 +80,7 @@ POST /api/auth/forgot-password
 
 ```json
 {
-    "email": "user@example.com"
+  "email": "user@example.com"
 }
 ```
 
@@ -106,8 +106,8 @@ POST /api/auth/verify-reset-code
 
 ```json
 {
-    "email": "user@example.com",
-    "code": "123456"
+  "email": "user@example.com",
+  "code": "123456"
 }
 ```
 
@@ -133,9 +133,9 @@ POST /api/auth/reset-password
 
 ```json
 {
-    "email": "user@example.com",
-    "code": "123456",
-    "new_password": "newPassword123"
+  "email": "user@example.com",
+  "code": "123456",
+  "new_password": "newPassword123"
 }
 ```
 
@@ -236,7 +236,7 @@ Controller/
 
 ```json
 {
-    "message": "Reset code sent successfully"
+  "message": "Reset code sent successfully"
 }
 ```
 
@@ -244,8 +244,8 @@ Controller/
 
 ```json
 {
-    "error": "invalid_or_expired_code",
-    "message": "The code is invalid or has expired."
+  "error": "invalid_or_expired_code",
+  "message": "The code is invalid or has expired."
 }
 ```
 

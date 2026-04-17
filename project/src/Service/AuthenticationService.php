@@ -16,6 +16,8 @@ use App\Enum\UserRole;
 use App\Repository\AuthSessionRepository;
 use App\Repository\ProfileRepository;
 use App\Repository\UserRepository;
+use App\Service\Security\TwoFactorCheckRateLimiter;
+use App\Service\Security\TwoFactorPendingLoginStore;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -31,6 +33,9 @@ final readonly class AuthenticationService
         private UserPasswordHasherInterface $passwordHasher,
         private JwtService $jwtService,
         private TokenGenerator $tokenGenerator,
+        private TwoFactorService $twoFactorService,
+        private TwoFactorPendingLoginStore $twoFactorPendingLoginStore,
+        private TwoFactorCheckRateLimiter $twoFactorCheckRateLimiter,
     ) {
     }
 
@@ -60,6 +65,7 @@ final readonly class AuthenticationService
             ->setPresenceStatus(PresenceStatus::ONLINE->value)
             ->setAccountStatus(AccountStatus::ACTIVE->value)
             ->setFaceRecognitionEnabled(false)
+            ->setTwoFactorEnabled(false)
             ->setCreatedAt($now)
             ->setUpdatedAt($now);
         $user->setPassword($this->passwordHasher->hashPassword($user, $request->password));
@@ -81,7 +87,7 @@ final readonly class AuthenticationService
         return ServiceResult::success('Registration successful.', $this->buildAuthPayload($user, $session->getRefreshToken()));
     }
 
-    public function login(LoginRequest $request): ServiceResult
+    public function login(LoginRequest $request, string $requestFingerprint): ServiceResult
     {
         $user = str_contains($request->usernameOrEmail, '@')
             ? $this->userRepository->findByEmail($request->usernameOrEmail)
@@ -95,12 +101,76 @@ final readonly class AuthenticationService
             return ServiceResult::failure('Invalid credentials.');
         }
 
+        if ($user->isTwoFactorEnabled()) {
+            $challenge = $this->twoFactorPendingLoginStore->create(
+                $user->getId(),
+                $request->rememberMe,
+                $requestFingerprint,
+            );
+
+            return ServiceResult::success('Two-factor authentication required.', [
+                'requires_2fa' => true,
+                'challengeId' => $challenge['challengeId'],
+                'challengeExpiresIn' => $challenge['expiresIn'],
+            ]);
+        }
+
         $this->sessionService->revokeActiveSessions($user);
         $session = $this->sessionService->createSession($user);
         $this->auditLogService->log($session, AuditAction::USER_LOGIN);
         $this->entityManager->flush();
 
         return ServiceResult::success('Login successful.', $this->buildAuthPayload($user, $session->getRefreshToken(), $request->rememberMe));
+    }
+
+    public function completeTwoFactorLogin(string $challengeId, string $code, string $requestFingerprint): ServiceResult
+    {
+        $challenge = $this->twoFactorPendingLoginStore->get($challengeId);
+        if ($challenge === null) {
+            return ServiceResult::failure('Invalid or expired two-factor challenge.', [
+                'error' => 'invalid_2fa_challenge',
+            ]);
+        }
+
+        if (!hash_equals($challenge['fingerprint'], $requestFingerprint)) {
+            return ServiceResult::failure('Two-factor challenge is not valid for this session.', [
+                'error' => 'two_factor_session_mismatch',
+            ]);
+        }
+
+        $rateLimitKey = $challengeId . '|' . $requestFingerprint;
+        if ($this->twoFactorCheckRateLimiter->isLimited($rateLimitKey)) {
+            return ServiceResult::failure('Too many invalid authentication codes. Please try again later.', [
+                'error' => 'two_factor_rate_limited',
+            ]);
+        }
+
+        $user = $this->userRepository->find($challenge['userId']);
+        if (!$user instanceof User || !$user->isTwoFactorEnabled()) {
+            return ServiceResult::failure('Two-factor authentication is not active for this account.', [
+                'error' => 'invalid_2fa_challenge',
+            ]);
+        }
+
+        if (!$this->twoFactorService->isCodeValid($user, $code)) {
+            $this->twoFactorCheckRateLimiter->recordFailure($rateLimitKey);
+            return ServiceResult::failure('Invalid authentication code.', [
+                'error' => 'invalid_2fa_code',
+            ]);
+        }
+
+        $this->twoFactorPendingLoginStore->consume($challengeId);
+        $this->twoFactorCheckRateLimiter->reset($rateLimitKey);
+
+        $this->sessionService->revokeActiveSessions($user);
+        $session = $this->sessionService->createSession($user);
+        $this->auditLogService->log($session, AuditAction::USER_LOGIN);
+        $this->entityManager->flush();
+
+        return ServiceResult::success('Login successful.', [
+            ...$this->buildAuthPayload($user, $session->getRefreshToken(), $challenge['rememberMe']),
+            'rememberMe' => $challenge['rememberMe'],
+        ]);
     }
 
     public function logout(string $refreshToken): ServiceResult
@@ -130,6 +200,7 @@ final readonly class AuthenticationService
             'accountStatus' => $user->getAccountStatus(),
             'presenceStatus' => $user->getPresenceStatus(),
             'faceRecognitionEnabled' => $user->isFaceRecognitionEnabled(),
+            'isTwoFactorEnabled' => $user->isTwoFactorEnabled(),
         ];
     }
 

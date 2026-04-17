@@ -167,6 +167,7 @@ final readonly class FaceAuthenticationService
                 'accountStatus' => $user->getAccountStatus(),
                 'presenceStatus' => $user->getPresenceStatus(),
                 'faceRecognitionEnabled' => $user->isFaceRecognitionEnabled(),
+                'isTwoFactorEnabled' => $user->isTwoFactorEnabled(),
             ],
         ];
     }

@@ -90,6 +90,12 @@
                         </div>
                     </label>
                     <label class="ac-check"><input type="checkbox" name="rememberMe" value="1"> Remember me</label>
+                    <div data-auth-form-target="otpStep" hidden>
+                        <label>
+                            <span class="ac-label">Authentication code</span>
+                            <input class="ac-input" type="text" name="otpCode" inputmode="numeric" autocomplete="one-time-code" data-auth-form-target="otpCode">
+                        </label>
+                    </div>
                     <button class="ac-btn ac-btn-primary" type="submit">
                         <span class="ac-btn-content">
                             <span class="ac-btn-text">Sign in</span>

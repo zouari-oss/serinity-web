@@ -21,6 +21,7 @@ import UserFiltersController from './controllers/user_filters_controller.js';
 import PasswordResetController from './controllers/password_reset_controller.js';
 import FaceLoginController from './controllers/face_login_controller.js';
 import FaceSettingsController from './controllers/face_settings_controller.js';
+import TwoFactorSettingsController from './controllers/two_factor_settings_controller.js';
 
 const app = startStimulusApp();
 
@@ -46,3 +47,4 @@ app.register('user-filters', UserFiltersController);
 app.register('password-reset', PasswordResetController);
 app.register('face-login', FaceLoginController);
 app.register('face-settings', FaceSettingsController);
+app.register('two-factor-settings', TwoFactorSettingsController);

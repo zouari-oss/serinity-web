@@ -1,9 +1,10 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-  static targets = ['error'];
+  static targets = ['error', 'otpStep', 'otpCode'];
 
   connect() {
+    this.pendingChallengeId = null;
     const params = new URLSearchParams(window.location.search);
     const oauthError = (params.get('oauth_error') || '').trim();
     if (!oauthError) {
@@ -24,78 +25,117 @@ export default class extends Controller {
     event.preventDefault();
 
     const form = event.currentTarget;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const btnContent = submitBtn?.querySelector('.ac-btn-content');
+    const btnText = btnContent?.querySelector('.ac-btn-text');
+    const btnSpinner = btnContent?.querySelector('.ac-btn-spinner');
+    const isLoginForm = /\/api\/auth\/(login|signin)$/.test(form.action);
+    if (!isLoginForm) {
+      this.pendingChallengeId = null;
+    }
+    const is2faCheck = isLoginForm && this.pendingChallengeId !== null && this.pendingChallengeId !== '';
+
     if (!form.checkValidity()) {
       form.reportValidity();
       return;
     }
 
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const btnContent = submitBtn?.querySelector('.ac-btn-content');
-    const btnText = btnContent?.querySelector('.ac-btn-text');
-    const btnSpinner = btnContent?.querySelector('.ac-btn-spinner');
-
     try {
-      // Show loading state
-      if (submitBtn && btnText && btnSpinner) {
-        submitBtn.disabled = true;
-        submitBtn.classList.add('is-loading');
-        btnText.hidden = true;
-        btnSpinner.hidden = false;
+      this.setLoadingState(submitBtn, btnText, btnSpinner);
+
+      let response;
+      if (is2faCheck) {
+        response = await fetch('/api/auth/2fa/check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            challengeId: this.pendingChallengeId,
+            code: this.hasOtpCodeTarget ? this.otpCodeTarget.value.trim() : '',
+          }),
+          credentials: 'include',
+        });
+      } else {
+        const body = new URLSearchParams(new FormData(form));
+        response = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body,
+          credentials: 'include',
+        });
       }
-
-      const body = new URLSearchParams(new FormData(form));
-      const response = await fetch(form.action, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body,
-        credentials: 'include',
-      });
-
       const payload = await response.json().catch(() => ({ success: false, message: 'Invalid server response.' }));
 
-      if (!response.ok || !payload.success) {
-        this.showError(payload.message || 'Authentication failed.');
-        // Reset button state on error
-        if (submitBtn && btnText && btnSpinner) {
-          submitBtn.disabled = false;
-          submitBtn.classList.remove('is-loading');
-          btnText.hidden = false;
-          btnSpinner.hidden = true;
-        }
+      if (!is2faCheck && payload?.data?.requires_2fa === true && payload?.data?.challengeId) {
+        this.pendingChallengeId = String(payload.data.challengeId);
+        this.enableOtpStep(submitBtn, btnText, btnSpinner);
+        this.showError('Two-factor authentication required. Enter your authenticator code.');
         return;
       }
 
-      // Store token
+      if (!response.ok || !payload.success) {
+        this.showError(payload.message || 'Authentication failed.');
+        this.resetButtonState(submitBtn, btnText, btnSpinner);
+        return;
+      }
+
       const token = payload?.data?.token || '';
       localStorage.setItem('access_token', token);
       if (token) {
         document.cookie = `access_token=${encodeURIComponent(token)}; Path=/; SameSite=Lax`;
       }
-      
-      // Show success state
+
       if (submitBtn && btnSpinner) {
         submitBtn.classList.remove('is-loading');
         submitBtn.classList.add('is-success');
         btnSpinner.innerHTML = '<span class="material-symbols-outlined">check_circle</span>';
       }
-      
+
       const role = String(payload?.data?.user?.role || '').toUpperCase();
       const redirectPath = role === 'ADMIN' ? '/admin/dashboard' : '/user/dashboard';
 
-      // Redirect after animation
       setTimeout(() => {
         window.location.href = redirectPath;
       }, 800);
-      
-    } catch (e) {
+    } catch (_error) {
       this.showError('Network error. Please try again.');
-      // Reset button state on error
-      if (submitBtn && btnText && btnSpinner) {
-        submitBtn.disabled = false;
-        submitBtn.classList.remove('is-loading');
-        btnText.hidden = false;
-        btnSpinner.hidden = true;
-      }
+      this.resetButtonState(submitBtn, btnText, btnSpinner);
+    }
+  }
+
+  setLoadingState(submitBtn, btnText, btnSpinner) {
+    if (!submitBtn || !btnText || !btnSpinner) {
+      return;
+    }
+    submitBtn.disabled = true;
+    submitBtn.classList.add('is-loading');
+    submitBtn.classList.remove('is-success');
+    btnText.hidden = true;
+    btnSpinner.hidden = false;
+    btnSpinner.innerHTML = '<span class="material-symbols-outlined ac-spin">progress_activity</span>';
+  }
+
+  resetButtonState(submitBtn, btnText, btnSpinner) {
+    if (!submitBtn || !btnText || !btnSpinner) {
+      return;
+    }
+    submitBtn.disabled = false;
+    submitBtn.classList.remove('is-loading');
+    btnText.hidden = false;
+    btnSpinner.hidden = true;
+    btnSpinner.innerHTML = '<span class="material-symbols-outlined ac-spin">progress_activity</span>';
+  }
+
+  enableOtpStep(submitBtn, btnText, btnSpinner) {
+    this.resetButtonState(submitBtn, btnText, btnSpinner);
+    if (this.hasOtpStepTarget) {
+      this.otpStepTarget.hidden = false;
+    }
+    if (this.hasOtpCodeTarget) {
+      this.otpCodeTarget.required = true;
+      this.otpCodeTarget.focus();
+    }
+    if (btnText) {
+      btnText.textContent = 'Verify code';
     }
   }
 

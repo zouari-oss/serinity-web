@@ -10,6 +10,7 @@ use App\Dto\Auth\RegisterRequest;
 use App\Service\AccessControlService;
 use App\Service\AuthenticationService;
 use App\Service\GoogleAuthService;
+use App\Service\Security\RequestFingerprintService;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Psr\Log\LoggerInterface;
@@ -29,6 +30,7 @@ final class AuthController extends AbstractApiController
         private readonly AccessControlService $accessControlService,
         private readonly ClientRegistry $clientRegistry,
         private readonly GoogleAuthService $googleAuthService,
+        private readonly RequestFingerprintService $requestFingerprintService,
         private readonly string $googleRedirectUri,
         private readonly LoggerInterface $logger,
     ) {
@@ -72,7 +74,10 @@ final class AuthController extends AbstractApiController
             return $errors;
         }
 
-        $result = $this->authenticationService->login($dto);
+        $result = $this->authenticationService->login(
+            $dto,
+            $this->requestFingerprintService->build($request),
+        );
         $response = $this->json($result->toArray(), $result->success ? 200 : 401);
 
         return $this->withRefreshCookie($response, $result->data['refreshToken'] ?? null, $dto->rememberMe ? 2592000 : 604800);

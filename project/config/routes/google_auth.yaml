@@ -1,0 +1,9 @@
+api_auth_google_connect:
+    path: /api/auth/google/connect
+    controller: App\Controller\Api\AuthController::googleConnect
+    methods: [GET]
+
+api_auth_google_callback:
+    path: /api/auth/google/callback
+    controller: App\Controller\Api\AuthController::googleCallback
+    methods: [GET]

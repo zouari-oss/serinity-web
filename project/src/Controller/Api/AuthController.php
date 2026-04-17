@@ -9,8 +9,13 @@ use App\Dto\Auth\RefreshRequest;
 use App\Dto\Auth\RegisterRequest;
 use App\Service\AccessControlService;
 use App\Service\AuthenticationService;
+use App\Service\GoogleAuthService;
+use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
@@ -22,6 +27,10 @@ final class AuthController extends AbstractApiController
     public function __construct(
         private readonly AuthenticationService $authenticationService,
         private readonly AccessControlService $accessControlService,
+        private readonly ClientRegistry $clientRegistry,
+        private readonly GoogleAuthService $googleAuthService,
+        private readonly string $googleRedirectUri,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -124,6 +133,110 @@ final class AuthController extends AbstractApiController
         ]);
     }
 
+    public function googleConnect(Request $request): RedirectResponse
+    {
+        $options = [];
+        if ($this->googleRedirectUri !== '') {
+            $configured = parse_url($this->googleRedirectUri);
+            $configuredHost = $configured['host'] ?? null;
+            if (is_string($configuredHost) && $configuredHost !== '' && $configuredHost !== $request->getHost()) {
+                $scheme = (string) ($configured['scheme'] ?? $request->getScheme());
+                $port = isset($configured['port']) ? ':' . (int) $configured['port'] : '';
+
+                return new RedirectResponse(sprintf(
+                    '%s://%s%s%s',
+                    $scheme,
+                    $configuredHost,
+                    $port,
+                    '/api/auth/google/connect',
+                ));
+            }
+
+            $options['redirect_uri'] = $this->googleRedirectUri;
+        }
+
+        return $this->clientRegistry
+            ->getClient('google')
+            ->redirect(['email', 'profile'], $options);
+    }
+
+    public function googleCallback(): RedirectResponse
+    {
+        $client = $this->clientRegistry->getClient('google');
+
+        try {
+            $googleUser = $client->fetchUser();
+        } catch (IdentityProviderException|\RuntimeException $exception) {
+            $message = mb_strtolower($exception->getMessage());
+            $errorCode = str_contains($message, 'state')
+                ? 'google_auth_state_mismatch'
+                : 'google_auth_failed';
+
+            $this->logger->error('Google OAuth callback failed.', [
+                'error_code' => $errorCode,
+                'exception' => $exception->getMessage(),
+                'type' => $exception::class,
+            ]);
+
+            return $this->failureRedirect($errorCode);
+        }
+
+        $profile = $googleUser->toArray();
+        $googleId = trim((string) $googleUser->getId());
+        $email = trim((string) ($googleUser->getEmail() ?? ''));
+        $name = trim((string) ($googleUser->getName() ?? ''));
+        $isVerified = filter_var(
+            $profile['email_verified'] ?? $profile['verified_email'] ?? false,
+            FILTER_VALIDATE_BOOL,
+        );
+
+        $result = $this->googleAuthService->authenticateOrRegister(
+            $googleId,
+            $email,
+            (bool) $isVerified,
+            $name !== '' ? $name : null,
+        );
+
+        if (!$result->success) {
+            return $this->failureRedirect((string) ($result->data['error'] ?? 'google_auth_failed'));
+        }
+
+        $token = (string) ($result->data['token'] ?? '');
+        $refreshToken = (string) ($result->data['refreshToken'] ?? '');
+        $role = mb_strtoupper((string) ($result->data['user']['role'] ?? ''));
+        $target = $role === 'ADMIN' ? '/admin/dashboard' : '/user/dashboard';
+
+        $response = new RedirectResponse($target);
+        if ($token !== '') {
+            $response->headers->setCookie(new Cookie(
+                'access_token',
+                $token,
+                time() + 900,
+                '/',
+                null,
+                false,
+                false,
+                false,
+                'lax',
+            ));
+        }
+        if ($refreshToken !== '') {
+            $response->headers->setCookie(new Cookie(
+                'refresh_token',
+                $refreshToken,
+                time() + 604800,
+                '/',
+                null,
+                false,
+                true,
+                false,
+                'lax',
+            ));
+        }
+
+        return $response;
+    }
+
     private function withRefreshCookie(JsonResponse $response, ?string $refreshToken, int $maxAge): JsonResponse
     {
         if (!is_string($refreshToken) || $refreshToken === '') {
@@ -143,5 +256,10 @@ final class AuthController extends AbstractApiController
         ));
 
         return $response;
+    }
+
+    private function failureRedirect(string $error): RedirectResponse
+    {
+        return new RedirectResponse('/login?mode=signin&oauth_error=' . rawurlencode($error));
     }
 }

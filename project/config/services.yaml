@@ -32,6 +32,7 @@ parameters:
     app.face_auth_python_script_path: '%env(string:FACE_AUTH_PYTHON_SCRIPT_PATH)%'
     app.face_auth_input_width: '%env(int:FACE_AUTH_INPUT_WIDTH)%'
     app.face_auth_input_height: '%env(int:FACE_AUTH_INPUT_HEIGHT)%'
+    app.google_redirect_uri: '%env(string:GOOGLE_REDIRECT_URI)%'
 
 services:
     # default configuration for services in *this* file
@@ -95,6 +96,10 @@ services:
             $cachePool: '@cache.app'
             $maxAttempts: '%app.face_auth_rate_limit_attempts%'
             $windowSeconds: '%app.face_auth_rate_limit_window_seconds%'
+
+    App\Controller\Api\AuthController:
+        arguments:
+            $googleRedirectUri: '%app.google_redirect_uri%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

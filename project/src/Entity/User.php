@@ -29,6 +29,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::STRING, length: 150, unique: true)]
     private string $email;
 
+    #[ORM\Column(name: 'google_id', type: Types::STRING, length: 191, nullable: true, unique: true)]
+    private ?string $googleId = null;
+
     /** Sensitive: password hash, never expose in API payloads. */
     #[ORM\Column(type: Types::STRING, length: 255)]
     private string $password;
@@ -111,6 +114,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmail(string $email): self
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    public function getGoogleId(): ?string
+    {
+        return $this->googleId;
+    }
+
+    public function setGoogleId(?string $googleId): self
+    {
+        $this->googleId = $googleId;
 
         return $this;
     }

@@ -3,6 +3,23 @@ import { Controller } from '@hotwired/stimulus';
 export default class extends Controller {
   static targets = ['error'];
 
+  connect() {
+    const params = new URLSearchParams(window.location.search);
+    const oauthError = (params.get('oauth_error') || '').trim();
+    if (!oauthError) {
+      return;
+    }
+
+    const messageByCode = {
+      google_auth_failed: 'Unable to authenticate with Google.',
+      google_auth_state_mismatch: 'Google login session expired or host mismatch. Please retry from localhost.',
+      google_email_not_verified: 'Your Google account email must be verified before signing in.',
+      google_account_link_conflict: 'This email is already linked to another Google account.',
+      google_auth_invalid_payload: 'Invalid Google authentication data. Please try again.',
+    };
+    this.showError(messageByCode[oauthError] || 'Unable to authenticate with Google.');
+  }
+
   async submit(event) {
     event.preventDefault();
 

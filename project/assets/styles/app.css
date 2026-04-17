@@ -420,6 +420,59 @@ h1,h2,h3,p { margin: 0; }
 }
 .ac-ghost-btn { background: transparent; border-color: var(--border); color: var(--text); }
 .ac-ghost-btn:hover { background: var(--surface-soft); border-color: var(--primary); color: var(--primary); }
+.ac-social-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .65rem;
+    width: 100%;
+    text-decoration: none;
+    min-height: 48px;
+}
+.ac-social-btn-google {
+    border: 1px solid color-mix(in srgb, var(--border), #d2d6db 35%);
+    border-radius: 999px;
+    background: #fff;
+    color: #1f1f1f;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+.ac-social-btn-google:hover {
+    background: #f8f9fa;
+    border-color: color-mix(in srgb, var(--primary), #d2d6db 60%);
+    transform: translateY(-1px);
+}
+.ac-social-btn-google:active {
+    transform: translateY(0);
+    background: #f1f3f4;
+}
+.ac-social-btn-google:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary), transparent 75%);
+}
+.ac-social-btn-icon {
+    display: inline-flex;
+    width: 20px;
+    height: 20px;
+}
+.ac-social-btn-icon svg {
+    width: 100%;
+    height: 100%;
+}
+.ac-social-btn-text {
+    letter-spacing: .01em;
+}
+.ac-auth-panel .ac-form + .ac-social-btn {
+    margin-top: .75rem;
+}
+[data-theme="dark"] .ac-social-btn-google {
+    background: #14171d;
+    color: #f5f7fa;
+    border-color: color-mix(in srgb, var(--border), #333b47 45%);
+}
+[data-theme="dark"] .ac-social-btn-google:hover {
+    background: #1b2028;
+}
 .ac-danger-btn {
     border-radius: 10px;
     padding: .6rem 1rem;

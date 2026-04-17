@@ -1,6 +1,10 @@
 {% extends 'access_control/layout.html.twig' %}
 {% block title %}Settings | Serinity{% endblock %}
 
+{% set settingsSaveRoute = settingsSaveRoute|default('user_ui_settings') %}
+{% set settingsChangePasswordRoute = settingsChangePasswordRoute|default('user_ui_settings_change_password') %}
+{% set settingsDeleteAccountRoute = settingsDeleteAccountRoute|default('user_ui_settings_delete_account') %}
+
 {% block content %}
 <div class="ac-app-layout">
     {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
@@ -15,7 +19,7 @@
             {% endfor %}
         </div>
         <section class="ac-card">
-            <form class="ac-form" method="post" action="{{ path('user_ui_settings') }}">
+            <form class="ac-form" method="post" action="{{ path(settingsSaveRoute) }}">
                 <label>
                     <span class="ac-label">Theme</span>
                     <select class="ac-input" name="theme">
@@ -44,10 +48,36 @@
                 <p data-face-settings-target="status" hidden></p>
             </div>
         </section>
+        <section class="ac-card" data-controller="two-factor-settings" data-two-factor-settings-enabled-value="{{ twoFactorEnabled ? 'true' : 'false' }}">
+            <h3>Two-factor authentication (TOTP)</h3>
+            <div class="ac-row-between">
+                <span class="ac-label">Status</span>
+                <span class="ac-badge" data-two-factor-settings-target="state"></span>
+            </div>
+            <div class="ac-row-end" style="gap: .5rem;">
+                <button class="ac-ghost-btn" type="button" data-action="two-factor-settings#enable">Enable</button>
+                <button class="ac-ghost-btn" type="button" data-action="two-factor-settings#verify">Verify setup</button>
+                <button class="ac-btn" type="button" data-action="two-factor-settings#disable">Disable</button>
+            </div>
+            <div data-two-factor-settings-target="setup" hidden>
+                <div class="ac-row-center" style="justify-content: center; margin-bottom: .75rem;">
+                    <img alt="Authenticator QR code" data-two-factor-settings-target="qrImage" style="max-width: 260px; width: 100%; height: auto; border-radius: .5rem; border: 1px solid rgba(15, 23, 42, .12);" hidden>
+                </div>
+                <label>
+                    <span class="ac-label">Authenticator setup URI (manual fallback)</span>
+                    <textarea class="ac-input" rows="2" readonly data-two-factor-settings-target="qrContent"></textarea>
+                </label>
+                <label>
+                    <span class="ac-label">Authentication code</span>
+                    <input class="ac-input" type="text" inputmode="numeric" autocomplete="one-time-code" data-two-factor-settings-target="code">
+                </label>
+            </div>
+            <p data-two-factor-settings-target="status" hidden></p>
+        </section>
         <section class="ac-card">
             <h3>Security</h3>
             <p style="color: var(--muted);">Change your password securely.</p>
-            <form class="ac-form" method="post" action="{{ path('user_ui_settings_change_password') }}">
+            <form class="ac-form" method="post" action="{{ path(settingsChangePasswordRoute) }}">
                 <label>
                     <span class="ac-label">Current password</span>
                     <input class="ac-input" type="password" name="currentPassword" required autocomplete="current-password">
@@ -68,7 +98,7 @@
         <section class="ac-card">
             <h3>Delete account</h3>
             <p style="color: var(--muted);">Delete your account permanently. This action cannot be undone.</p>
-            <form class="ac-form" method="post" action="{{ path('user_ui_settings_delete_account') }}">
+            <form class="ac-form" method="post" action="{{ path(settingsDeleteAccountRoute) }}">
                 <label>
                     <span class="ac-label">Current password</span>
                     <input class="ac-input" type="password" name="currentPassword" required autocomplete="current-password">

@@ -58,6 +58,7 @@ final class SettingsController extends AbstractUserUiController
             'userName' => $user->getEmail(),
             'settings' => $current,
             'faceRecognitionEnabled' => $user->isFaceRecognitionEnabled(),
+            'twoFactorEnabled' => $user->isTwoFactorEnabled(),
         ]);
     }
 

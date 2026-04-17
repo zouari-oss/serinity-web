@@ -48,6 +48,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'face_recognition_enabled', type: Types::BOOLEAN)]
     private bool $faceRecognitionEnabled;
 
+    #[ORM\Column(name: 'totp_secret_encrypted', type: Types::STRING, length: 255, nullable: true)]
+    private ?string $totpSecretEncrypted = null;
+
+    #[ORM\Column(name: 'is_two_factor_enabled', type: Types::BOOLEAN)]
+    private bool $isTwoFactorEnabled = false;
+
+    #[ORM\Column(name: 'totp_enabled_at', type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $totpEnabledAt = null;
+
     /** @var Collection<int, AuthSession> */
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: AuthSession::class, orphanRemoval: true)]
     private Collection $authSessions;
@@ -186,6 +195,42 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setFaceRecognitionEnabled(bool $faceRecognitionEnabled): self
     {
         $this->faceRecognitionEnabled = $faceRecognitionEnabled;
+
+        return $this;
+    }
+
+    public function getTotpSecretEncrypted(): ?string
+    {
+        return $this->totpSecretEncrypted;
+    }
+
+    public function setTotpSecretEncrypted(?string $totpSecretEncrypted): self
+    {
+        $this->totpSecretEncrypted = $totpSecretEncrypted;
+
+        return $this;
+    }
+
+    public function isTwoFactorEnabled(): bool
+    {
+        return $this->isTwoFactorEnabled;
+    }
+
+    public function setTwoFactorEnabled(bool $twoFactorEnabled): self
+    {
+        $this->isTwoFactorEnabled = $twoFactorEnabled;
+
+        return $this;
+    }
+
+    public function getTotpEnabledAt(): ?\DateTimeImmutable
+    {
+        return $this->totpEnabledAt;
+    }
+
+    public function setTotpEnabledAt(?\DateTimeImmutable $totpEnabledAt): self
+    {
+        $this->totpEnabledAt = $totpEnabledAt;
 
         return $this;
     }

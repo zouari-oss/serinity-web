@@ -33,6 +33,9 @@ parameters:
     app.face_auth_input_width: '%env(int:FACE_AUTH_INPUT_WIDTH)%'
     app.face_auth_input_height: '%env(int:FACE_AUTH_INPUT_HEIGHT)%'
     app.google_redirect_uri: '%env(string:GOOGLE_REDIRECT_URI)%'
+    app.two_factor_challenge_ttl_seconds: '%env(int:TWO_FACTOR_CHALLENGE_TTL_SECONDS)%'
+    app.two_factor_rate_limit_attempts: '%env(int:TWO_FACTOR_RATE_LIMIT_ATTEMPTS)%'
+    app.two_factor_rate_limit_window_seconds: '%env(int:TWO_FACTOR_RATE_LIMIT_WINDOW_SECONDS)%'
 
 services:
     # default configuration for services in *this* file
@@ -46,6 +49,10 @@ services:
         resource: '../src/'
 
     App\Service\JwtService:
+        arguments:
+            $appSecret: '%app.jwt_secret%'
+
+    App\Service\TwoFactorCryptoService:
         arguments:
             $appSecret: '%app.jwt_secret%'
 
@@ -96,6 +103,17 @@ services:
             $cachePool: '@cache.app'
             $maxAttempts: '%app.face_auth_rate_limit_attempts%'
             $windowSeconds: '%app.face_auth_rate_limit_window_seconds%'
+
+    App\Service\Security\TwoFactorCheckRateLimiter:
+        arguments:
+            $cachePool: '@cache.app'
+            $maxAttempts: '%app.two_factor_rate_limit_attempts%'
+            $windowSeconds: '%app.two_factor_rate_limit_window_seconds%'
+
+    App\Service\Security\TwoFactorPendingLoginStore:
+        arguments:
+            $cachePool: '@cache.app'
+            $ttlSeconds: '%app.two_factor_challenge_ttl_seconds%'
 
     App\Controller\Api\AuthController:
         arguments:

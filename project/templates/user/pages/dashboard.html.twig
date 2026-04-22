@@ -3,26 +3,55 @@
 
 {% block content %}
 <div class="ac-app-layout">
-    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
-    <div class="ac-main">
-        {% include 'access_control/components/_topbar.html.twig' with { title: 'My Dashboard', subtitle: 'Your personal overview', username: userName } %}
-        <section class="ac-cards">
-            <article class="ac-stat-card"><h3>Active Sessions</h3><p>{{ summary.activeSessions }}</p></article>
-            <article class="ac-stat-card"><h3>Recent Activity</h3><p>{{ summary.recentAuditEvents }}</p></article>
-            <article class="ac-stat-card"><h3>Profile Completion</h3><p>{{ summary.profileCompletion }}%</p></article>
-            <article class="ac-stat-card"><h3>Role</h3><p>{{ summary.role }}</p></article>
-        </section>
-        <section class="ac-card">
-            <h3>Quick access</h3>
-            <div class="ac-cards ac-cards-quick">
-                <a class="ac-ghost-btn" href="{{ path('user_ui_consultations') }}">Consultations</a>
-                <a class="ac-ghost-btn" href="{{ path('user_ui_exercises') }}">Exercises</a>
-                <a class="ac-ghost-btn" href="{{ path('user_ui_forum') }}">Forum</a>
-                <a class="ac-ghost-btn" href="{{ path('user_ui_mood') }}">Mood</a>
-                <a class="ac-ghost-btn" href="{{ path('user_ui_sleep') }}">Sleep</a>
-                <a class="ac-ghost-btn" href="{{ path('user_ui_settings') }}">Settings</a>
-            </div>
-        </section>
-    </div>
+  {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+  <div class="ac-main">
+    {% include 'access_control/components/_topbar.html.twig' with { title: 'My Dashboard', subtitle: 'Your personal
+    overview', username: userName } %}
+    {% if summary.profileImageUrl %}
+    <section class="ac-card" data-controller="avatar-generator"
+      data-avatar-generator-endpoint-value="{{ path('api_avatar_generate') }}"
+      data-avatar-generator-status-endpoint-value="{{ path('api_avatar_status') }}"
+      data-avatar-generator-auto-value="false">
+
+      <h3>Anime Avatar</h3>
+
+      <div style="margin: .8rem 0; display: flex; justify-content: center;">
+        <img data-avatar-generator-target="preview"
+          src="{{ summary.animeAvatarImage ? 'data:image/png;base64,' ~ summary.animeAvatarImage : summary.profileImageUrl }}"
+          alt="Avatar preview" onclick="this.classList.toggle('spin')"
+          style="max-width: 300px; max-height: 300px; border-radius: 50%; border: 1px solid var(--border); transition: opacity .2s ease;">
+      </div>
+    </section>
+    {% endif %}
+    <section class="ac-cards">
+      <article class="ac-stat-card">
+        <h3>Active Sessions</h3>
+        <p>{{ summary.activeSessions }}</p>
+      </article>
+      <article class="ac-stat-card">
+        <h3>Recent Activity</h3>
+        <p>{{ summary.recentAuditEvents }}</p>
+      </article>
+      <article class="ac-stat-card">
+        <h3>Profile Completion</h3>
+        <p>{{ summary.profileCompletion }}%</p>
+      </article>
+      <article class="ac-stat-card">
+        <h3>Role</h3>
+        <p>{{ summary.role }}</p>
+      </article>
+    </section>
+    <section class="ac-card">
+      <h3>Quick access</h3>
+      <div class="ac-cards ac-cards-quick">
+        <a class="ac-ghost-btn" href="{{ path('user_ui_consultations') }}">Consultations</a>
+        <a class="ac-ghost-btn" href="{{ path('user_ui_exercises') }}">Exercises</a>
+        <a class="ac-ghost-btn" href="{{ path('user_ui_forum') }}">Forum</a>
+        <a class="ac-ghost-btn" href="{{ path('user_ui_mood') }}">Mood</a>
+        <a class="ac-ghost-btn" href="{{ path('user_ui_sleep') }}">Sleep</a>
+        <a class="ac-ghost-btn" href="{{ path('user_ui_settings') }}">Settings</a>
+      </div>
+    </section>
+  </div>
 </div>
 {% endblock %}

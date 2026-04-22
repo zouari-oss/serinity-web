@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Controller\User;
 
 use App\Dto\User\UpdateProfileRequest;
+use App\Message\GenerateAnimeAvatarMessage;
+use App\Service\Avatar\AvatarGenerationPendingStore;
 use App\Service\ImageUploadService;
 use App\Service\User\UserProfileService;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -20,6 +23,8 @@ final class ProfileController extends AbstractUserUiController
     public function __construct(
         private readonly UserProfileService $userProfileService,
         private readonly ImageUploadService $imageUploadService,
+        private readonly MessageBusInterface $messageBus,
+        private readonly AvatarGenerationPendingStore $pendingStore,
     ) {
     }
 
@@ -50,7 +55,10 @@ final class ProfileController extends AbstractUserUiController
                         try {
                             $imageUrl = $this->imageUploadService->uploadProfileImage($file);
                             $this->userProfileService->setProfileImage($user, $imageUrl);
+                            $this->pendingStore->markPending($user->getId());
+                            $this->messageBus->dispatch(new GenerateAnimeAvatarMessage($user->getId()));
                             $this->addFlash('success', 'Profile image updated successfully.');
+                            $this->addFlash('success', 'Anime avatar generation started in background.');
                         } catch (\RuntimeException $exception) {
                             $this->addFlash('error', 'Profile saved, but image upload failed.');
                         }

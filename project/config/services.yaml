@@ -36,6 +36,14 @@ parameters:
     app.two_factor_challenge_ttl_seconds: '%env(int:TWO_FACTOR_CHALLENGE_TTL_SECONDS)%'
     app.two_factor_rate_limit_attempts: '%env(int:TWO_FACTOR_RATE_LIMIT_ATTEMPTS)%'
     app.two_factor_rate_limit_window_seconds: '%env(int:TWO_FACTOR_RATE_LIMIT_WINDOW_SECONDS)%'
+    app.avatar_img2img_api_url: '%env(string:AVATAR_IMG2IMG_API_URL)%'
+    app.avatar_img2img_timeout: '%env(int:AVATAR_IMG2IMG_TIMEOUT)%'
+    app.avatar_default_prompt: '%env(string:AVATAR_DEFAULT_PROMPT)%'
+    app.avatar_default_negative_prompt: '%env(string:AVATAR_DEFAULT_NEGATIVE_PROMPT)%'
+    app.avatar_default_strength: '%env(float:AVATAR_DEFAULT_STRENGTH)%'
+    app.avatar_rate_limit_attempts: '%env(int:AVATAR_RATE_LIMIT_ATTEMPTS)%'
+    app.avatar_rate_limit_window_seconds: '%env(int:AVATAR_RATE_LIMIT_WINDOW_SECONDS)%'
+    app.avatar_generation_pending_ttl_seconds: '%env(int:AVATAR_GENERATION_PENDING_TTL_SECONDS)%'
 
 services:
     # default configuration for services in *this* file
@@ -114,6 +122,25 @@ services:
         arguments:
             $cachePool: '@cache.app'
             $ttlSeconds: '%app.two_factor_challenge_ttl_seconds%'
+
+    App\Service\Avatar\AvatarGenerator:
+        arguments:
+            $img2imgApiUrl: '%app.avatar_img2img_api_url%'
+            $timeoutSeconds: '%app.avatar_img2img_timeout%'
+            $defaultPrompt: '%app.avatar_default_prompt%'
+            $defaultNegativePrompt: '%app.avatar_default_negative_prompt%'
+            $defaultStrength: '%app.avatar_default_strength%'
+
+    App\Service\Security\AvatarGenerationRateLimiter:
+        arguments:
+            $cachePool: '@cache.app'
+            $maxAttempts: '%app.avatar_rate_limit_attempts%'
+            $windowSeconds: '%app.avatar_rate_limit_window_seconds%'
+
+    App\Service\Avatar\AvatarGenerationPendingStore:
+        arguments:
+            $cachePool: '@cache.app'
+            $ttlSeconds: '%app.avatar_generation_pending_ttl_seconds%'
 
     App\Controller\Api\AuthController:
         arguments:

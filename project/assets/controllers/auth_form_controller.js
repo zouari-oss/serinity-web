@@ -78,6 +78,21 @@ export default class extends Controller {
         return;
       }
 
+      if (!isLoginForm && payload?.data?.requiresEmailVerification === true) {
+        const emailInput = form.querySelector('input[name="email"]');
+        const signupEmail = (emailInput?.value || '').trim().toLowerCase();
+        const expiresIn = Number(payload?.data?.expiresIn || 900);
+        if (signupEmail) {
+          sessionStorage.setItem('verificationEmail', signupEmail);
+          sessionStorage.setItem('verificationCodeExpiresAt', String(Date.now() + expiresIn * 1000));
+        }
+
+        setTimeout(() => {
+          window.location.href = String(payload?.data?.redirect || '/verify-email');
+        }, 400);
+        return;
+      }
+
       const token = payload?.data?.token || '';
       localStorage.setItem('access_token', token);
       if (token) {

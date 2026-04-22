@@ -1,0 +1,46 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Verify email | Serinity{% endblock %}
+
+{% block content %}
+<main
+    class="ac-center-page"
+    data-controller="verify-email"
+    data-verify-email-verify-url-value="{{ path('api_auth_verify_email') }}"
+    data-verify-email-resend-url-value="{{ path('api_auth_verify_email_resend') }}"
+    data-verify-email-login-url-value="{{ path('ac_ui_login') }}"
+    data-verify-email-expires-in-value="900"
+>
+    <p class="ac-inline-error ac-reset-status" data-verify-email-target="status" hidden></p>
+
+    <section class="ac-card ac-reset-screen">
+        <h2>Verify your email</h2>
+        <p class="ac-reset-subtitle" data-verify-email-target="verifyHint">Enter the 6-digit code sent to your email.</p>
+
+        <form class="ac-form" data-verify-email-target="verifyForm" data-action="submit->verify-email#verifyCodeAction">
+            <label>
+                <span class="ac-label">Verification code</span>
+                <div class="ac-otp-grid">
+                    {% for i in 0..5 %}
+                        <input
+                            class="ac-input ac-otp-input"
+                            type="text"
+                            inputmode="numeric"
+                            pattern="[0-9]"
+                            maxlength="1"
+                            data-verify-email-target="otpInput"
+                            data-action="input->verify-email#onOtpInput keydown->verify-email#onOtpKeydown paste->verify-email#onOtpPaste"
+                            required
+                        >
+                    {% endfor %}
+                </div>
+            </label>
+            <button class="ac-btn ac-btn-primary" type="submit">Verify email</button>
+        </form>
+
+        <p class="ac-reset-countdown" data-verify-email-target="countdown"></p>
+        <button class="ac-link-btn" type="button" data-verify-email-target="resendButton" data-action="click->verify-email#resendCodeAction">Resend code</button>
+    </section>
+
+    <a class="ac-link-btn" href="{{ path('ac_ui_login') }}">Back to login</a>
+</main>
+{% endblock %}

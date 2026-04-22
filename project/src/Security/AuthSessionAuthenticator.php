@@ -77,6 +77,8 @@ final class AuthSessionAuthenticator extends AbstractAuthenticator
             '/api/auth/reset-password',
             '/api/auth/reset/send',
             '/api/auth/reset/confirm',
+            '/api/auth/verify-email',
+            '/api/auth/verify-email/resend',
         ], true);
     }
 }

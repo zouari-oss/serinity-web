@@ -21,6 +21,10 @@ parameters:
     app.password_reset_rate_limit_attempts: '%env(int:PASSWORD_RESET_RATE_LIMIT_ATTEMPTS)%'
     app.password_reset_rate_limit_window_seconds: '%env(int:PASSWORD_RESET_RATE_LIMIT_WINDOW_SECONDS)%'
     app.password_reset_max_resends: '%env(int:PASSWORD_RESET_MAX_RESENDS)%'
+    app.email_verification_code_ttl_minutes: '%env(int:EMAIL_VERIFICATION_CODE_TTL_MINUTES)%'
+    app.email_verification_rate_limit_attempts: '%env(int:EMAIL_VERIFICATION_RATE_LIMIT_ATTEMPTS)%'
+    app.email_verification_rate_limit_window_seconds: '%env(int:EMAIL_VERIFICATION_RATE_LIMIT_WINDOW_SECONDS)%'
+    app.email_verification_max_resends: '%env(int:EMAIL_VERIFICATION_MAX_RESENDS)%'
     app.whatsapp_phone: '%env(string:WHATSAPP_PHONE)%'
     app.whatsapp_api_key: '%env(string:WHATSAPP_API_KEY)%'
     app.face_auth_similarity_threshold: '%env(float:FACE_AUTH_SIMILARITY_THRESHOLD)%'
@@ -50,6 +54,7 @@ parameters:
     app.ai_emotion_api_timeout: '%env(float:AI_EMOTION_API_TIMEOUT)%'
     app.ai_emotion_api_threshold: '%env(float:AI_EMOTION_API_THRESHOLD)%'
     app.ai_emotion_api_top_k: '%env(int:AI_EMOTION_API_TOP_K)%'
+    app.account_ban_duration_minutes: '%env(int:ACCOUNT_BAN_DURATION_MINUTES)%'
 
 services:
     # default configuration for services in *this* file
@@ -91,6 +96,13 @@ services:
             $rateLimitAttempts: '%app.password_reset_rate_limit_attempts%'
             $rateLimitWindowSeconds: '%app.password_reset_rate_limit_window_seconds%'
             $maxResendAttempts: '%app.password_reset_max_resends%'
+
+    App\Service\EmailVerificationService:
+        arguments:
+            $codeTtlMinutes: '%app.email_verification_code_ttl_minutes%'
+            $verifyRateLimitAttempts: '%app.email_verification_rate_limit_attempts%'
+            $verifyRateLimitWindowSeconds: '%app.email_verification_rate_limit_window_seconds%'
+            $maxResendAttempts: '%app.email_verification_max_resends%'
 
     App\Service\User\JournalContentSanitizer:
         arguments:
@@ -164,6 +176,10 @@ services:
     App\Controller\Api\AuthController:
         arguments:
             $googleRedirectUri: '%app.google_redirect_uri%'
+
+    App\Service\AccountAccessService:
+        arguments:
+            $banDurationMinutes: '%app.account_ban_duration_minutes%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

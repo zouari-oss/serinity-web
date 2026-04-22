@@ -3,136 +3,163 @@
 
 {% block content %}
 <div class="ac-app-layout">
-    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
-    <div class="ac-main">
-        {% include 'access_control/components/_topbar.html.twig' with { title: 'Dashboard', subtitle: 'Activity overview', username: userName } %}
-        {% set adminCompletion = max(0, min(100, stats.adminProfileCompletion|default(0))) %}
-        {% set usersCompletion = max(0, min(100, stats.usersProfileCompletion|default(0))) %}
+  {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+  <div class="ac-main">
+    {% include 'access_control/components/_topbar.html.twig' with { title: 'Dashboard', subtitle: 'Activity overview',
+    username: userName } %}
+    {% set adminCompletion = max(0, min(100, stats.adminProfileCompletion|default(0))) %}
+    {% set usersCompletion = max(0, min(100, stats.usersProfileCompletion|default(0))) %}
 
-        <section class="ac-cards ac-cards-two">
-            <article class="ac-card">
-                <div class="ac-row-between">
-                    <h3>Admin</h3>
-                    <span class="ac-badge ac-badge-primary">{{ adminCompletion }}%</span>
-                </div>
-                <div class="ac-dashboard-split">
-                    <div class="ac-pie-chart" style="--slice-a: {{ adminCompletion }}; --color-a: var(--primary); --color-b: var(--muted);">
-                        <span>{{ adminCompletion }}%</span>
-                    </div>
-                    <div class="ac-kpi-grid">
-                        <div><strong>{{ stats.activeSessions }}</strong><span>Sessions</span></div>
-                        <div><strong>{{ stats.recentAuditEvents }}</strong><span>Events</span></div>
-                    </div>
-                </div>
-            </article>
-            <article class="ac-card">
-                <div class="ac-row-between">
-                    <h3>Users</h3>
-                    <span class="ac-badge ac-badge-primary">{{ usersCompletion }}%</span>
-                </div>
-                <div class="ac-dashboard-split">
-                    <div class="ac-pie-chart" style="--slice-a: {{ usersCompletion }}; --color-a: var(--primary); --color-b: var(--muted);">
-                        <span>{{ usersCompletion }}%</span>
-                    </div>
-                    <div class="ac-kpi-grid">
-                        <div><strong>{{ stats.usersPopulation }}</strong><span>Total</span></div>
-                        <div><strong>{{ stats.usersCompleteProfiles }}</strong><span>Full profiles</span></div>
-                    </div>
-                </div>
-            </article>
-        </section>
+    <section class="ac-cards ac-cards-two">
+      <article class="ac-card">
+        <div class="ac-row-between">
+          <h3>Admin</h3>
+          <span class="ac-badge ac-badge-primary">{{ adminCompletion }}%</span>
+        </div>
+        <div class="ac-dashboard-split">
+          <div class="ac-pie-chart"
+            style="--slice-a: {{ adminCompletion }}; --color-a: var(--primary); --color-b: var(--muted);">
+            <span>{{ adminCompletion }}%</span>
+          </div>
+          <div class="ac-kpi-grid">
+            <div><strong>{{ stats.activeSessions }}</strong><span>Sessions</span></div>
+            <div><strong>{{ stats.recentAuditEvents }}</strong><span>Events</span></div>
+          </div>
+        </div>
+      </article>
+      <article class="ac-card">
+        <div class="ac-row-between">
+          <h3>Users</h3>
+          <span class="ac-badge ac-badge-primary">{{ usersCompletion }}%</span>
+        </div>
+        <div class="ac-dashboard-split">
+          <div class="ac-pie-chart"
+            style="--slice-a: {{ usersCompletion }}; --color-a: var(--primary); --color-b: var(--muted);">
+            <span>{{ usersCompletion }}%</span>
+          </div>
+          <div class="ac-kpi-grid">
+            <div><strong>{{ stats.usersPopulation }}</strong><span>Total</span></div>
+            <div><strong>{{ stats.usersCompleteProfiles }}</strong><span>Full profiles</span></div>
+          </div>
+        </div>
+      </article>
+    </section>
 
-        <section class="ac-cards">
-            <article class="ac-stat-card"><h3>Total Users</h3><p>{{ stats.usersPopulation }}</p></article>
-            <article class="ac-stat-card"><h3>New Users (7d)</h3><p>{{ stats.newUsers7d }}</p></article>
-            <article class="ac-stat-card"><h3>Patients</h3><p>{{ stats.patients }}</p></article>
-            <article class="ac-stat-card"><h3>Therapists</h3><p>{{ stats.therapists }}</p></article>
-        </section>
+    <section class="ac-cards">
+      <article class="ac-stat-card">
+        <h3>Total Users</h3>
+        <p>{{ stats.usersPopulation }}</p>
+      </article>
+      <article class="ac-stat-card">
+        <h3>New Users (7d)</h3>
+        <p>{{ stats.newUsers7d }}</p>
+      </article>
+      <article class="ac-stat-card">
+        <h3>Patients</h3>
+        <p>{{ stats.patients }}</p>
+      </article>
+      <article class="ac-stat-card">
+        <h3>Therapists</h3>
+        <p>{{ stats.therapists }}</p>
+      </article>
+    </section>
 
-        <section class="ac-charts">
-            <article class="ac-card">
-                <h3>Activity chart</h3>
-                {% set sessions = stats.activeSessions|default(0) %}
-                {% set audits = stats.recentAuditEvents|default(0) %}
-                {% set peak = max(1, sessions, audits) %}
-                <div class="ac-bar-chart">
-                    <div class="ac-bar-row">
-                        <div class="ac-bar-label">Active sessions</div>
-                        <div class="ac-bar-track"><div class="ac-bar-fill" style="width: {{ (sessions / peak * 100)|number_format(0, '.', '') }}%;"></div></div>
-                        <div class="ac-bar-value">{{ sessions }}</div>
-                    </div>
-                    <div class="ac-bar-row">
-                        <div class="ac-bar-label">Audit events (7d)</div>
-                        <div class="ac-bar-track"><div class="ac-bar-fill ac-bar-fill-alt" style="width: {{ (audits / peak * 100)|number_format(0, '.', '') }}%;"></div></div>
-                        <div class="ac-bar-value">{{ audits }}</div>
-                    </div>
-                </div>
-            </article>
-            <article class="ac-card">
-                <h3>Profile completion</h3>
-                {% set globalCompletion = max(0, min(100, stats.profileCompletionPercentage|default(0))) %}
-                <div class="ac-progress-chart">
-                    <div class="ac-progress-track">
-                        <div class="ac-progress-fill" style="width: {{ globalCompletion }}%;"></div>
-                    </div>
-                    <div class="ac-progress-meta">
-                        <strong>{{ globalCompletion|number_format(0) }}%</strong>
-                        <span>{{ stats.usersCompleteProfiles }} / {{ stats.usersPopulation }} users complete</span>
-                    </div>
-                </div>
-            </article>
-            <article class="ac-card">
-                <h3>User roles distribution</h3>
-                {% set patients = stats.patients|default(0) %}
-                {% set therapists = stats.therapists|default(0) %}
-                {% set rolePeak = max(1, patients, therapists) %}
-                <div class="ac-bar-chart">
-                    <div class="ac-bar-row">
-                        <div class="ac-bar-label">Patients</div>
-                        <div class="ac-bar-track"><div class="ac-bar-fill" style="width: {{ (patients / rolePeak * 100)|number_format(0, '.', '') }}%;"></div></div>
-                        <div class="ac-bar-value">{{ patients }}</div>
-                    </div>
-                    <div class="ac-bar-row">
-                        <div class="ac-bar-label">Therapists</div>
-                        <div class="ac-bar-track"><div class="ac-bar-fill ac-bar-fill-alt" style="width: {{ (therapists / rolePeak * 100)|number_format(0, '.', '') }}%;"></div></div>
-                        <div class="ac-bar-value">{{ therapists }}</div>
-                    </div>
-                </div>
-            </article>
-            <article class="ac-card">
-                <h3>Account status</h3>
-                {% set activeUsers = stats.activeUsers|default(0) %}
-                {% set disabledUsers = stats.disabledUsers|default(0) %}
-                {% set totalStatus = max(1, activeUsers + disabledUsers) %}
-                {% set activeShare = ((activeUsers / totalStatus) * 100)|number_format(0, '.', '') %}
-                <div class="ac-dashboard-split">
-                    <div class="ac-pie-chart" style="--slice-a: {{ activeShare }}; --color-a: var(--success); --color-b: var(--danger);">
-                        <span>{{ activeShare }}%</span>
-                    </div>
-                    <div class="ac-kpi-grid">
-                        <div><strong>{{ activeUsers }}</strong><span>Active</span></div>
-                        <div><strong>{{ disabledUsers }}</strong><span>Disabled</span></div>
-                    </div>
-                </div>
-            </article>
-        </section>
-        <section class="ac-card">
-            <h3>Recent activity</h3>
-            {% if recentActivity is empty %}
-                <p style="padding: 2rem; text-align: center; color: var(--ac-text-muted, #6b7280);">No recent activity</p>
-            {% else %}
-                {% include 'access_control/components/_table.html.twig' with {
-                    columns: ['Time', 'Event', 'User', 'IP Address'],
-                    rows: recentActivity|map(activity => [
-                        activity.timestamp|date('Y-m-d H:i'),
-                        activity.eventType,
-                        activity.userEmail,
-                        activity.ipAddress
-                    ]),
-                    searchable: true
-                } %}
-            {% endif %}
-        </section>
-    </div>
+    <section class="ac-charts">
+      <article class="ac-card">
+        <h3>Activity chart</h3>
+        {% set sessions = stats.activeSessions|default(0) %}
+        {% set audits = stats.recentAuditEvents|default(0) %}
+        {% set peak = max(1, sessions, audits) %}
+        <div class="ac-bar-chart">
+          <div class="ac-bar-row">
+            <div class="ac-bar-label">Active sessions</div>
+            <div class="ac-bar-track">
+              <div class="ac-bar-fill" style="width: {{ (sessions / peak * 100)|number_format(0, '.', '') }}%;"></div>
+            </div>
+            <div class="ac-bar-value">{{ sessions }}</div>
+          </div>
+          <div class="ac-bar-row">
+            <div class="ac-bar-label">Audit events (7d)</div>
+            <div class="ac-bar-track">
+              <div class="ac-bar-fill ac-bar-fill-alt"
+                style="width: {{ (audits / peak * 100)|number_format(0, '.', '') }}%;"></div>
+            </div>
+            <div class="ac-bar-value">{{ audits }}</div>
+          </div>
+        </div>
+      </article>
+      <article class="ac-card">
+        <h3>Profile completion</h3>
+        {% set globalCompletion = max(0, min(100, stats.profileCompletionPercentage|default(0))) %}
+        <div class="ac-progress-chart">
+          <div class="ac-progress-track">
+            <div class="ac-progress-fill" style="width: {{ globalCompletion }}%;"></div>
+          </div>
+          <div class="ac-progress-meta">
+            <strong>{{ globalCompletion|number_format(0) }}%</strong>
+            <span>{{ stats.usersCompleteProfiles }} / {{ stats.usersPopulation }} users complete</span>
+          </div>
+        </div>
+      </article>
+      <article class="ac-card">
+        <h3>User roles distribution</h3>
+        {% set patients = stats.patients|default(0) %}
+        {% set therapists = stats.therapists|default(0) %}
+        {% set rolePeak = max(1, patients, therapists) %}
+        <div class="ac-bar-chart">
+          <div class="ac-bar-row">
+            <div class="ac-bar-label">Patients</div>
+            <div class="ac-bar-track">
+              <div class="ac-bar-fill" style="width: {{ (patients / rolePeak * 100)|number_format(0, '.', '') }}%;">
+              </div>
+            </div>
+            <div class="ac-bar-value">{{ patients }}</div>
+          </div>
+          <div class="ac-bar-row">
+            <div class="ac-bar-label">Therapists</div>
+            <div class="ac-bar-track">
+              <div class="ac-bar-fill ac-bar-fill-alt"
+                style="width: {{ (therapists / rolePeak * 100)|number_format(0, '.', '') }}%;"></div>
+            </div>
+            <div class="ac-bar-value">{{ therapists }}</div>
+          </div>
+        </div>
+      </article>
+      <article class="ac-card">
+        <h3>Account status</h3>
+        {% set activeUsers = stats.activeUsers|default(0) %}
+        {% set disabledUsers = stats.disabledUsers|default(0) %}
+        {% set totalStatus = max(1, activeUsers + disabledUsers) %}
+        {% set activeShare = ((activeUsers / totalStatus) * 100)|number_format(0, '.', '') %}
+        <div class="ac-dashboard-split">
+          <div class="ac-pie-chart"
+            style="--slice-a: {{ activeShare }}; --color-a: var(--success); --color-b: var(--danger);">
+            <span>{{ activeShare }}%</span>
+          </div>
+          <div class="ac-kpi-grid">
+            <div><strong>{{ activeUsers }}</strong><span>Active</span></div>
+            <div><strong>{{ disabledUsers }}</strong><span>Disabled</span></div>
+          </div>
+        </div>
+      </article>
+    </section>
+    <section class="ac-card">
+      <h3>Recent activity</h3>
+      {% if recentActivity is empty %}
+      <p style="padding: 2rem; text-align: center; color: var(--ac-text-muted, #6b7280);">No recent activity</p>
+      {% else %}
+      {% include 'access_control/components/_table.html.twig' with {
+      columns: ['Time', 'Event', 'User', 'IP Address'],
+      rows: recentActivity|map(activity => [
+      activity.timestamp|date('Y-m-d H:i'),
+      activity.eventType,
+      activity.userEmail,
+      activity.ipAddress
+      ]),
+      searchable: true
+      } %}
+      {% endif %}
+    </section>
+  </div>
 </div>
 {% endblock %}

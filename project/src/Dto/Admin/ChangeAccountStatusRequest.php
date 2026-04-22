@@ -13,7 +13,7 @@ final readonly class ChangeAccountStatusRequest
 {
     public function __construct(
         #[Assert\NotBlank(message: 'Account status is required')]
-        #[Assert\Choice(choices: ['ACTIVE', 'DISABLED'], message: 'Invalid account status. Must be ACTIVE or DISABLED')]
+        #[Assert\Choice(choices: ['ACTIVE', 'DISABLED', 'BANNED'], message: 'Invalid account status. Must be ACTIVE, DISABLED, or BANNED')]
         public string $accountStatus,
     ) {
     }

@@ -101,6 +101,14 @@
                                     </button>
                                     <button class="ac-icon-btn ac-danger"
                                             type="button"
+                                            title="Ban user" 
+                                            data-user-id="{{ user.id }}"
+                                            data-user-email="{{ user.email|e('html_attr') }}"
+                                            data-action="click->user-actions#banUser">
+                                        <span class="material-symbols-outlined">block</span>
+                                    </button>
+                                    <button class="ac-icon-btn ac-danger"
+                                            type="button"
                                             title="Delete user" 
                                             data-user-id="{{ user.id }}"
                                             data-user-email="{{ user.email|e('html_attr') }}"
@@ -138,7 +146,7 @@
         <div class="ac-modal" id="create-user-modal" hidden>
             <div class="ac-modal-content">
                 <h3>Create user</h3>
-                <form class="ac-form" method="post" action="{{ path('api_auth_signup') }}" data-action="submit->user-actions#createUser">
+                <form class="ac-form" method="post" action="{{ path('api_admin_users_create') }}" data-action="submit->user-actions#createUser">
                     <label>Email<input class="ac-input" name="email" type="email" required></label>
                     <label>Password<input class="ac-input" name="password" type="password" required></label>
                     <label>Confirm password<input class="ac-input" name="confirmPassword" type="password" required></label>
@@ -171,6 +179,7 @@
                     <label>
                         <span class="ac-label">Role</span>
                         <select class="ac-input" name="role" data-edit-user-target="role" required>
+                            <option value="ADMIN">Admin</option>
                             <option value="THERAPIST">Therapist</option>
                             <option value="PATIENT">Patient</option>
                         </select>

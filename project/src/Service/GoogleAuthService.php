@@ -27,6 +27,7 @@ final readonly class GoogleAuthService
         private UserPasswordHasherInterface $passwordHasher,
         private JwtService $jwtService,
         private TokenGenerator $tokenGenerator,
+        private AccountAccessService $accountAccessService,
     ) {
     }
 
@@ -73,6 +74,11 @@ final readonly class GoogleAuthService
 
     private function loginUser(User $user): ServiceResult
     {
+        $eligibilityResult = $this->accountAccessService->checkLoginEligibility($user);
+        if ($eligibilityResult !== null) {
+            return $eligibilityResult;
+        }
+
         $this->sessionService->revokeActiveSessions($user);
         $session = $this->sessionService->createSession($user);
         $this->auditLogService->log($session, AuditAction::USER_LOGIN);

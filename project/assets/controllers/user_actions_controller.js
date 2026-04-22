@@ -45,6 +45,47 @@ export default class extends Controller {
         );
     }
 
+    async banUser(event) {
+        event.preventDefault();
+        const button = event.currentTarget;
+        const userId = button.dataset.userId;
+        const row = button.closest('tr');
+        const statusBadge = row.querySelector('td:nth-child(4) .ac-badge');
+        const currentStatus = statusBadge.textContent.trim();
+        const newStatus = currentStatus === 'BANNED' ? 'ACTIVE' : 'BANNED';
+
+        this.pendingAction = async () => {
+            button.disabled = true;
+            try {
+                const response = await fetch(`${this.apiBaseValue}/${userId}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accountStatus: newStatus })
+                });
+
+                const payload = await response.json().catch(() => null);
+                if (!response.ok) {
+                    throw new Error(payload?.error?.message || payload?.message || 'Failed to update status');
+                }
+
+                statusBadge.textContent = newStatus;
+                statusBadge.className = `ac-badge ac-badge-${newStatus === 'ACTIVE' ? 'success' : 'danger'}`;
+                this.showToast(`User ${newStatus === 'BANNED' ? 'banned' : 'unbanned'} successfully`, 'success');
+            } catch (error) {
+                this.showToast(error.message, 'error');
+            } finally {
+                button.disabled = false;
+            }
+        };
+
+        const actionWord = newStatus === 'BANNED' ? 'ban' : 'unban';
+        this.openConfirmationModal(
+            `${actionWord.charAt(0).toUpperCase() + actionWord.slice(1)} user`,
+            `Are you sure you want to ${actionWord} ${button.dataset.userEmail || 'this user'}?`,
+            `Yes, ${actionWord} user`
+        );
+    }
+
     async deleteUser(event) {
         event.preventDefault();
         const button = event.currentTarget;
@@ -123,10 +164,12 @@ export default class extends Controller {
         submitButton.textContent = 'Saving...';
 
         try {
+            const payloadData = Object.fromEntries(formData.entries());
             const response = await fetch(form.action, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams(formData).toString()
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payloadData),
+                credentials: 'include',
             });
 
             const payload = await response.json().catch(() => null);

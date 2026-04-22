@@ -53,7 +53,10 @@ final class AuthController extends AbstractApiController
         }
 
         $result = $this->authenticationService->register($dto);
-        $response = $this->json($result->toArray(), $result->success ? 201 : 400);
+        $status = $result->success
+            ? (($result->data['requiresEmailVerification'] ?? false) ? 202 : 201)
+            : 400;
+        $response = $this->json($result->toArray(), $status);
 
         return $this->withRefreshCookie($response, $result->data['refreshToken'] ?? null, 604800);
     }
@@ -78,7 +81,11 @@ final class AuthController extends AbstractApiController
             $dto,
             $this->requestFingerprintService->build($request),
         );
-        $response = $this->json($result->toArray(), $result->success ? 200 : 401);
+        $error = $result->data['error'] ?? null;
+        $status = in_array($error, ['account_disabled', 'account_banned'], true)
+            ? 403
+            : ($result->success ? 200 : 401);
+        $response = $this->json($result->toArray(), $status);
 
         return $this->withRefreshCookie($response, $result->data['refreshToken'] ?? null, $dto->rememberMe ? 2592000 : 604800);
     }

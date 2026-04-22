@@ -36,6 +36,8 @@ final readonly class AuthenticationService
         private TwoFactorService $twoFactorService,
         private TwoFactorPendingLoginStore $twoFactorPendingLoginStore,
         private TwoFactorCheckRateLimiter $twoFactorCheckRateLimiter,
+        private EmailVerificationService $emailVerificationService,
+        private AccountAccessService $accountAccessService,
     ) {
     }
 
@@ -63,7 +65,7 @@ final readonly class AuthenticationService
             ->setEmail(mb_strtolower(trim($request->email)))
             ->setRole($role->value)
             ->setPresenceStatus(PresenceStatus::ONLINE->value)
-            ->setAccountStatus(AccountStatus::ACTIVE->value)
+            ->setAccountStatus(AccountStatus::DISABLED->value)
             ->setFaceRecognitionEnabled(false)
             ->setTwoFactorEnabled(false)
             ->setCreatedAt($now)
@@ -77,14 +79,21 @@ final readonly class AuthenticationService
             ->setCreatedAt($now)
             ->setUpdatedAt($now);
 
-        $session = $this->sessionService->createSession($user);
-        $this->auditLogService->log($session, AuditAction::USER_SIGN_UP);
-
         $this->entityManager->persist($user);
         $this->entityManager->persist($profile);
         $this->entityManager->flush();
 
-        return ServiceResult::success('Registration successful.', $this->buildAuthPayload($user, $session->getRefreshToken()));
+        $verificationResult = $this->emailVerificationService->sendCodeForUser($user, false);
+        if (!$verificationResult->success) {
+            return $verificationResult;
+        }
+
+        return ServiceResult::success('Registration successful. Verification code sent successfully.', [
+            'requiresEmailVerification' => true,
+            'email' => $user->getEmail(),
+            'expiresIn' => $verificationResult->data['expiresIn'] ?? null,
+            'redirect' => '/verify-email',
+        ]);
     }
 
     public function login(LoginRequest $request, string $requestFingerprint): ServiceResult
@@ -95,6 +104,11 @@ final readonly class AuthenticationService
 
         if (!$user instanceof User) {
             return ServiceResult::failure('Invalid credentials.');
+        }
+
+        $eligibilityResult = $this->accountAccessService->checkLoginEligibility($user);
+        if ($eligibilityResult !== null) {
+            return $eligibilityResult;
         }
 
         if (!$this->passwordHasher->isPasswordValid($user, $request->password)) {
@@ -171,6 +185,16 @@ final readonly class AuthenticationService
             ...$this->buildAuthPayload($user, $session->getRefreshToken(), $challenge['rememberMe']),
             'rememberMe' => $challenge['rememberMe'],
         ]);
+    }
+
+    public function createAuthenticatedPayload(User $user, bool $rememberMe = false): array
+    {
+        $this->sessionService->revokeActiveSessions($user);
+        $session = $this->sessionService->createSession($user);
+        $this->auditLogService->log($session, AuditAction::USER_LOGIN);
+        $this->entityManager->flush();
+
+        return $this->buildAuthPayload($user, $session->getRefreshToken(), $rememberMe);
     }
 
     public function logout(string $refreshToken): ServiceResult

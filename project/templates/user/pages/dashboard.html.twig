@@ -15,12 +15,13 @@
 
       <h3>Anime Avatar</h3>
 
-        <div style="margin: .8rem 0; display: flex; justify-content: center;">
-          <img data-avatar-generator-target="preview"
-          src="{{ summary.animeAvatarImageUrl ?: summary.profileImageUrl }}"
-          alt="Avatar preview" onclick="this.classList.toggle('spin')"
-          style="max-width: 300px; max-height: 300px; border-radius: 50%; border: 1px solid var(--border); transition: opacity .2s ease;">
-        </div>
+      <div style="margin: .8rem 0; display: flex; justify-content: center;">
+        <img data-avatar-generator-target="preview" src="{{ summary.animeAvatarImageUrl ?: summary.profileImageUrl }}"
+          alt="Avatar preview" onclick="this.classList.toggle('spin'); document.getElementById('avatarSound').play();"
+          style="max-width: 300px; max-height: 300px; border-radius: 50%; border: 1px solid var(--border); transition: opacity .2s ease; cursor: pointer;">
+
+        <audio id="avatarSound" src="{{ asset('music/karkadan-discoteque.mp3') }}"></audio>
+      </div>
     </section>
     {% endif %}
     <section class="ac-cards">

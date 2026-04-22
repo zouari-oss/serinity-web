@@ -44,6 +44,12 @@ parameters:
     app.avatar_rate_limit_attempts: '%env(int:AVATAR_RATE_LIMIT_ATTEMPTS)%'
     app.avatar_rate_limit_window_seconds: '%env(int:AVATAR_RATE_LIMIT_WINDOW_SECONDS)%'
     app.avatar_generation_pending_ttl_seconds: '%env(int:AVATAR_GENERATION_PENDING_TTL_SECONDS)%'
+    app.ai_emotion_api_enabled: '%env(bool:AI_EMOTION_API_ENABLED)%'
+    app.ai_emotion_api_base_url: '%env(string:AI_EMOTION_API_BASE_URL)%'
+    app.ai_emotion_api_route: '%env(string:AI_EMOTION_API_ROUTE)%'
+    app.ai_emotion_api_timeout: '%env(float:AI_EMOTION_API_TIMEOUT)%'
+    app.ai_emotion_api_threshold: '%env(float:AI_EMOTION_API_THRESHOLD)%'
+    app.ai_emotion_api_top_k: '%env(int:AI_EMOTION_API_TOP_K)%'
 
 services:
     # default configuration for services in *this* file
@@ -105,6 +111,19 @@ services:
             $similarityThreshold: '%app.face_auth_similarity_threshold%'
             $inputWidth: '%app.face_auth_input_width%'
             $inputHeight: '%app.face_auth_input_height%'
+
+    App\Service\AI\JournalEmotionClient:
+        arguments:
+            $enabled: '%app.ai_emotion_api_enabled%'
+            $baseUrl: '%app.ai_emotion_api_base_url%'
+            $route: '%app.ai_emotion_api_route%'
+            $timeout: '%app.ai_emotion_api_timeout%'
+            $threshold: '%app.ai_emotion_api_threshold%'
+            $topK: '%app.ai_emotion_api_top_k%'
+
+    App\Service\AI\JournalEmotionTagger:
+        arguments:
+            $journalEmotionClient: '@App\Service\AI\JournalEmotionClient'
 
     App\Service\Security\FaceLoginRateLimiter:
         arguments:

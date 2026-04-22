@@ -33,7 +33,7 @@ final readonly class UserMoodService
     {
         $rawEntryDate = $this->nullable($request->entryDate);
         $entryDate = $rawEntryDate === null
-            ? new \DateTimeImmutable('today')
+            ? new \DateTimeImmutable()
             : $this->parseDate($rawEntryDate);
 
         if ($entryDate === null) {

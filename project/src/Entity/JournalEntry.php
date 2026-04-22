@@ -164,4 +164,46 @@ class JournalEntry
 
         return $this;
     }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function getDecodedAiTags(): ?array
+    {
+        if ($this->aiTags === null || trim($this->aiTags) === '') {
+            return null;
+        }
+
+        try {
+            $decoded = json_decode($this->aiTags, true, flags: JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            return null;
+        }
+
+        if (!is_array($decoded) || $decoded === []) {
+            return null;
+        }
+
+        return $decoded;
+    }
+
+    public function getTopEmotionLabel(): ?string
+    {
+        $decoded = $this->getDecodedAiTags();
+        if ($decoded === null) {
+            return null;
+        }
+
+        $topLabel = $decoded['top_label'] ?? null;
+        if (is_string($topLabel) && trim($topLabel) !== '') {
+            return trim($topLabel);
+        }
+
+        $firstLabel = $decoded['labels'][0]['label'] ?? null;
+        if (is_string($firstLabel) && trim($firstLabel) !== '') {
+            return trim($firstLabel);
+        }
+
+        return null;
+    }
 }

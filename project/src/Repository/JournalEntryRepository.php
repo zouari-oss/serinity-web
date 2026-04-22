@@ -40,6 +40,22 @@ class JournalEntryRepository extends ServiceEntityRepository
         return $this->findOneBy(['id' => (string) $id, 'user' => $user]);
     }
 
+    /**
+     * @return list<JournalEntry>
+     */
+    public function findForUserWithinRange(User $user, \DateTimeImmutable $from, \DateTimeImmutable $to): array
+    {
+        return $this->createQueryBuilder('entry')
+            ->andWhere('entry.user = :user')
+            ->andWhere('entry.createdAt BETWEEN :fromDate AND :toDate')
+            ->setParameter('user', $user)
+            ->setParameter('fromDate', $from)
+            ->setParameter('toDate', $to)
+            ->orderBy('entry.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function countEntriesWithinRange(User $user, \DateTimeImmutable $fromDate, \DateTimeImmutable $toDate): int
     {
         return (int) $this->createQueryBuilder('entry')

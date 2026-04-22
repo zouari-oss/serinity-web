@@ -6,6 +6,7 @@ namespace App\Controller\User;
 
 use App\Entity\JournalEntry;
 use App\Repository\JournalEntryRepository;
+use App\Service\AI\JournalEmotionTagger;
 use App\Service\Api\CallMeBotClient;
 use App\Service\User\JournalContentSanitizer;
 use Doctrine\ORM\EntityManagerInterface;
@@ -25,6 +26,7 @@ final class JournalEntryController extends AbstractUserUiController
         private readonly EntityManagerInterface $entityManager,
         private readonly JournalContentSanitizer $journalContentSanitizer,
         private readonly CallMeBotClient $callMeBotClient,
+        private readonly JournalEmotionTagger $journalEmotionTagger,
     ) {
     }
 
@@ -32,10 +34,14 @@ final class JournalEntryController extends AbstractUserUiController
     public function index(Request $request): Response
     {
         $user = $this->currentUser();
-        $search = trim((string) $request->query->get('q', ''));
+        $selectedMonth = $this->resolveCalendarMonth((string) $request->query->get('month', ''));
+        $calendarMonth = $selectedMonth->format('Y-m');
+        $monthStart = $selectedMonth->setTime(0, 0, 0);
+        $monthEnd = $selectedMonth->modify('last day of this month')->setTime(23, 59, 59);
 
-        $journalEntries = $this->journalEntryRepository->findForUser($user, $search === '' ? null : $search);
-        $groupedEntries = $this->groupEntries($journalEntries);
+        $monthEntries = $this->journalEntryRepository->findForUserWithinRange($user, $monthStart, $monthEnd);
+        $entriesByDay = $this->groupEntriesByDay($monthEntries);
+        $calendarCells = $this->buildCalendarCells($monthStart, $monthEnd, $entriesByDay);
 
         $allEntries = $this->journalEntryRepository->findForUser($user);
         $distinctDays = $this->extractDistinctJournalDays($allEntries);
@@ -43,8 +49,12 @@ final class JournalEntryController extends AbstractUserUiController
         return $this->render('user/pages/journal_entry.html.twig', [
             'nav' => $this->buildNav('user_ui_journal_entry'),
             'userName' => $user->getEmail(),
-            'grouped_entries' => $groupedEntries,
-            'search' => $search,
+            'calendar_month' => $calendarMonth,
+            'calendar_label' => $selectedMonth->format('F Y'),
+            'previous_month' => $selectedMonth->modify('-1 month')->format('Y-m'),
+            'next_month' => $selectedMonth->modify('+1 month')->format('Y-m'),
+            'calendar_cells' => $calendarCells,
+            'entries_by_day' => $entriesByDay,
             'current_streak' => $this->calculateCurrentStreak($distinctDays),
             'longest_streak' => $this->calculateLongestStreak($distinctDays),
             'max_entries_one_day' => $this->calculateMaxEntriesOneDay($allEntries),
@@ -55,6 +65,7 @@ final class JournalEntryController extends AbstractUserUiController
     public function create(Request $request, ValidatorInterface $validator): RedirectResponse
     {
         $user = $this->currentUser();
+        $month = $this->resolveMonthValue($request->request->get('month'));
         $title = trim((string) $request->request->get('title', ''));
         $content = $this->journalContentSanitizer->sanitize((string) $request->request->get('content', ''));
 
@@ -70,11 +81,12 @@ final class JournalEntryController extends AbstractUserUiController
         if (count($violations) > 0) {
             $this->addFlash('error', $violations[0]->getMessage());
 
-            return $this->redirectToRoute('user_ui_journal_entry');
+            return $this->redirectToJournalIndex($month);
         }
 
         $this->entityManager->persist($entry);
         $this->entityManager->flush();
+        $this->applyEmotionTaggingSafely($entry);
         $this->callMeBotClient->sendJournalSavedNotification(
             $entry->getTitle() ?? '',
             $entry->getCreatedAt(),
@@ -82,61 +94,69 @@ final class JournalEntryController extends AbstractUserUiController
 
         $this->addFlash('success', 'Journal entry created successfully.');
 
-        return $this->redirectToRoute('user_ui_journal_entry');
+        return $this->redirectToJournalIndex($month);
     }
 
     #[Route('/{id}/edit', name: 'user_ui_journal_entry_edit', methods: ['POST'])]
     public function edit(Request $request, int $id, ValidatorInterface $validator): RedirectResponse
     {
         $user = $this->currentUser();
+        $month = $this->resolveMonthValue($request->request->get('month'));
         $entry = $this->journalEntryRepository->findOneOwnedByUser($user, $id);
 
         if ($entry === null) {
             $this->addFlash('error', 'Journal entry not found.');
 
-            return $this->redirectToRoute('user_ui_journal_entry');
+            return $this->redirectToJournalIndex($month);
         }
 
         if (!$this->isCsrfTokenValid('journal_edit_' . $entry->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid edit token.');
 
-            return $this->redirectToRoute('user_ui_journal_entry');
+            return $this->redirectToJournalIndex($month);
         }
+
+        $sanitizedContent = $this->journalContentSanitizer->sanitize((string) $request->request->get('content', ''));
+        $contentChanged = $entry->getContent() !== $sanitizedContent;
 
         $entry
             ->setTitle(trim((string) $request->request->get('title', '')))
-            ->setContent($this->journalContentSanitizer->sanitize((string) $request->request->get('content', '')))
+            ->setContent($sanitizedContent)
             ->setUpdatedAt(new \DateTimeImmutable());
 
         $violations = $validator->validate($entry);
         if (count($violations) > 0) {
             $this->addFlash('error', $violations[0]->getMessage());
 
-            return $this->redirectToRoute('user_ui_journal_entry');
+            return $this->redirectToJournalIndex($month);
         }
 
         $this->entityManager->flush();
+        if ($contentChanged) {
+            $this->applyEmotionTaggingSafely($entry);
+        }
         $this->addFlash('success', 'Journal entry updated successfully.');
 
-        return $this->redirectToRoute('user_ui_journal_entry');
+        return $this->redirectToJournalIndex($month);
     }
 
     #[Route('/{id}/delete', name: 'user_ui_journal_entry_delete', methods: ['POST'])]
     public function delete(Request $request, int $id): RedirectResponse
     {
         $user = $this->currentUser();
+        $month = $this->resolveMonthValue($request->request->get('month'));
         $entry = $this->journalEntryRepository->findOneOwnedByUser($user, $id);
 
         if ($entry === null) {
             $this->addFlash('error', 'Journal entry not found.');
 
-            return $this->redirectToRoute('user_ui_journal_entry');
+            return $this->redirectToJournalIndex($month);
         }
 
         if (!$this->isCsrfTokenValid('journal_delete_' . $entry->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid delete token.');
 
-            return $this->redirectToRoute('user_ui_journal_entry');
+            return $this->redirectToJournalIndex($month);
         }
 
         $this->entityManager->remove($entry);
@@ -144,41 +164,95 @@ final class JournalEntryController extends AbstractUserUiController
 
         $this->addFlash('success', 'Journal entry deleted successfully.');
 
-        return $this->redirectToRoute('user_ui_journal_entry');
+        return $this->redirectToJournalIndex($month);
     }
 
     /**
      * @param list<JournalEntry> $entries
-     * @return array<string,array{label:string,entries:list<JournalEntry>}>
+     * @return array<string,list<JournalEntry>>
      */
-    private function groupEntries(array $entries): array
+    private function groupEntriesByDay(array $entries): array
     {
-        $today = new \DateTimeImmutable('today');
-        $yesterday = $today->modify('-1 day');
         $groupedEntries = [];
-
         foreach ($entries as $entry) {
-            $entryDay = $entry->getCreatedAt()->setTime(0, 0);
-
-            if ($entryDay == $today) {
-                $groupKey = 'today';
-                $groupLabel = 'Today';
-            } elseif ($entryDay == $yesterday) {
-                $groupKey = 'yesterday';
-                $groupLabel = 'Yesterday';
-            } else {
-                $groupKey = $entryDay->format('Y-m-d');
-                $groupLabel = $entryDay->format('Y-m-d');
-            }
-
-            if (!isset($groupedEntries[$groupKey])) {
-                $groupedEntries[$groupKey] = ['label' => $groupLabel, 'entries' => []];
-            }
-
-            $groupedEntries[$groupKey]['entries'][] = $entry;
+            $dayKey = $entry->getCreatedAt()->format('Y-m-d');
+            $groupedEntries[$dayKey] ??= [];
+            $groupedEntries[$dayKey][] = $entry;
         }
 
+        ksort($groupedEntries);
+
         return $groupedEntries;
+    }
+
+    /**
+     * @param array<string,list<JournalEntry>> $entriesByDay
+     * @return list<array{
+     *     date:string,
+     *     day_number:int,
+     *     is_current_month:bool,
+     *     is_today:bool,
+     *     has_entries:bool,
+     *     entry_count:int
+     * }>
+     */
+    private function buildCalendarCells(
+        \DateTimeImmutable $monthStart,
+        \DateTimeImmutable $monthEnd,
+        array $entriesByDay,
+    ): array {
+        $calendarStart = $monthStart->modify('monday this week')->setTime(0, 0, 0);
+        $calendarEnd = $monthEnd->modify('sunday this week')->setTime(0, 0, 0);
+        $today = (new \DateTimeImmutable('today'))->format('Y-m-d');
+        $cells = [];
+
+        for ($cursor = $calendarStart; $cursor <= $calendarEnd; $cursor = $cursor->modify('+1 day')) {
+            $dayKey = $cursor->format('Y-m-d');
+            $entryCount = count($entriesByDay[$dayKey] ?? []);
+
+            $cells[] = [
+                'date' => $dayKey,
+                'day_number' => (int) $cursor->format('j'),
+                'is_current_month' => $cursor->format('Y-m') === $monthStart->format('Y-m'),
+                'is_today' => $dayKey === $today,
+                'has_entries' => $entryCount > 0,
+                'entry_count' => $entryCount,
+            ];
+        }
+
+        return $cells;
+    }
+
+    private function resolveCalendarMonth(string $monthValue): \DateTimeImmutable
+    {
+        $month = $this->resolveMonthValue($monthValue);
+        if ($month === null) {
+            return new \DateTimeImmutable('first day of this month');
+        }
+
+        try {
+            return (new \DateTimeImmutable($month . '-01'))->setTime(0, 0, 0);
+        } catch (\Exception) {
+            return new \DateTimeImmutable('first day of this month');
+        }
+    }
+
+    private function resolveMonthValue(mixed $monthValue): ?string
+    {
+        if (!is_string($monthValue)) {
+            return null;
+        }
+
+        $month = trim($monthValue);
+
+        return preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $month) === 1 ? $month : null;
+    }
+
+    private function redirectToJournalIndex(?string $month): RedirectResponse
+    {
+        $parameters = $month === null ? [] : ['month' => $month];
+
+        return $this->redirectToRoute('user_ui_journal_entry', $parameters);
     }
 
     /**
@@ -262,5 +336,18 @@ final class JournalEntryController extends AbstractUserUiController
         }
 
         return $entriesPerDay === [] ? 0 : max($entriesPerDay);
+    }
+
+    private function applyEmotionTaggingSafely(JournalEntry $entry): void
+    {
+        try {
+            if (!$this->journalEmotionTagger->apply($entry)) {
+                return;
+            }
+
+            $this->entityManager->flush();
+        } catch (\Throwable) {
+            $this->addFlash('error', 'Journal entry was saved, but emotion tagging is currently unavailable.');
+        }
     }
 }

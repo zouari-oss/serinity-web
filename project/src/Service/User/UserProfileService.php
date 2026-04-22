@@ -32,7 +32,7 @@ final readonly class UserProfileService
      *     state:string,
      *     aboutMe:string,
      *     profileImageUrl:string,
-     *     animeAvatarImage:string
+     *     animeAvatarImageUrl:string
      * }
      */
     public function toArray(User $user): array
@@ -48,7 +48,7 @@ final readonly class UserProfileService
             'state' => $profile?->getState() ?? '',
             'aboutMe' => $profile?->getAboutMe() ?? '',
             'profileImageUrl' => $profile?->getProfileImageUrl() ?? '',
-            'animeAvatarImage' => $profile?->getAnimeAvatarImage() ?? '',
+            'animeAvatarImageUrl' => $profile?->getAnimeAvatarImageUrl() ?? '',
         ];
     }
 
@@ -99,29 +99,26 @@ final readonly class UserProfileService
         $normalizedImageUrl = trim($imageUrl);
         $profile
             ->setProfileImageUrl($normalizedImageUrl)
-            ->setAnimeAvatarImage(null)
-            ->setAnimeAvatarSourceHash(null)
+            ->setAnimeAvatarImageUrl(null)
             ->setUpdatedAt(new \DateTimeImmutable());
 
         $this->entityManager->persist($profile);
         $this->entityManager->flush();
     }
 
-    public function getStoredAvatarIfFresh(User $user): ?string
+    public function getStoredAvatarUrl(User $user): ?string
     {
         $profile = $user->getProfile();
         if (!$profile instanceof Profile) {
             return null;
         }
 
-        $imageUrl = trim((string) $profile->getProfileImageUrl());
-        $storedAvatar = $profile->getAnimeAvatarImage();
-        $storedHash = $profile->getAnimeAvatarSourceHash();
-        if ($imageUrl === '' || !is_string($storedAvatar) || trim($storedAvatar) === '' || !is_string($storedHash)) {
+        $storedAvatarUrl = $profile->getAnimeAvatarImageUrl();
+        if (!is_string($storedAvatarUrl) || trim($storedAvatarUrl) === '') {
             return null;
         }
 
-        return hash_equals($storedHash, $this->avatarSourceHash($imageUrl)) ? $storedAvatar : null;
+        return trim($storedAvatarUrl);
     }
 
     public function generateAndStoreAvatar(User $user): string
@@ -136,16 +133,15 @@ final readonly class UserProfileService
             throw new \InvalidArgumentException('Please upload a profile image first.');
         }
 
-        $avatarImage = $this->avatarGenerator->generateFromProfileImageUrl($imageUrl);
+        $avatarImageUrl = $this->avatarGenerator->generateFromProfileImageUrl($imageUrl);
         $profile
-            ->setAnimeAvatarImage($avatarImage)
-            ->setAnimeAvatarSourceHash($this->avatarSourceHash($imageUrl))
+            ->setAnimeAvatarImageUrl($avatarImageUrl)
             ->setUpdatedAt(new \DateTimeImmutable());
 
         $this->entityManager->persist($profile);
         $this->entityManager->flush();
 
-        return $avatarImage;
+        return $avatarImageUrl;
     }
 
     public function deleteAccount(User $user, ?string $currentPassword, ?string $confirmText): ServiceResult
@@ -221,8 +217,4 @@ final readonly class UserProfileService
         return $trimmed === '' ? null : $trimmed;
     }
 
-    private function avatarSourceHash(string $imageUrl): string
-    {
-        return hash('sha256', trim($imageUrl));
-    }
 }

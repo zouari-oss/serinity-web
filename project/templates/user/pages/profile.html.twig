@@ -39,8 +39,8 @@
           <div data-controller="avatar-generator"
             data-avatar-generator-endpoint-value="{{ path('api_avatar_generate') }}"
             data-avatar-generator-status-endpoint-value="{{ path('api_avatar_status') }}"
-            data-avatar-generator-auto-value="false" style="margin-bottom: .6rem;">
-            <img data-avatar-generator-target="preview" src="{{ profile.profileImageUrl }}" alt="Profile image"
+            data-avatar-generator-auto-value="{{ profile.animeAvatarImageUrl ? 'false' : 'true' }}" style="margin-bottom: .6rem;">
+            <img data-avatar-generator-target="preview" src="{{ profile.animeAvatarImageUrl ?: profile.profileImageUrl }}" alt="Profile image"
               style="max-width: 120px; max-height: 120px; border-radius: 12px; border: 1px solid var(--border); transition: opacity .2s ease;">
           </div>
           {% endif %}

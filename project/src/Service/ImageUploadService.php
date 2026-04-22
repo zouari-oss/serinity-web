@@ -23,10 +23,24 @@ final readonly class ImageUploadService
             throw new \RuntimeException('Unable to read uploaded image.');
         }
 
+        return $this->uploadBase64Image(base64_encode($binary));
+    }
+
+    public function uploadBase64Image(string $base64Image): string
+    {
+        $normalizedSource = trim($base64Image);
+        if (str_starts_with($normalizedSource, 'data:image/')) {
+            $parts = explode(',', $normalizedSource, 2);
+            $normalizedSource = $parts[1] ?? '';
+        }
+        if ($normalizedSource === '') {
+            throw new \RuntimeException('Image payload is empty.');
+        }
+
         $response = $this->httpClient->request('POST', $this->imageRequestUrl, [
             'body' => [
                 'key' => $this->imageApiKey,
-                'source' => base64_encode($binary),
+                'source' => $normalizedSource,
                 'format' => 'json',
             ],
         ]);

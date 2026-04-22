@@ -11,16 +11,16 @@
     <section class="ac-card" data-controller="avatar-generator"
       data-avatar-generator-endpoint-value="{{ path('api_avatar_generate') }}"
       data-avatar-generator-status-endpoint-value="{{ path('api_avatar_status') }}"
-      data-avatar-generator-auto-value="false">
+      data-avatar-generator-auto-value="{{ summary.animeAvatarImageUrl ? 'false' : 'true' }}">
 
       <h3>Anime Avatar</h3>
 
-      <div style="margin: .8rem 0; display: flex; justify-content: center;">
-        <img data-avatar-generator-target="preview"
-          src="{{ summary.animeAvatarImage ? 'data:image/png;base64,' ~ summary.animeAvatarImage : summary.profileImageUrl }}"
+        <div style="margin: .8rem 0; display: flex; justify-content: center;">
+          <img data-avatar-generator-target="preview"
+          src="{{ summary.animeAvatarImageUrl ?: summary.profileImageUrl }}"
           alt="Avatar preview" onclick="this.classList.toggle('spin')"
           style="max-width: 300px; max-height: 300px; border-radius: 50%; border: 1px solid var(--border); transition: opacity .2s ease;">
-      </div>
+        </div>
     </section>
     {% endif %}
     <section class="ac-cards">

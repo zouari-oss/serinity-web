@@ -26,7 +26,7 @@ final readonly class UserDashboardService
      *     role:string,
      *     accountStatus:string,
      *     profileImageUrl:string,
-     *     animeAvatarImage:string
+     *     animeAvatarImageUrl:string
      * }
      */
     public function getSummary(User $user): array
@@ -53,7 +53,7 @@ final readonly class UserDashboardService
             'role' => $user->getRole(),
             'accountStatus' => $user->getAccountStatus(),
             'profileImageUrl' => $profile?->getProfileImageUrl() ?? '',
-            'animeAvatarImage' => $profile?->getAnimeAvatarImage() ?? '',
+            'animeAvatarImageUrl' => $profile?->getAnimeAvatarImageUrl() ?? '',
         ];
     }
 

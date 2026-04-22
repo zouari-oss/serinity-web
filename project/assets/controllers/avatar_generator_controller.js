@@ -143,7 +143,7 @@ export default class extends Controller {
   }
 
   swapPreview(image) {
-    const imageData = image.startsWith('data:image/')
+    const imageData = image.startsWith('data:image/') || image.startsWith('http://') || image.startsWith('https://')
       ? image
       : `data:image/png;base64,${image}`;
 

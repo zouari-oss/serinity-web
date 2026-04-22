@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Avatar;
 
+use App\Service\ImageUploadService;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -15,6 +16,7 @@ final readonly class AvatarGenerator
 {
     public function __construct(
         private HttpClientInterface $httpClient,
+        private ImageUploadService $imageUploadService,
         private string $img2imgApiUrl,
         private int $timeoutSeconds,
         private string $defaultPrompt,
@@ -45,17 +47,17 @@ final readonly class AvatarGenerator
             $payload = $response->toArray(false);
             $image = $payload['image'] ?? null;
             if (is_string($image) && trim($image) !== '') {
-                return $this->normalizeBase64Image($image);
+                return $this->imageUploadService->uploadBase64Image($image);
             }
 
             $hostedImageUrl = $payload['image_url']
                 ?? $payload['url']
                 ?? null;
             if (!is_string($hostedImageUrl) || trim($hostedImageUrl) === '') {
-                throw new \RuntimeException('Avatar generation returned an empty image.');
+                throw new \RuntimeException('Avatar generation did not return an image URL.');
             }
 
-            return $this->downloadHostedImageAsBase64($hostedImageUrl);
+            return $this->normalizeSourceImageUrl($hostedImageUrl);
         } catch (TransportExceptionInterface) {
             throw new \RuntimeException('Avatar generation timed out or failed to connect.');
         } catch (DecodingExceptionInterface|ClientExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface) {
@@ -132,44 +134,4 @@ final readonly class AvatarGenerator
         return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false;
     }
 
-    private function normalizeBase64Image(string $image): string
-    {
-        $trimmed = trim($image);
-        if (str_starts_with($trimmed, 'data:image/')) {
-            $parts = explode(',', $trimmed, 2);
-            $trimmed = $parts[1] ?? '';
-        }
-
-        $decoded = base64_decode($trimmed, true);
-        if (!is_string($decoded) || $decoded === '') {
-            throw new \RuntimeException('Avatar generation returned invalid image data.');
-        }
-
-        return $trimmed;
-    }
-
-    private function downloadHostedImageAsBase64(string $url): string
-    {
-        $normalizedUrl = $this->normalizeSourceImageUrl($url);
-
-        try {
-            $response = $this->httpClient->request('GET', $normalizedUrl, [
-                'timeout' => $this->timeoutSeconds,
-            ]);
-            if ($response->getStatusCode() !== 200) {
-                throw new \RuntimeException('Generated avatar image is unavailable.');
-            }
-
-            $content = $response->getContent(false);
-            if (!is_string($content) || $content === '') {
-                throw new \RuntimeException('Generated avatar image is empty.');
-            }
-
-            return base64_encode($content);
-        } catch (TransportExceptionInterface) {
-            throw new \RuntimeException('Generated avatar image download timed out.');
-        } catch (DecodingExceptionInterface|ClientExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface) {
-            throw new \RuntimeException('Generated avatar image download failed.');
-        }
-    }
 }

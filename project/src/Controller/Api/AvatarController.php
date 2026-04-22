@@ -38,7 +38,7 @@ final class AvatarController extends AbstractApiController
             ], 401);
         }
 
-        $storedAvatar = $this->userProfileService->getStoredAvatarIfFresh($user);
+        $storedAvatar = $this->userProfileService->getStoredAvatarUrl($user);
         if (is_string($storedAvatar) && trim($storedAvatar) !== '') {
             return $this->json([
                 'image' => $storedAvatar,
@@ -98,7 +98,7 @@ final class AvatarController extends AbstractApiController
             ], 401);
         }
 
-        $storedAvatar = $this->userProfileService->getStoredAvatarIfFresh($user);
+        $storedAvatar = $this->userProfileService->getStoredAvatarUrl($user);
         if (is_string($storedAvatar) && trim($storedAvatar) !== '') {
             return $this->json([
                 'image' => $storedAvatar,

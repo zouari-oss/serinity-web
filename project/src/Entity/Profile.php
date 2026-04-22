@@ -41,11 +41,8 @@ class Profile
     #[ORM\Column(name: 'profile_image_url', type: Types::STRING, length: 512, nullable: true)]
     private ?string $profileImageUrl = null;
 
-    #[ORM\Column(name: 'anime_avatar_image', type: Types::TEXT, nullable: true)]
-    private ?string $animeAvatarImage = null;
-
-    #[ORM\Column(name: 'anime_avatar_source_hash', type: Types::STRING, length: 64, nullable: true)]
-    private ?string $animeAvatarSourceHash = null;
+    #[ORM\Column(name: 'anime_avatar_image_url', type: Types::STRING, length: 512, nullable: true)]
+    private ?string $animeAvatarImageUrl = null;
 
     #[ORM\Column(type: Types::STRING, length: 100, nullable: true)]
     private ?string $country = null;
@@ -168,26 +165,14 @@ class Profile
         return $this;
     }
 
-    public function getAnimeAvatarImage(): ?string
+    public function getAnimeAvatarImageUrl(): ?string
     {
-        return $this->animeAvatarImage;
+        return $this->animeAvatarImageUrl;
     }
 
-    public function setAnimeAvatarImage(?string $animeAvatarImage): self
+    public function setAnimeAvatarImageUrl(?string $animeAvatarImageUrl): self
     {
-        $this->animeAvatarImage = $animeAvatarImage;
-
-        return $this;
-    }
-
-    public function getAnimeAvatarSourceHash(): ?string
-    {
-        return $this->animeAvatarSourceHash;
-    }
-
-    public function setAnimeAvatarSourceHash(?string $animeAvatarSourceHash): self
-    {
-        $this->animeAvatarSourceHash = $animeAvatarSourceHash;
+        $this->animeAvatarImageUrl = $animeAvatarImageUrl;
 
         return $this;
     }

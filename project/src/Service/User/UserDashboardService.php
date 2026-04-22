@@ -24,7 +24,9 @@ final readonly class UserDashboardService
      *     recentAuditEvents:int,
      *     profileCompletion:int,
      *     role:string,
-     *     accountStatus:string
+     *     accountStatus:string,
+     *     profileImageUrl:string,
+     *     animeAvatarImage:string
      * }
      */
     public function getSummary(User $user): array
@@ -50,6 +52,8 @@ final readonly class UserDashboardService
             'profileCompletion' => $profileCompletion,
             'role' => $user->getRole(),
             'accountStatus' => $user->getAccountStatus(),
+            'profileImageUrl' => $profile?->getProfileImageUrl() ?? '',
+            'animeAvatarImage' => $profile?->getAnimeAvatarImage() ?? '',
         ];
     }
 

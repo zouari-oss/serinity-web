@@ -37,6 +37,7 @@ security:
         - { path: ^/api/auth/(login|register|logout|refresh|forgot-password|verify-reset-code|reset-password|reset/send|reset/confirm|face/login|google/connect|google/callback)$, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/face/(enable|disable|enroll)$, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/api/auth/me$, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/avatar/generate$, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/(sommeil|reve), roles: [ROLE_PATIENT, ROLE_THERAPIST] }
         - { path: ^/user, roles: [ROLE_PATIENT, ROLE_THERAPIST] }
         - { path: ^/api/user, roles: [ROLE_PATIENT, ROLE_THERAPIST] }

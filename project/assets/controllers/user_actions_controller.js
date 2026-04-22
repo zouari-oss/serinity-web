@@ -123,10 +123,12 @@ export default class extends Controller {
         submitButton.textContent = 'Saving...';
 
         try {
+            const payloadData = Object.fromEntries(formData.entries());
             const response = await fetch(form.action, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams(formData).toString()
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payloadData),
+                credentials: 'include',
             });
 
             const payload = await response.json().catch(() => null);

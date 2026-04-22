@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Admin\Api;
 
 use App\Dto\Admin\ChangeAccountStatusRequest;
+use App\Dto\Admin\CreateUserRequest;
 use App\Dto\Admin\UpdateUserRequest;
 use App\Dto\Admin\UserFilterRequest;
 use App\Service\Admin\UserManagementService;
@@ -68,6 +69,27 @@ final class UserController extends AbstractController
                 ],
             ],
         ]);
+    }
+
+    #[Route('', name: 'create', methods: ['POST'])]
+    public function create(#[MapRequestPayload] CreateUserRequest $request): JsonResponse
+    {
+        $result = $this->userManagementService->createUser($request);
+
+        if (!$result->success) {
+            return $this->json([
+                'success' => false,
+                'error' => [
+                    'code' => 'ADMIN_USER_CREATE_FAILED',
+                    'message' => $result->message,
+                ],
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        return $this->json([
+            'success' => true,
+            'message' => $result->message,
+        ], Response::HTTP_CREATED);
     }
 
     /**

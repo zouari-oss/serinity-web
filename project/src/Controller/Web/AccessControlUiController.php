@@ -81,6 +81,12 @@ final class AccessControlUiController extends AbstractController
         ]);
     }
 
+    #[Route('/verify-email', name: 'ac_ui_verify_email', methods: ['GET'])]
+    public function verifyEmail(): Response
+    {
+        return $this->render('access_control/pages/verify_email.html.twig');
+    }
+
     #[Route('/dashboard', name: 'ac_ui_dashboard_legacy', methods: ['GET'])]
     public function dashboardLegacy(): Response
     {

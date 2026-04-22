@@ -34,7 +34,7 @@ security:
     access_control:
         - { path: ^/api/auth/2fa/check$, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/2fa/(enable|verify|disable)$, roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/api/auth/(login|register|logout|refresh|forgot-password|verify-reset-code|reset-password|reset/send|reset/confirm|face/login|google/connect|google/callback)$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/(login|register|logout|refresh|forgot-password|verify-reset-code|reset-password|reset/send|reset/confirm|verify-email|verify-email/resend|face/login|google/connect|google/callback)$, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/face/(enable|disable|enroll)$, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/api/auth/me$, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/api/avatar/generate$, roles: IS_AUTHENTICATED_FULLY }

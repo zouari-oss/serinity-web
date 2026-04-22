@@ -5,15 +5,19 @@ declare(strict_types=1);
 namespace App\Service\Admin;
 
 use App\Dto\Admin\ChangeAccountStatusRequest;
+use App\Dto\Admin\CreateUserRequest;
 use App\Dto\Admin\UpdateUserRequest;
 use App\Dto\Admin\UserFilterRequest;
 use App\Dto\Common\ServiceResult;
 use App\Entity\AuthSession;
+use App\Entity\Profile;
 use App\Entity\User;
 use App\Enum\AccountStatus;
 use App\Enum\AuditAction;
+use App\Enum\PresenceStatus;
 use App\Enum\UserRole;
 use App\Repository\AuthSessionRepository;
+use App\Repository\ProfileRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -27,9 +31,11 @@ final readonly class UserManagementService
 {
     public function __construct(
         private UserRepository $userRepository,
+        private ProfileRepository $profileRepository,
         private AuthSessionRepository $authSessionRepository,
         private EntityManagerInterface $entityManager,
         private UserPasswordHasherInterface $passwordHasher,
+        private \App\Service\TokenGenerator $tokenGenerator,
         private \App\Service\AuditLogService $auditLogService,
         private Security $security,
     ) {
@@ -45,6 +51,54 @@ final readonly class UserManagementService
             $request->limit,
             $request->toFilters()
         );
+    }
+
+    public function createUser(CreateUserRequest $request): ServiceResult
+    {
+        if ($request->password !== $request->confirmPassword) {
+            return ServiceResult::failure('Passwords do not match.');
+        }
+
+        if ($this->userRepository->findByEmail($request->email) !== null) {
+            return ServiceResult::failure('Email is already used.');
+        }
+
+        $role = UserRole::tryFrom($request->role);
+        if ($role === null) {
+            return ServiceResult::failure('Invalid role.');
+        }
+
+        $status = AccountStatus::tryFrom($request->accountStatus);
+        if ($status === null) {
+            return ServiceResult::failure('Invalid account status.');
+        }
+
+        $now = new \DateTimeImmutable();
+        $user = (new User())
+            ->setId($this->tokenGenerator->generateUuidV4())
+            ->setEmail(mb_strtolower(trim($request->email)))
+            ->setRole($role->value)
+            ->setPresenceStatus(PresenceStatus::ONLINE->value)
+            ->setAccountStatus($status->value)
+            ->setFaceRecognitionEnabled(false)
+            ->setTwoFactorEnabled(false)
+            ->setCreatedAt($now)
+            ->setUpdatedAt($now);
+        $user->setPassword($this->passwordHasher->hashPassword($user, $request->password));
+
+        $profile = (new Profile())
+            ->setId($this->tokenGenerator->generateUuidV4())
+            ->setUsername($this->generateUsername($user->getEmail()))
+            ->setUser($user)
+            ->setCreatedAt($now)
+            ->setUpdatedAt($now);
+
+        $this->entityManager->persist($user);
+        $this->entityManager->persist($profile);
+        $this->logAdminAction(AuditAction::USER_SIGN_UP);
+        $this->entityManager->flush();
+
+        return ServiceResult::success('User created successfully.', ['user' => $user]);
     }
 
     /**
@@ -169,5 +223,19 @@ final readonly class UserManagementService
         /** @var AuthSession $session */
         $session = $activeSessions[0];
         $this->auditLogService->log($session, $action);
+    }
+
+    private function generateUsername(string $email): string
+    {
+        $base = preg_replace('/[^a-z0-9_]/', '_', strtolower(strtok($email, '@') ?: 'user'));
+        $username = $base;
+        $i = 1;
+
+        while ($this->profileRepository->findOneBy(['username' => $username]) !== null) {
+            ++$i;
+            $username = sprintf('%s_%d', $base, $i);
+        }
+
+        return $username;
     }
 }

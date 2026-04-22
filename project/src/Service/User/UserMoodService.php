@@ -15,6 +15,8 @@ use App\Entity\User;
 use App\Repository\MoodEmotionRepository;
 use App\Repository\MoodEntryRepository;
 use App\Repository\MoodInfluenceRepository;
+use App\Service\Notification\CriticalAlertGuard;
+use App\Service\Notification\DoctorNtfyNotifier;
 use Doctrine\ORM\EntityManagerInterface;
 
 final readonly class UserMoodService
@@ -26,11 +28,16 @@ final readonly class UserMoodService
         private EntityManagerInterface $entityManager,
         private CriticalPeriodDetectionService $criticalPeriodDetectionService,
         private ResilienceScoreService $resilienceScoreService,
+        private DoctorNtfyNotifier $doctorNtfyNotifier,
+        private CriticalAlertGuard $criticalAlertGuard,
+        private int $ntfyCooldownSeconds,
     ) {
     }
 
     public function create(User $user, MoodCreateRequest $request): ServiceResult
     {
+        $wasCriticalBefore = $this->criticalPeriodDetectionService->isCritical($user);
+
         $rawEntryDate = $this->nullable($request->entryDate);
         $entryDate = $rawEntryDate === null
             ? new \DateTimeImmutable()
@@ -74,12 +81,15 @@ final readonly class UserMoodService
 
         $this->entityManager->persist($entry);
         $this->entityManager->flush();
+        $this->handleCriticalStateNotification($user, $wasCriticalBefore, true);
 
         return ServiceResult::success('Mood entry created successfully.', $this->toArray($entry));
     }
 
     public function update(User $user, string $entryId, MoodCreateRequest $request): ServiceResult
     {
+        $wasCriticalBefore = $this->criticalPeriodDetectionService->isCritical($user);
+
         $entry = $this->moodEntryRepository->findOneBy([
             'id' => $entryId,
             'user' => $user,
@@ -137,6 +147,7 @@ final readonly class UserMoodService
         }
 
         $this->entityManager->flush();
+        $this->handleCriticalStateNotification($user, $wasCriticalBefore);
 
         return ServiceResult::success('Mood entry updated successfully.', $this->toArray($entry));
     }
@@ -152,8 +163,13 @@ final readonly class UserMoodService
             return ServiceResult::failure('Mood entry not found.');
         }
 
+        $wasCriticalBefore = $this->criticalPeriodDetectionService->isCritical($user);
         $this->entityManager->remove($entry);
         $this->entityManager->flush();
+
+        if ($wasCriticalBefore && !$this->criticalPeriodDetectionService->isCritical($user)) {
+            $this->criticalAlertGuard->clear($user->getId());
+        }
 
         return ServiceResult::success('Mood entry deleted successfully.');
     }
@@ -438,6 +454,55 @@ final readonly class UserMoodService
             return new \DateTimeImmutable($value);
         } catch (\Exception) {
             return null;
+        }
+    }
+
+    private function buildPatientLabel(User $user): string
+    {
+        $profile = $user->getProfile();
+
+        if ($profile !== null) {
+            $fullName = trim(sprintf(
+                '%s %s',
+                (string) ($profile->getFirstName() ?? ''),
+                (string) ($profile->getLastName() ?? ''),
+            ));
+
+            if ($fullName !== '') {
+                return $fullName;
+            }
+
+            $username = trim($profile->getUsername());
+            if ($username !== '') {
+                return $username;
+            }
+        }
+
+        return $user->getEmail();
+    }
+
+    private function handleCriticalStateNotification(
+        User $user,
+        bool $wasCriticalBefore,
+        bool $sendWhenStillCritical = false,
+    ): void
+    {
+        $isCriticalNow = $this->criticalPeriodDetectionService->isCritical($user);
+
+        if ($isCriticalNow && (!$wasCriticalBefore || $sendWhenStillCritical)) {
+            if ($this->criticalAlertGuard->shouldSend($user->getId(), $this->ntfyCooldownSeconds)) {
+                $this->doctorNtfyNotifier->sendCriticalPatientAlert(
+                    $this->buildPatientLabel($user),
+                    $user->getEmail(),
+                    'Critical state detected. Please contact the patient.',
+                );
+            }
+
+            return;
+        }
+
+        if ($wasCriticalBefore && !$isCriticalNow) {
+            $this->criticalAlertGuard->clear($user->getId());
         }
     }
 

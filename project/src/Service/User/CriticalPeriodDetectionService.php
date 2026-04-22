@@ -140,6 +140,13 @@ final readonly class CriticalPeriodDetectionService
         ];
     }
 
+    public function isCritical(User $user, int $days = 7): bool
+    {
+        $result = $this->detect($user, $days);
+
+        return ($result['status'] ?? 'stable') === 'critical';
+    }
+
     /**
      * @param list<MoodEntry> $entries
      */

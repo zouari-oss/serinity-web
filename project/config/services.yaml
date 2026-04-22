@@ -55,6 +55,10 @@ parameters:
     app.ai_emotion_api_threshold: '%env(float:AI_EMOTION_API_THRESHOLD)%'
     app.ai_emotion_api_top_k: '%env(int:AI_EMOTION_API_TOP_K)%'
     app.account_ban_duration_minutes: '%env(int:ACCOUNT_BAN_DURATION_MINUTES)%'
+    app.ntfy_base_url: '%env(string:NTFY_BASE_URL)%'
+    app.ntfy_doctor_topic: '%env(string:NTFY_DOCTOR_TOPIC)%'
+    app.ntfy_enabled: '%env(bool:NTFY_ENABLED)%'
+    app.ntfy_cooldown_seconds: '%env(int:NTFY_COOLDOWN_SECONDS)%'
 
 services:
     # default configuration for services in *this* file
@@ -136,6 +140,20 @@ services:
     App\Service\AI\JournalEmotionTagger:
         arguments:
             $journalEmotionClient: '@App\Service\AI\JournalEmotionClient'
+
+    App\Service\Notification\DoctorNtfyNotifier:
+        arguments:
+            $baseUrl: '%app.ntfy_base_url%'
+            $topic: '%app.ntfy_doctor_topic%'
+            $enabled: '%app.ntfy_enabled%'
+
+    App\Service\Notification\CriticalAlertGuard:
+        arguments:
+            $cache: '@cache.app'
+
+    App\Service\User\UserMoodService:
+        arguments:
+            $ntfyCooldownSeconds: '%app.ntfy_cooldown_seconds%'
 
     App\Service\Security\FaceLoginRateLimiter:
         arguments:

@@ -1,0 +1,103 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Exercise resources | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main" data-controller="flash-toast">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Resources', subtitle: exercice.title, username: userName } %}
+
+        {% for message in app.flashes('success') %}
+            <span data-flash-toast-target="message" data-type="success" hidden>{{ message }}</span>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <span data-flash-toast-target="message" data-type="error" hidden>{{ message }}</span>
+        {% endfor %}
+
+        <section class="ac-card">
+            <div class="ac-row-between" style="gap:1rem;">
+                <div>
+                    <h3>{{ exercice.title }}</h3>
+                    <p class="ac-muted" style="margin:.25rem 0 0;">{{ exercice.type }} · Level {{ exercice.level }} · {{ exercice.durationMinutes }} min</p>
+                </div>
+                <div class="ac-row-end" style="gap:.5rem;">
+                    <a class="ac-ghost-btn" href="{{ path('ac_ui_exercises_edit', { id: exercice.id }) }}">Edit exercise</a>
+                    <a class="ac-ghost-btn" href="{{ path('ac_ui_exercises') }}">Back to exercises</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="ac-card">
+            <h3>Resource coverage</h3>
+            <div id="admin_resource_count_chart" style="width:100%; height:320px; min-height:320px;"></div>
+        </section>
+
+        <section class="ac-card">
+            <h3>Add resource</h3>
+            <form method="post" action="{{ path('ac_ui_exercises_add_resource', { id: exercice.id }) }}" class="ac-form ac-grid-two">
+                <input type="hidden" name="_token" value="{{ csrf_token('exercice_resource_' ~ exercice.id) }}">
+                <input type="hidden" name="returnTo" value="resources">
+                <label>Title<input class="ac-input" name="title"></label>
+                <label>Resource type<input class="ac-input" name="resourceType" placeholder="AUDIO / VIDEO / DOCUMENT"></label>
+                <label class="ac-col-span-2">Resource URL<input class="ac-input" name="resourceUrl" placeholder="https://..."></label>
+                <div class="ac-row-end ac-col-span-2">
+                    <button class="ac-btn ac-btn-primary" type="submit">Add resource</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="ac-card">
+            <h3>Existing resources</h3>
+            {% if resources is empty %}
+                <p class="ac-muted">No resources linked to this exercise yet.</p>
+            {% else %}
+                <div class="ac-table-container">
+                    <table class="ac-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Preview</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for resource in resources %}
+                                <tr>
+                                    <td>{{ resource.title }}</td>
+                                    <td>{{ resource.resourceType }}</td>
+                                    <td>
+                                        <a href="{{ resource.resourceUrl }}" target="_blank" rel="noopener noreferrer">
+                                            {{ resource.resourceUrl|length > 70 ? resource.resourceUrl|slice(0, 70) ~ '...' : resource.resourceUrl }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <div class="ac-row-end" style="gap:.35rem;">
+                                            <a class="ac-ghost-btn" href="{{ path('ac_ui_exercise_resource_edit', { id: resource.id }) }}">Edit</a>
+                                            <form method="post" action="{{ path('ac_ui_exercise_resource_delete', { id: resource.id }) }}" onsubmit="return confirm('Delete this resource?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('exercice_resource_delete_' ~ resource.id) }}">
+                                                <button class="ac-ghost-btn" type="submit">Delete</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="ac-row-end" style="margin-top:1rem;">
+                    {{ knp_pagination_render(resources) }}
+                </div>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block body_javascripts %}
+    {{ parent() }}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        {{ gc_draw(resourceCountChart, 'admin_resource_count_chart') }}
+    </script>
+{% endblock %}

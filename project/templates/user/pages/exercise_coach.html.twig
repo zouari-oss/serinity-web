@@ -1,0 +1,211 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}AI Coach | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+        {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+        <div class="ac-main">
+            {% include 'access_control/components/_topbar.html.twig' with { title: 'AI Coach', subtitle: 'Exercise interpretation and improvement plan', username: userName } %}
+
+        {% for message in app.flashes('success') %}
+            <section class="ac-card"><p style="color: var(--success);">{{ message }}</p></section>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <section class="ac-card"><p style="color: var(--danger);">{{ message }}</p></section>
+        {% endfor %}
+
+        <section class="ac-cards">
+            <article class="ac-stat-card">
+                <h3>Engagement</h3>
+                <p>{{ report.engagementScore|default(0) }}/100</p>
+            </article>
+            <article class="ac-stat-card">
+                <h3>Streak</h3>
+                <p>{{ report.streakDays|default(0) }} days</p>
+            </article>
+            <article class="ac-stat-card">
+                <h3>Completion</h3>
+                <p>{{ report.completionRate|default(0) }}%</p>
+            </article>
+            <article class="ac-stat-card">
+                <h3>Last 7 days</h3>
+                <p>{{ report.activeMinutesLast7Days|default(0) }} min</p>
+            </article>
+        </section>
+
+        <section class="ac-card ac-coach-shell">
+            <div class="ac-row-between ac-coach-head">
+                <div>
+                    <span class="ac-exercise-detail-label">Coach insight</span>
+                    <h3>{{ insight.source == 'ai' ? 'Personalized AI coaching' : 'Local coaching insight' }}</h3>
+                </div>
+                <span class="ac-badge {{ insight.source == 'ai' ? 'ac-badge-primary' : 'ac-badge-secondary' }}">
+                    {{ insight.source == 'ai' ? 'AI-generated' : 'Local fallback' }}
+                </span>
+            </div>
+
+            <p class="ac-coach-summary">{{ insight.summary }}</p>
+
+            {% if insight.source != 'ai' %}
+                <p class="ac-muted" style="margin: 0;">Gemini is temporarily unavailable, so this coach view is based on Serinity's local exercise analysis.</p>
+            {% endif %}
+
+            <div class="ac-row-end" style="margin-top: 1rem;">
+                <a class="ac-btn ac-btn-primary" href="{{ path('user_ui_exercises_coach_pdf') }}">Download PDF</a>
+            </div>
+
+            {{ form_start(emailForm, { action: path('user_exercise_coach_email'), attr: { class: 'ac-form', style: 'margin-top: 1rem;' } }) }}
+                <h4 style="margin: 0;">Send your plan by email</h4>
+                <label>
+                    Recipient email
+                    {{ form_widget(emailForm.recipientEmail, { attr: { class: 'ac-input', autocomplete: 'email' } }) }}
+                </label>
+                {{ form_errors(emailForm.recipientEmail) }}
+                <div class="ac-row-end">
+                    {{ form_widget(emailForm.send, { attr: { class: 'ac-btn ac-btn-primary' } }) }}
+                </div>
+            {{ form_end(emailForm) }}
+        </section>
+
+        <section class="ac-grid-two">
+            <article class="ac-card ac-coach-list-card">
+                <h3>Strengths</h3>
+                <ul class="ac-coach-list">
+                    {% for strength in insight.strengths %}
+                        <li>{{ strength }}</li>
+                    {% endfor %}
+                </ul>
+            </article>
+
+            <article class="ac-card ac-coach-list-card">
+                <h3>Improvement points</h3>
+                <ul class="ac-coach-list">
+                    {% for improvement in insight.improvements %}
+                        <li>{{ improvement }}</li>
+                    {% endfor %}
+                </ul>
+            </article>
+        </section>
+
+        <section class="ac-card ac-coach-list-card">
+            <div class="ac-row-between" style="gap: 1rem;">
+                <h3>Personalized recommendations</h3>
+                <a class="ac-ghost-btn" href="{{ path('user_ui_exercises') }}">Back to exercises</a>
+            </div>
+            <ul class="ac-coach-list ac-coach-list-grid">
+                {% for recommendation in insight.recommendations %}
+                    <li>{{ recommendation }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="ac-card ac-coach-list-card">
+            <h3>Nutrition support</h3>
+            <p class="ac-muted" style="margin-top: 0;">{{ insight.nutritionSupport.focus }}</p>
+
+            <section class="ac-grid-two">
+                <article>
+                    <h4>Suggested foods</h4>
+                    <ul class="ac-coach-list">
+                        {% for food in insight.nutritionSupport.foods %}
+                            <li>{{ food }}</li>
+                        {% endfor %}
+                    </ul>
+                </article>
+
+                <article>
+                    <h4>Simple dish ideas</h4>
+                    <ul class="ac-coach-list">
+                        {% for dish in insight.nutritionSupport.dishes %}
+                            <li>{{ dish }}</li>
+                        {% endfor %}
+                    </ul>
+                </article>
+            </section>
+
+            <div class="ac-plan-support-card" style="margin-top: 1rem;">
+                <span class="ac-exercise-detail-label">Gentle note</span>
+                <p>{{ insight.nutritionSupport.note }}</p>
+            </div>
+        </section>
+
+        <section class="ac-card ac-coach-list-card">
+            <h3>7-day improvement plan</h3>
+            <div class="ac-coach-plan-grid">
+                {% for day in insight.plan7Days %}
+                    <article class="ac-plan-support-card">
+                        <span class="ac-exercise-detail-label">Day {{ loop.index }}</span>
+                        <p>{{ day }}</p>
+                    </article>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="ac-card ac-coach-list-card" data-coach-chat data-chat-url="{{ path('user_exercise_coach_chat') }}">
+            <h3>AI Coach Assistant</h3>
+            <div data-coach-chat-history style="border: 1px solid #d8e7e6; border-radius: 6px; min-height: 120px; max-height: 260px; overflow-y: auto; padding: 0.75rem; margin-bottom: 1rem;">
+                <p class="ac-muted" style="margin: 0;">Ask about your report, recommendations, 7-day plan, strengths, improvement points, or nutrition support.</p>
+            </div>
+            <form class="ac-form" data-coach-chat-form style="display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.75rem; align-items: end;">
+                <label style="margin: 0;">
+                    Your question
+                    <input class="ac-input" name="message" type="text" maxlength="600" autocomplete="off" placeholder="How should I start today's plan?">
+                </label>
+                <button class="ac-btn ac-btn-primary" type="submit">Send</button>
+            </form>
+        </section>
+    </div>
+</div>
+
+<script>
+    (() => {
+        const chat = document.querySelector('[data-coach-chat]');
+        if (!chat) {
+            return;
+        }
+
+        const form = chat.querySelector('[data-coach-chat-form]');
+        const history = chat.querySelector('[data-coach-chat-history]');
+        const input = form.querySelector('input[name="message"]');
+        const url = chat.dataset.chatUrl;
+
+        const addMessage = (author, text, source = '') => {
+            const message = document.createElement('p');
+            message.style.margin = '0 0 0.75rem';
+            const sourceText = source ? ` (${source === 'gemini' ? 'AI' : 'Local fallback'})` : '';
+            const label = document.createElement('strong');
+            label.textContent = `${author}${sourceText}: `;
+            message.appendChild(label);
+            message.appendChild(document.createTextNode(text));
+            history.appendChild(message);
+            history.scrollTop = history.scrollHeight;
+        };
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const message = input.value.trim();
+            if (!message) {
+                return;
+            }
+
+            input.value = '';
+            addMessage('You', message);
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ message })
+                });
+                const data = await response.json();
+                addMessage('Coach', data.reply || 'I could not answer that right now.', data.source || 'local_fallback');
+            } catch (error) {
+                addMessage('Coach', 'I could not reach the coach assistant right now.', 'local_fallback');
+            }
+        });
+    })();
+</script>
+{% endblock %}

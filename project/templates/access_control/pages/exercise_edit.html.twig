@@ -1,0 +1,44 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Edit exercise | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main" data-controller="flash-toast">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Edit exercise', subtitle: exercice.title, username: userName } %}
+
+        {% for message in app.flashes('success') %}
+            <span data-flash-toast-target="message" data-type="success" hidden>{{ message }}</span>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <span data-flash-toast-target="message" data-type="error" hidden>{{ message }}</span>
+        {% endfor %}
+
+        <section class="ac-card">
+            <div class="ac-row-between" style="gap:1rem;">
+                <h3>Edit exercise</h3>
+                <div class="ac-row-end" style="gap:.5rem;">
+                    <a class="ac-ghost-btn" href="{{ path('ac_ui_exercises_resources', { id: exercice.id }) }}">Manage resources</a>
+                    <a class="ac-ghost-btn" href="{{ path('ac_ui_exercises') }}">Back to exercises</a>
+                </div>
+            </div>
+
+            <form method="post" action="{{ path('ac_ui_exercises_edit', { id: exercice.id }) }}" class="ac-form ac-grid-two">
+                <input type="hidden" name="_token" value="{{ csrf_token('exercice_edit_' ~ exercice.id) }}">
+                <label>Title<input class="ac-input" name="title" value="{{ exercice.title }}"></label>
+                <label>Type<input class="ac-input" name="type" value="{{ exercice.type }}"></label>
+                <label>Level<input class="ac-input" name="level" type="number" min="1" max="10" value="{{ exercice.level }}"></label>
+                <label>Duration (minutes)<input class="ac-input" name="durationMinutes" type="number" min="1" max="300" value="{{ exercice.durationMinutes }}"></label>
+                <label class="ac-col-span-2">Description<textarea class="ac-input" name="description" rows="4">{{ exercice.description }}</textarea></label>
+                <label class="ac-col-span-2">
+                    <span class="ac-label">Active</span>
+                    <input type="checkbox" name="isActive" value="1" {{ exercice.isActive ? 'checked' : '' }}>
+                </label>
+                <div class="ac-row-end ac-col-span-2">
+                    <button class="ac-btn ac-btn-primary" type="submit">Save changes</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

@@ -30,7 +30,7 @@ CREATE TABLE emotion (
   name VARCHAR(40) NOT NULL,
   UNIQUE INDEX UNIQ_BF661BDE5E237E06 (name),
   PRIMARY KEY(id)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
+) DEFAULT CHARACTER SET utf8mb4 ENGINE = InnoDB
 SQL);
 
         $this->addSql(<<<'SQL'
@@ -39,7 +39,7 @@ CREATE TABLE influence (
   name VARCHAR(60) NOT NULL,
   UNIQUE INDEX UNIQ_2864F98E5E237E06 (name),
   PRIMARY KEY(id)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
+) DEFAULT CHARACTER SET utf8mb4 ENGINE = InnoDB
 SQL);
 
         $this->addSql(<<<'SQL'
@@ -53,7 +53,7 @@ CREATE TABLE mood_entry (
   INDEX idx_mood_entry_user_date (user_id, entry_date),
   PRIMARY KEY(id),
   CONSTRAINT fk_mood_entry_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_uca1400_ai_ci` ENGINE = InnoDB
+) DEFAULT CHARACTER SET utf8mb4 ENGINE = InnoDB
 SQL);
 
         $this->addSql(<<<'SQL'
@@ -64,7 +64,7 @@ CREATE TABLE mood_entry_emotion (
   PRIMARY KEY(mood_entry_id, emotion_id),
   CONSTRAINT FK_EB264C1975B2D1A3 FOREIGN KEY (mood_entry_id) REFERENCES mood_entry (id) ON DELETE CASCADE,
   CONSTRAINT FK_EB264C19A755B3DD FOREIGN KEY (emotion_id) REFERENCES emotion (id) ON DELETE CASCADE
-) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
+) DEFAULT CHARACTER SET utf8mb4 ENGINE = InnoDB
 SQL);
 
         $this->addSql(<<<'SQL'
@@ -75,7 +75,7 @@ CREATE TABLE mood_entry_influence (
   PRIMARY KEY(mood_entry_id, influence_id),
   CONSTRAINT FK_EB05BFC75B2D1A3 FOREIGN KEY (mood_entry_id) REFERENCES mood_entry (id) ON DELETE CASCADE,
   CONSTRAINT FK_EB05BFC277FE226 FOREIGN KEY (influence_id) REFERENCES influence (id) ON DELETE CASCADE
-) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
+) DEFAULT CHARACTER SET utf8mb4 ENGINE = InnoDB
 SQL);
 
         $this->addSql(<<<'SQL'

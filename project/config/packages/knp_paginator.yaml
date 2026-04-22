@@ -1,0 +1,8 @@
+knp_paginator:
+    default_options:
+        page_name: page
+        sort_field_name: knp_sort
+        sort_direction_name: knp_direction
+        distinct: true
+    template:
+        pagination: '@KnpPaginator/Pagination/sliding.html.twig'

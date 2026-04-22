@@ -12,6 +12,7 @@ use App\Entity\ExerciceResource;
 use App\Entity\User;
 use App\Repository\ExerciceControlRepository;
 use App\Repository\ExerciceRepository;
+use App\Repository\ExerciceResourceRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -20,6 +21,7 @@ final readonly class AdminExerciceService
     public function __construct(
         private ExerciceRepository $exerciceRepository,
         private ExerciceControlRepository $controlRepository,
+        private ExerciceResourceRepository $resourceRepository,
         private UserRepository $userRepository,
         private EntityManagerInterface $entityManager,
     ) {
@@ -31,6 +33,16 @@ final readonly class AdminExerciceService
             fn(Exercice $exercice): array => $this->toExerciceArray($exercice),
             $this->exerciceRepository->findCatalog($search, $type, $active),
         );
+    }
+
+    public function getExercice(int $id): ?array
+    {
+        $exercice = $this->exerciceRepository->find($id);
+        if (!$exercice instanceof Exercice) {
+            return null;
+        }
+
+        return $this->toExerciceArray($exercice);
     }
 
     public function createExercice(ExerciceUpsertRequest $request): ServiceResult
@@ -109,6 +121,72 @@ final readonly class AdminExerciceService
         return ServiceResult::success('Resource added successfully.', $this->toExerciceArray($exercice));
     }
 
+    public function resourcesForExercice(int $exerciceId): ServiceResult
+    {
+        $exercice = $this->exerciceRepository->find($exerciceId);
+        if (!$exercice instanceof Exercice) {
+            return ServiceResult::failure('Exercice not found.');
+        }
+
+        return ServiceResult::success('Resources fetched successfully.', [
+            'exercice' => $this->toExerciceArray($exercice),
+            'resources' => array_map(
+                fn(ExerciceResource $resource): array => $this->toResourceArray($resource),
+                $this->resourceRepository->findForExercice($exercice),
+            ),
+        ]);
+    }
+
+    public function getResource(int $resourceId): ?array
+    {
+        $resource = $this->resourceRepository->find($resourceId);
+        if (!$resource instanceof ExerciceResource) {
+            return null;
+        }
+
+        return $this->toResourceArray($resource);
+    }
+
+    public function updateResource(int $resourceId, string $title, string $resourceType, string $resourceUrl): ServiceResult
+    {
+        $resource = $this->resourceRepository->find($resourceId);
+        if (!$resource instanceof ExerciceResource) {
+            return ServiceResult::failure('Resource not found.');
+        }
+
+        $title = trim($title);
+        $resourceType = trim($resourceType);
+        $resourceUrl = trim($resourceUrl);
+        if ($title === '' || $resourceType === '' || $resourceUrl === '') {
+            return ServiceResult::failure('Title, resource type and URL are required.');
+        }
+
+        $resource
+            ->setTitle($title)
+            ->setResourceType($resourceType)
+            ->setResourceUrl($resourceUrl);
+
+        $this->entityManager->flush();
+
+        return ServiceResult::success('Resource updated successfully.', $this->toResourceArray($resource));
+    }
+
+    public function deleteResource(int $resourceId): ServiceResult
+    {
+        $resource = $this->resourceRepository->find($resourceId);
+        if (!$resource instanceof ExerciceResource) {
+            return ServiceResult::failure('Resource not found.');
+        }
+
+        $exerciceId = (int) $resource->getExercice()->getId();
+        $this->entityManager->remove($resource);
+        $this->entityManager->flush();
+
+        return ServiceResult::success('Resource deleted successfully.', [
+            'exerciceId' => $exerciceId,
+        ]);
+    }
+
     public function assignExercice(int $exerciceId, string $userId, User $assignedBy): ServiceResult
     {
         $exercice = $this->exerciceRepository->find($exerciceId);
@@ -180,12 +258,7 @@ final readonly class AdminExerciceService
     {
         $resources = [];
         foreach ($exercice->getResources() as $resource) {
-            $resources[] = [
-                'id' => $resource->getId(),
-                'title' => $resource->getTitle(),
-                'resourceType' => $resource->getResourceType(),
-                'resourceUrl' => $resource->getResourceUrl(),
-            ];
+            $resources[] = $this->toResourceArray($resource, includeExercice: false);
         }
 
         return [
@@ -200,6 +273,86 @@ final readonly class AdminExerciceService
             'createdAt' => $exercice->getCreatedAt()->format('c'),
             'updatedAt' => $exercice->getUpdatedAt()->format('c'),
         ];
+    }
+
+    /**
+     * @return list<array{0:string,1:int}>
+     */
+    public function countExercicesByType(): array
+    {
+        $rows = $this->exerciceRepository->createQueryBuilder('exercice')
+            ->select('exercice.type AS label, COUNT(exercice.id) AS total')
+            ->groupBy('exercice.type')
+            ->orderBy('exercice.type', 'ASC')
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_map(
+            static fn(array $row): array => [(string) $row['label'], (int) $row['total']],
+            $rows,
+        );
+    }
+
+    /**
+     * @return list<array{0:string,1:int}>
+     */
+    public function countControlsByStatus(): array
+    {
+        $rows = $this->controlRepository->createQueryBuilder('control')
+            ->select('control.status AS label, COUNT(control.id) AS total')
+            ->groupBy('control.status')
+            ->orderBy('control.status', 'ASC')
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_map(
+            static fn(array $row): array => [ucfirst(strtolower(str_replace('_', ' ', (string) $row['label']))), (int) $row['total']],
+            $rows,
+        );
+    }
+
+    /**
+     * @return list<array{0:string,1:int}>
+     */
+    public function countResourcesByExercise(int $limit = 10): array
+    {
+        $rows = $this->exerciceRepository->createQueryBuilder('exercice')
+            ->select('exercice.title AS title, COUNT(resource.id) AS total')
+            ->leftJoin('exercice.resources', 'resource')
+            ->groupBy('exercice.id')
+            ->addGroupBy('exercice.title')
+            ->orderBy('total', 'DESC')
+            ->addOrderBy('exercice.title', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_map(
+            static fn(array $row): array => [(string) $row['title'], (int) $row['total']],
+            $rows,
+        );
+    }
+
+    private function toResourceArray(ExerciceResource $resource, bool $includeExercice = true): array
+    {
+        $data = [
+            'id' => $resource->getId(),
+            'title' => $resource->getTitle(),
+            'resourceType' => $resource->getResourceType(),
+            'resourceUrl' => $resource->getResourceUrl(),
+            'createdAt' => $resource->getCreatedAt()->format('c'),
+        ];
+
+        if ($includeExercice) {
+            $exercice = $resource->getExercice();
+            $data['exercice'] = [
+                'id' => $exercice->getId(),
+                'title' => $exercice->getTitle(),
+                'type' => $exercice->getType(),
+            ];
+        }
+
+        return $data;
     }
 
     private function toControlArray(ExerciceControl $control): array

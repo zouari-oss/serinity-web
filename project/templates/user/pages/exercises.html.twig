@@ -14,16 +14,125 @@
             <section class="ac-card"><p style="color: var(--danger);">{{ message }}</p></section>
         {% endfor %}
 
-        <section class="ac-cards">
-            <article class="ac-stat-card"><h3>Assigned</h3><p>{{ summary.total|default(0) }}</p></article>
-            <article class="ac-stat-card"><h3>In progress</h3><p>{{ summary.inProgress|default(0) }}</p></article>
-            <article class="ac-stat-card"><h3>Completed</h3><p>{{ summary.completed|default(0) }}</p></article>
-            <article class="ac-stat-card"><h3>Completion rate</h3><p>{{ summary.completionRate|default(0) }}%</p></article>
+        <section class="ac-card">
+            <h3>My exercise progress</h3>
+            <div class="ac-cards ac-cards-two">
+                <div id="user_exercise_status_chart" style="width:100%; height:320px; min-height:320px;"></div>
+                <div id="user_exercise_completion_chart" style="width:100%; height:320px; min-height:320px;"></div>
+            </div>
+        </section>
+
+        <section class="ac-card ac-exercise-recommendation-shell">
+            <div class="ac-row-between ac-exercise-recommendation-head">
+                <div>
+                    <h3>{{ plan.title }}</h3>
+                </div>
+                <span class="ac-exercise-recommendation-clock">{{ weather.localTime }}{% if weather.timezone %} &bull; {{ weather.timezone }}{% endif %}</span>
+            </div>
+
+            <article class="ac-exercise-recommendation-card">
+                <form method="get" action="{{ path('user_ui_exercises') }}" class="ac-plan-form">
+                    <input type="hidden" name="q" value="{{ filters.q }}">
+                    <input type="hidden" name="type" value="{{ filters.type }}">
+                    <input type="hidden" name="level" value="{{ filters.level }}">
+                    <input type="hidden" name="sort" value="{{ filters.sort }}">
+
+                    <div class="ac-plan-form-copy">
+                        <span class="ac-exercise-detail-label">How do you feel right now?</span>
+                        <div class="ac-plan-fatigue-group">
+                            {% for option in fatigueOptions %}
+                                <label class="ac-plan-fatigue-option">
+                                    <input type="radio" name="fatigue" value="{{ option.value }}" {{ filters.fatigue == option.value ? 'checked' : '' }}>
+                                    <span>{{ option.label }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="ac-plan-actions">
+                        <button class="ac-ghost-btn" type="submit">Refresh plan</button>
+                        <a class="ac-ghost-btn" href="{{ path('user_ui_exercises_coach') }}">Coach</a>
+                    </div>
+                </form>
+
+                <div class="ac-exercise-recommendation-meta">
+                    {% for badge in plan.recommendation.badges %}
+                        <span class="ac-badge {{ loop.first ? 'ac-badge-primary' : 'ac-badge-secondary' }}">{{ badge }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="ac-exercise-recommendation-copy">
+                    <p class="ac-exercise-recommendation-kicker">Current energy: {{ plan.fatigue.label }}</p>
+                    <h4>{{ plan.recommendation.title }}</h4>
+                    <p class="ac-muted" style="font-size: .88rem;">Why this? {{ plan.recommendation.whyHint }}</p>
+                </div>
+
+                <div class="ac-exercise-recommendation-details">
+                    <div>
+                        <span class="ac-exercise-detail-label">Duration</span>
+                        <strong>{{ plan.recommendation.duration }}</strong>
+                    </div>
+                    <div>
+                        <span class="ac-exercise-detail-label">Intensity</span>
+                        <strong>{{ plan.recommendation.level }}</strong>
+                    </div>
+                    <div>
+                        <span class="ac-exercise-detail-label">Best time</span>
+                        <strong>{{ plan.recommendation.bestTime }}</strong>
+                    </div>
+                </div>
+
+                <div class="ac-plan-support-grid">
+                    <article class="ac-plan-support-card">
+                        <span class="ac-exercise-detail-label">Plan</span>
+                        <h5>{{ plan.support.title }}</h5>
+                        <p class="ac-muted">{{ plan.support.detail }}</p>
+                    </article>
+                    <article class="ac-plan-support-card">
+                        <span class="ac-exercise-detail-label">Meditation</span>
+                        <h5>{{ plan.meditation.title }}</h5>
+                        <p class="ac-muted">{{ plan.meditation.detail }}</p>
+                    </article>
+                </div>
+
+                {% if plan.videos is not empty %}
+                    <section class="ac-plan-video-section">
+                        <div class="ac-row-between" style="gap: 1rem; align-items: end;">
+                            <div>
+                                <span class="ac-exercise-detail-label">Recommended videos</span>
+                                <p class="ac-muted" style="margin-top: .35rem;">{{ plan.videoIntro }}</p>
+                            </div>
+                        </div>
+                        <div class="ac-plan-video-grid">
+                            {% for video in plan.videos %}
+                                <a class="ac-plan-video-card" href="{{ video.url }}" target="_blank" rel="noopener noreferrer">
+                                    {% if video.thumbnailUrl %}
+                                        <img src="{{ video.thumbnailUrl }}" alt="{{ video.title }}">
+                                    {% endif %}
+                                    <div class="ac-plan-video-copy">
+                                        <strong>{{ video.title }}</strong>
+                                        <span>{{ video.channel }}</span>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </section>
+                {% endif %}
+
+                <div class="ac-row-end">
+                    <a class="ac-btn ac-btn-primary" href="{{ plan.recommendation.actionUrl }}" data-audio-start-link>Start now</a>
+                </div>
+            </article>
+
+            <article class="ac-exercise-quote-card">
+                <p class="ac-muted" style="font-size: .82rem; margin: 0;">Today's reflection</p>
+                <p class="ac-exercise-quote-text">"{{ quote.text is defined and quote.text is not empty ? quote.text : 'Take a moment to breathe and refocus.' }}"</p>
+                <p class="ac-exercise-quote-author">{{ quote.author is defined and quote.author is not empty and quote.author|lower != 'unknown' ? quote.author : 'Serinity' }}</p>
+            </article>
         </section>
 
         <section class="ac-card">
             <div class="ac-row-between" style="margin-bottom: 1rem;">
-                <h3>Catalogue exercices</h3>
+                <h3>Exercise catalog</h3>
                 <a class="ac-btn ac-btn-primary" href="{{ path('user_ui_exercises_sessions') }}">My sessions</a>
             </div>
             <form method="get" action="{{ path('user_ui_exercises') }}" class="ac-form" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap: 1rem; margin-bottom: 1rem;">
@@ -63,7 +172,7 @@
             </form>
 
             {% if catalog is empty %}
-                <p class="ac-muted">No exercice found with your current filters.</p>
+                <p class="ac-muted">No exercise found with your current filters.</p>
             {% else %}
                 <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem;">
                     {% for item in catalog %}
@@ -79,7 +188,7 @@
                                 <span class="ac-badge {{ item.status == 'COMPLETED' ? 'ac-badge-success' : (item.status == 'NOT_STARTED' ? 'ac-badge-secondary' : 'ac-badge-warning') }}">{{ item.statusMessage ?? item.status }}</span>
                             </div>
                             <div class="ac-row-between">
-                                <a class="ac-ghost-btn" href="{{ path('user_ui_exercises_show', { id: item.exercice.id }) }}">See exercice</a>
+                                <a class="ac-ghost-btn" href="{{ path('user_ui_exercises_show', { id: item.exercice.id }) }}">View exercise</a>
                                 <form method="post" action="{{ path('user_ui_exercises_favorite') }}">
                                     <input type="hidden" name="favoriteType" value="EXERCICE">
                                     <input type="hidden" name="itemId" value="{{ item.exercice.id }}">
@@ -89,8 +198,46 @@
                         </article>
                     {% endfor %}
                 </div>
+                <div class="ac-row-end" style="margin-top:1rem;">
+                    {{ knp_pagination_render(catalog) }}
+                </div>
             {% endif %}
         </section>
     </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        (() => {
+            const markAudioIntent = () => {
+                document.querySelectorAll('[data-audio-start-link]').forEach((link) => {
+                    if (link.dataset.audioIntentBound === '1') {
+                        return;
+                    }
+                    link.dataset.audioIntentBound = '1';
+                    link.addEventListener('click', () => {
+                        sessionStorage.setItem('serinity:auto-play-audio', '1');
+                    });
+                });
+            };
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', markAudioIntent, { once: true });
+            } else {
+                markAudioIntent();
+            }
+
+            document.addEventListener('turbo:load', markAudioIntent);
+        })();
+    </script>
+{% endblock %}
+
+{% block body_javascripts %}
+    {{ parent() }}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        {{ gc_draw([progressDistributionChart, completionRateChart], ['user_exercise_status_chart', 'user_exercise_completion_chart']) }}
+    </script>
 {% endblock %}

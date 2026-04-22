@@ -47,11 +47,38 @@
             <div class="ac-row-end" style="gap:.5rem;">
                 <a class="ac-ghost-btn" href="{{ path('user_ui_exercises') }}">Back to catalogue</a>
                 <a class="ac-ghost-btn" href="{{ path('user_ui_exercises_sessions') }}">My sessions</a>
-                <a class="ac-btn ac-btn-primary" href="{{ path('user_ui_exercises_session_start', { id: item.exercice.id }) }}">
+                <a class="ac-btn ac-btn-primary" href="{{ path('user_ui_exercises_session_start', { id: item.exercice.id }) }}" data-audio-start-link>
                     {{ item.status == 'COMPLETED' ? 'Start new session' : 'Start session' }}
                 </a>
             </div>
         </section>
     </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        (() => {
+            const bindAudioIntent = () => {
+                document.querySelectorAll('[data-audio-start-link]').forEach((link) => {
+                    if (link.dataset.audioIntentBound === '1') {
+                        return;
+                    }
+                    link.dataset.audioIntentBound = '1';
+                    link.addEventListener('click', () => {
+                        sessionStorage.setItem('serinity:auto-play-audio', '1');
+                    });
+                });
+            };
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', bindAudioIntent, { once: true });
+            } else {
+                bindAudioIntent();
+            }
+
+            document.addEventListener('turbo:load', bindAudioIntent);
+        })();
+    </script>
 {% endblock %}

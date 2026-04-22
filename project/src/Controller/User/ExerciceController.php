@@ -5,7 +5,15 @@ declare(strict_types=1);
 namespace App\Controller\User;
 
 use App\Dto\Exercice\CompleteControlRequest;
+use App\Service\AmbientSoundService;
+use App\Service\QuoteService;
+use App\Service\User\ContextAwarePlanner;
+use App\Service\User\FatigueResolver;
+use App\Service\User\YouTubeRecommendationService;
 use App\Service\User\UserExerciceService;
+use App\Service\WeatherService;
+use CMEN\GoogleChartsBundle\GoogleCharts\Charts\PieChart;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -19,6 +27,15 @@ final class ExerciceController extends AbstractUserUiController
 {
     public function __construct(
         private readonly UserExerciceService $userExerciceService,
+        private readonly AmbientSoundService $ambientSoundService,
+        private readonly QuoteService $quoteService,
+        private readonly WeatherService $weatherService,
+        private readonly ContextAwarePlanner $contextAwarePlanner,
+        private readonly FatigueResolver $fatigueResolver,
+        private readonly YouTubeRecommendationService $youTubeRecommendationService,
+        private readonly PaginatorInterface $paginator,
+        private readonly float $defaultLatitude,
+        private readonly float $defaultLongitude,
     ) {
     }
 
@@ -33,6 +50,7 @@ final class ExerciceController extends AbstractUserUiController
         $type = trim((string) $request->query->get('type', ''));
         $level = trim((string) $request->query->get('level', ''));
         $sort = trim((string) $request->query->get('sort', 'title_asc'));
+        $fatigue = $this->fatigueResolver->resolve($request->query->get('fatigue'));
 
         $availableTypes = array_values(array_unique(array_map(
             static fn(array $item): string => (string) ($item['exercice']['type'] ?? ''),
@@ -81,10 +99,21 @@ final class ExerciceController extends AbstractUserUiController
             };
         });
 
+        $quote = $this->quoteService->getRandomQuote();
+        $weather = $this->weatherService->getCurrentWeather($this->defaultLatitude, $this->defaultLongitude);
+        $plan = $this->contextAwarePlanner->build($weather, $catalogRows, $fatigue);
+        $plan['recommendation']['actionUrl'] = ($plan['recommendation']['exerciseId'] ?? null) !== null
+            ? $this->generateUrl('user_ui_exercises_session_start', [
+                'id' => $plan['recommendation']['exerciseId'],
+                'fatigue' => $fatigue,
+            ])
+            : $this->generateUrl('user_ui_exercises_sessions');
+        $plan['videos'] = $this->youTubeRecommendationService->recommend($plan['youtubeQuery']);
+
         return $this->render('user/pages/exercises.html.twig', [
             'nav' => $this->buildNav('user_ui_exercises'),
             'userName' => $user->getEmail(),
-            'catalog' => $catalog,
+            'catalog' => $this->paginator->paginate($catalog, max(1, $request->query->getInt('page', 1)), 9),
             'availableTypes' => $availableTypes,
             'availableLevels' => $availableLevels,
             'filters' => [
@@ -92,8 +121,15 @@ final class ExerciceController extends AbstractUserUiController
                 'type' => $type,
                 'level' => $level,
                 'sort' => $sort,
+                'fatigue' => $fatigue,
             ],
             'summary' => $summary,
+            'quote' => $quote,
+            'weather' => $weather,
+            'plan' => $plan,
+            'fatigueOptions' => $this->fatigueResolver->options(),
+            'progressDistributionChart' => $this->buildProgressDistributionChart($summary),
+            'completionRateChart' => $this->buildCompletionRateChart($summary),
         ]);
     }
 
@@ -112,8 +148,8 @@ final class ExerciceController extends AbstractUserUiController
         ]);
     }
 
-    #[Route('/session/{id}/start', name: 'user_ui_exercises_session_start', methods: ['GET'])]
-    public function sessionStart(int $id): Response
+    #[Route('/session/{id}/start', name: 'user_ui_exercises_session_start', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function sessionStart(int $id, Request $request): Response
     {
         $user = $this->currentUser();
         $result = $this->userExerciceService->startByExercice($user, $id);
@@ -123,14 +159,10 @@ final class ExerciceController extends AbstractUserUiController
             return $this->redirectToRoute('user_ui_exercises');
         }
 
-        return $this->render('user/pages/exercise_session_start.html.twig', [
-            'nav' => $this->buildNav('user_ui_exercises'),
-            'userName' => $user->getEmail(),
-            'session' => $result->data,
-        ]);
+        return $this->renderSessionPage($user->getEmail(), $result->data, $this->fatigueResolver->resolve($request->query->get('fatigue')));
     }
 
-    #[Route('/session/{id}/finish', name: 'user_ui_exercises_session_finish', methods: ['POST'])]
+    #[Route('/session/{id}/finish', name: 'user_ui_exercises_session_finish', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function sessionFinish(int $id, Request $request, ValidatorInterface $validator): Response
     {
         $user = $this->currentUser();
@@ -155,8 +187,8 @@ final class ExerciceController extends AbstractUserUiController
         return $this->redirectToRoute('user_ui_exercises_sessions');
     }
 
-    #[Route('/{id}/start', name: 'user_ui_exercises_start', methods: ['POST'])]
-    public function startLegacy(int $id): Response
+    #[Route('/{id}/start', name: 'user_ui_exercises_start', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function startLegacy(int $id, Request $request): Response
     {
         $user = $this->currentUser();
         $result = $this->userExerciceService->start($user, $id);
@@ -166,14 +198,10 @@ final class ExerciceController extends AbstractUserUiController
             return $this->redirectToRoute('user_ui_exercises');
         }
 
-        return $this->render('user/pages/exercise_session_start.html.twig', [
-            'nav' => $this->buildNav('user_ui_exercises'),
-            'userName' => $user->getEmail(),
-            'session' => $result->data,
-        ]);
+        return $this->renderSessionPage($user->getEmail(), $result->data, $this->fatigueResolver->resolve($request->query->get('fatigue')));
     }
 
-    #[Route('/{id}/complete', name: 'user_ui_exercises_complete', methods: ['POST'])]
+    #[Route('/{id}/complete', name: 'user_ui_exercises_complete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function completeLegacy(int $id, Request $request, ValidatorInterface $validator): Response
     {
         return $this->sessionFinish($id, $request, $validator);
@@ -191,7 +219,7 @@ final class ExerciceController extends AbstractUserUiController
         return $this->redirectToRoute('user_ui_exercises');
     }
 
-    #[Route('/{id}', name: 'user_ui_exercises_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'user_ui_exercises_show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(int $id): Response
     {
         $user = $this->currentUser();
@@ -205,7 +233,7 @@ final class ExerciceController extends AbstractUserUiController
         }
 
         if ($selected === null) {
-            $this->addFlash('error', 'Exercice not found.');
+            $this->addFlash('error', 'Exercise not found.');
 
             return $this->redirectToRoute('user_ui_exercises');
         }
@@ -215,5 +243,102 @@ final class ExerciceController extends AbstractUserUiController
             'userName' => $user->getEmail(),
             'item' => $selected,
         ]);
+    }
+
+    /**
+     * @param array<string,mixed> $sessionData
+     */
+    private function renderSessionPage(string $userName, array $sessionData, string $fatigue): Response
+    {
+        $weather = $this->weatherService->getCurrentWeather($this->defaultLatitude, $this->defaultLongitude);
+        $moment = $this->resolveMoment((string) ($weather['localTime'] ?? '12:00'));
+        $ambientSound = $this->ambientSoundService->getAmbientSound([
+            'moment' => $moment,
+            'fatigue' => $fatigue,
+            'exerciseType' => (string) ($sessionData['exercice']['type'] ?? ''),
+            'recommendationType' => (string) ($sessionData['exercice']['type'] ?? ''),
+            'weatherLabel' => (string) ($weather['weatherLabel'] ?? ''),
+        ]);
+
+        return $this->render('user/pages/exercise_session_start.html.twig', [
+            'nav' => $this->buildNav('user_ui_exercises'),
+            'userName' => $userName,
+            'session' => $sessionData,
+            'audioUrl' => (string) ($ambientSound['audioUrl'] ?? ''),
+            'audioTitle' => (string) ($ambientSound['title'] ?? ''),
+            'audioType' => (string) ($ambientSound['type'] ?? ''),
+            'audioMood' => ucfirst($moment),
+        ]);
+    }
+
+    private function resolveMoment(string $localTime): string
+    {
+        $hour = (int) strtok($localTime, ':');
+
+        return match (true) {
+            $hour >= 21 || $hour < 5 => 'night',
+            $hour >= 18 => 'evening',
+            $hour >= 12 => 'afternoon',
+            default => 'morning',
+        };
+    }
+
+    /**
+     * @param array<string,mixed> $summary
+     */
+    private function buildProgressDistributionChart(array $summary): PieChart
+    {
+        $rows = [];
+        foreach ([
+            'Assigned' => (int) ($summary['assigned'] ?? 0),
+            'In progress' => (int) ($summary['inProgress'] ?? 0),
+            'Completed' => (int) ($summary['completed'] ?? 0),
+        ] as $label => $count) {
+            if ($count > 0) {
+                $rows[] = [$label, $count];
+            }
+        }
+
+        $chart = new PieChart();
+        $chart->getData()->setArrayToDataTable([
+            ['Status', 'Sessions'],
+            ...($rows !== [] ? $rows : [['No sessions yet', 0]]),
+        ]);
+        $chart->getOptions()
+            ->setTitle('Session status')
+            ->setHeight(320)
+            ->setWidth(520)
+            ->setPieHole(0.45)
+            ->setPieSliceText('value')
+            ->setColors(['#cfe1df', '#88bdbc', '#2f6f6d']);
+        $chart->getOptions()->getLegend()->setPosition('bottom');
+
+        return $chart;
+    }
+
+    /**
+     * @param array<string,mixed> $summary
+     */
+    private function buildCompletionRateChart(array $summary): PieChart
+    {
+        $completionRate = max(0.0, min(100.0, (float) ($summary['completionRate'] ?? 0.0)));
+        $remainingRate = max(0.0, 100.0 - $completionRate);
+
+        $chart = new PieChart();
+        $chart->getData()->setArrayToDataTable([
+            ['Progress', 'Percent'],
+            ['Completed', $completionRate],
+            ['Remaining', $remainingRate],
+        ]);
+        $chart->getOptions()
+            ->setTitle('Completion rate')
+            ->setHeight(320)
+            ->setWidth(520)
+            ->setPieHole(0.62)
+            ->setPieSliceText('percentage')
+            ->setColors(['#2f6f6d', '#e4eeee']);
+        $chart->getOptions()->getLegend()->setPosition('bottom');
+
+        return $chart;
     }
 }

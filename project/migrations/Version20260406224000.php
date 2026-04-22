@@ -35,7 +35,7 @@ CREATE TABLE exercice (
     updated_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)',
     INDEX idx_exercice_active (is_active),
     PRIMARY KEY(id)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_uca1400_ai_ci` ENGINE = InnoDB
+) DEFAULT CHARACTER SET utf8mb4 ENGINE = InnoDB
 SQL);
 
         $this->addSql(<<<'SQL'
@@ -61,7 +61,7 @@ CREATE TABLE exercice_control (
     CONSTRAINT FK_21B7B411A76ED395 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
     CONSTRAINT FK_21B7B4117D3C2A0A FOREIGN KEY (exercice_id) REFERENCES exercice (id) ON DELETE CASCADE,
     CONSTRAINT FK_21B7B4118B2E1E52 FOREIGN KEY (assigned_by) REFERENCES users (id) ON DELETE SET NULL
-) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_uca1400_ai_ci` ENGINE = InnoDB
+) DEFAULT CHARACTER SET utf8mb4 ENGINE = InnoDB
 SQL);
 
         $this->addSql(<<<'SQL'
@@ -75,7 +75,7 @@ CREATE TABLE exercice_resource (
     INDEX idx_exercice_resource_exercice (exercice_id),
     PRIMARY KEY(id),
     CONSTRAINT FK_C75F218B7D3C2A0A FOREIGN KEY (exercice_id) REFERENCES exercice (id) ON DELETE CASCADE
-) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_uca1400_ai_ci` ENGINE = InnoDB
+) DEFAULT CHARACTER SET utf8mb4 ENGINE = InnoDB
 SQL);
 
         $this->addSql(<<<'SQL'
@@ -89,7 +89,7 @@ CREATE TABLE exercice_favorite (
     UNIQUE INDEX uniq_exercice_favorite (user_id, favorite_type, item_id),
     PRIMARY KEY(id),
     CONSTRAINT FK_4BE85D7CA76ED395 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_uca1400_ai_ci` ENGINE = InnoDB
+) DEFAULT CHARACTER SET utf8mb4 ENGINE = InnoDB
 SQL);
 
         $this->addSql(<<<'SQL'

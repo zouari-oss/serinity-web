@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Serinity Coaching Report</title>
+    <style>
+        @page {
+            margin: 28px;
+        }
+
+        body {
+            color: #1f2d2d;
+            font-family: "DejaVu Sans", Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.55;
+            margin: 0;
+        }
+
+        h1 {
+            color: #2f6f6d;
+            font-size: 26px;
+            margin: 0 0 6px;
+        }
+
+        h2 {
+            color: #2f6f6d;
+            font-size: 16px;
+            margin: 0 0 8px;
+        }
+
+        h3 {
+            color: #1f4746;
+            font-size: 13px;
+            margin: 0 0 6px;
+        }
+
+        p {
+            margin: 0 0 8px;
+        }
+
+        ul,
+        ol {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        .header {
+            border-bottom: 2px solid #cfe1df;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+        }
+
+        .meta {
+            color: #607675;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+
+        .section {
+            border: 1px solid #d8e7e6;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            padding: 12px;
+        }
+
+        .grid {
+            display: table;
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        .grid-cell {
+            display: table-cell;
+            padding-right: 12px;
+            vertical-align: top;
+            width: 50%;
+        }
+
+        .grid-cell:last-child {
+            padding-right: 0;
+        }
+
+        .note {
+            background: #f6fbfb;
+            border-left: 4px solid #88bdbc;
+            margin-top: 10px;
+            padding: 9px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Serinity Coaching Report</h1>
+        <p class="meta">
+            Generated for {{ userEmail }} on {{ generatedAt|date('F j, Y H:i') }}
+            | Source: {{ insight.source == 'ai' ? 'AI-generated' : 'Activity-based fallback' }}
+        </p>
+    </header>
+
+    <section class="section">
+        <h2>Summary</h2>
+        <p>{{ insight.summary|default('Your coaching summary is ready.') }}</p>
+    </section>
+
+    <section class="section">
+        <div class="grid">
+            <div class="grid-cell">
+                <h2>Strengths</h2>
+                <ul>
+                    {% for strength in insight.strengths|default([]) %}
+                        <li>{{ strength }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="grid-cell">
+                <h2>Improvements</h2>
+                <ul>
+                    {% for improvement in insight.improvements|default([]) %}
+                        <li>{{ improvement }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Recommendations</h2>
+        <ul>
+            {% for recommendation in insight.recommendations|default([]) %}
+                <li>{{ recommendation }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section class="section">
+        <h2>7-day plan</h2>
+        <ol>
+            {% for day in insight.plan7Days|default([]) %}
+                <li>{{ day }}</li>
+            {% endfor %}
+        </ol>
+    </section>
+
+    <section class="section">
+        <h2>Nutrition support</h2>
+        <p><strong>Focus:</strong> {{ insight.nutritionSupport.focus|default('Food-first support for energy and recovery.') }}</p>
+
+        <div class="grid">
+            <div class="grid-cell">
+                <h3>Suggested foods</h3>
+                <ul>
+                    {% for food in insight.nutritionSupport.foods|default([]) %}
+                        <li>{{ food }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="grid-cell">
+                <h3>Simple dish ideas</h3>
+                <ul>
+                    {% for dish in insight.nutritionSupport.dishes|default([]) %}
+                        <li>{{ dish }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <p class="note"><strong>Gentle note:</strong> {{ insight.nutritionSupport.note|default('This nutrition support is general wellness guidance, not medical advice.') }}</p>
+    </section>
+
+    <p class="meta">
+        This report is wellness-oriented support from Serinity and is not medical advice.
+    </p>
+</body>
+</html>

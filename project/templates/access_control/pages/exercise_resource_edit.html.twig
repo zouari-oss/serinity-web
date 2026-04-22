@@ -1,0 +1,36 @@
+{% extends 'access_control/layout.html.twig' %}
+{% block title %}Edit resource | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main" data-controller="flash-toast">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Edit resource', subtitle: resource.exercice.title, username: userName } %}
+
+        {% for message in app.flashes('success') %}
+            <span data-flash-toast-target="message" data-type="success" hidden>{{ message }}</span>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <span data-flash-toast-target="message" data-type="error" hidden>{{ message }}</span>
+        {% endfor %}
+
+        <section class="ac-card">
+            <div class="ac-row-between" style="gap:1rem;">
+                <h3>Edit resource</h3>
+                <a class="ac-ghost-btn" href="{{ path('ac_ui_exercises_resources', { id: resource.exercice.id }) }}">Back to resources</a>
+            </div>
+
+            <form method="post" action="{{ path('ac_ui_exercise_resource_edit', { id: resource.id }) }}" class="ac-form ac-grid-two">
+                <input type="hidden" name="_token" value="{{ csrf_token('exercice_resource_edit_' ~ resource.id) }}">
+                <label>Title<input class="ac-input" name="title" value="{{ resource.title }}"></label>
+                <label>Resource type<input class="ac-input" name="resourceType" value="{{ resource.resourceType }}"></label>
+                <label class="ac-col-span-2">Resource URL<input class="ac-input" name="resourceUrl" value="{{ resource.resourceUrl }}"></label>
+                <div class="ac-row-between ac-col-span-2" style="gap:1rem;">
+                    <a class="ac-ghost-btn" href="{{ resource.resourceUrl }}" target="_blank" rel="noopener noreferrer">Open resource</a>
+                    <button class="ac-btn ac-btn-primary" type="submit">Save changes</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

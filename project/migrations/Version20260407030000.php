@@ -36,7 +36,7 @@ CREATE TABLE sleep_session (
     INDEX idx_sleep_session_quality (sleep_quality),
     PRIMARY KEY(id),
     CONSTRAINT FK_SLEEP_SESSION_USER FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_uca1400_ai_ci` ENGINE = InnoDB
+) DEFAULT CHARACTER SET utf8mb4 ENGINE = InnoDB
 SQL);
 
         $this->addSql(<<<'SQL'
@@ -55,7 +55,7 @@ CREATE TABLE sleep_dream (
     PRIMARY KEY(id),
     CONSTRAINT FK_SLEEP_DREAM_USER FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
     CONSTRAINT FK_SLEEP_DREAM_SESSION FOREIGN KEY (sleep_session_id) REFERENCES sleep_session (id) ON DELETE SET NULL
-) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_uca1400_ai_ci` ENGINE = InnoDB
+) DEFAULT CHARACTER SET utf8mb4 ENGINE = InnoDB
 SQL);
         $this->addSql('SET FOREIGN_KEY_CHECKS = 1');
     }

@@ -133,6 +133,33 @@
                 <button class="ac-ghost-btn" type="button" data-session-resume hidden>Resume</button>
             </div>
 
+            <div class="ac-card" style="margin:0 0 1rem; padding:1rem;">
+                <div class="ac-row-between" style="gap:.75rem; align-items:center; margin-bottom:.75rem;">
+                    <div>
+                        <p class="ac-muted" style="margin:0;">Ambient sound</p>
+                        <h4 style="margin:.2rem 0 0;">{{ audioMood }} soundtrack</h4>
+                    </div>
+                    <span class="ac-badge ac-badge-secondary">{{ audioType|default('ambient')|capitalize }}</span>
+                </div>
+
+                <audio id="ambient-audio" loop preload="auto" playsinline {% if audioUrl %}data-audio-url="{{ audioUrl }}"{% endif %}>
+                    {% if audioUrl %}
+                        <source src="{{ audioUrl }}" type="audio/mpeg">
+                    {% endif %}
+                </audio>
+
+                <p class="ac-muted" style="margin:0 0 .75rem;" data-audio-status>
+                    Relaxing background music will start automatically when playback is allowed.
+                </p>
+
+                <div class="ac-row-end" style="gap:.5rem;">
+                    <button class="ac-btn ac-btn-primary" type="button" data-audio-play hidden>Play ambient music</button>
+                    <button class="ac-ghost-btn" type="button" data-audio-pause>Pause music</button>
+                    <button class="ac-ghost-btn" type="button" data-audio-resume>Resume music</button>
+                    <button class="ac-ghost-btn" type="button" data-audio-stop>Stop music</button>
+                </div>
+            </div>
+
             <div class="ac-breathing-card">
                 <div class="ac-breathing-head">
                     <div>
@@ -188,6 +215,12 @@
             const activeSecondsField = root.querySelector('[data-session-active-seconds]');
             const pauseButton = root.querySelector('[data-session-pause]');
             const resumeButton = root.querySelector('[data-session-resume]');
+            const ambientAudioNode = document.getElementById('ambient-audio');
+            const audioStatusNode = root.querySelector('[data-audio-status]');
+            const audioPlayButton = root.querySelector('[data-audio-play]');
+            const audioPauseButton = root.querySelector('[data-audio-pause]');
+            const audioResumeButton = root.querySelector('[data-audio-resume]');
+            const audioStopButton = root.querySelector('[data-audio-stop]');
             const breathCircleNode = root.querySelector('[data-breath-circle]');
             const breathLabelNode = root.querySelector('[data-breath-label]');
             const breathCountNode = root.querySelector('[data-breath-count]');
@@ -255,6 +288,94 @@
                 }
             };
 
+            const updateAudioStatus = (message) => {
+                if (audioStatusNode) {
+                    audioStatusNode.textContent = message;
+                }
+            };
+
+            const setAudioManualMode = (enabled) => {
+                if (audioPlayButton) {
+                    audioPlayButton.hidden = !enabled;
+                }
+            };
+
+            const resolveAudioSource = () => {
+                if (!ambientAudioNode) {
+                    console.warn('[Serinity] Ambient audio element not found.');
+                    return '';
+                }
+
+                const currentSourceNode = ambientAudioNode.querySelector('source');
+                const currentSource = currentSourceNode ? currentSourceNode.getAttribute('src') || '' : '';
+                const datasetSource = ambientAudioNode.dataset.audioUrl || '';
+                const finalSource = currentSource || datasetSource || '';
+
+                if (currentSourceNode && currentSourceNode.getAttribute('src') !== finalSource) {
+                    currentSourceNode.setAttribute('src', finalSource);
+                }
+                if (ambientAudioNode.getAttribute('src') !== finalSource) {
+                    ambientAudioNode.setAttribute('src', finalSource);
+                }
+                if (finalSource !== '') {
+                    ambientAudioNode.load();
+                }
+
+                console.info('[Serinity] Ambient audio source resolved.', {
+                    audioElementFound: true,
+                    audioSource: finalSource,
+                });
+
+                return finalSource;
+            };
+
+            function playAudio() {
+                const source = resolveAudioSource();
+                if (!ambientAudioNode || source === '') {
+                    updateAudioStatus('Ambient music is unavailable right now.');
+                    console.warn('[Serinity] Ambient audio playback skipped because no source URL was available.');
+                    setAudioManualMode(false);
+                    return Promise.resolve();
+                }
+
+                console.info('[Serinity] Attempting ambient audio playback.', {
+                    source,
+                    autoplayIntent: sessionStorage.getItem('serinity:auto-play-audio') === '1',
+                });
+
+                return ambientAudioNode.play()
+                    .then(() => {
+                        updateAudioStatus('Relaxing ambient music is playing.');
+                        console.info('[Serinity] Ambient audio autoplay succeeded.');
+                        setAudioManualMode(false);
+                    })
+                    .catch((error) => {
+                        updateAudioStatus('Autoplay was blocked. Tap Play ambient music to start.');
+                        console.warn('[Serinity] Ambient audio autoplay failed.', error);
+                        setAudioManualMode(true);
+                    });
+            }
+
+            function pauseAudio() {
+                if (!ambientAudioNode) {
+                    return;
+                }
+                ambientAudioNode.pause();
+                updateAudioStatus('Ambient music is paused.');
+                console.info('[Serinity] Ambient audio paused.');
+            }
+
+            function stopAudio() {
+                if (!ambientAudioNode) {
+                    return;
+                }
+                ambientAudioNode.pause();
+                ambientAudioNode.currentTime = 0;
+                updateAudioStatus('Ambient music stopped.');
+                console.info('[Serinity] Ambient audio stopped.');
+                setAudioManualMode(true);
+            }
+
             const render = () => {
                 const minutes = Math.floor(seconds / 60);
                 const remain = seconds % 60;
@@ -290,6 +411,25 @@
             };
 
             render();
+            resolveAudioSource();
+
+            if (ambientAudioNode) {
+                ambientAudioNode.addEventListener('error', () => {
+                    console.error('[Serinity] Ambient audio element reported a playback error.', {
+                        currentSrc: ambientAudioNode.currentSrc,
+                        networkState: ambientAudioNode.networkState,
+                        readyState: ambientAudioNode.readyState,
+                    });
+                    updateAudioStatus('Ambient music could not be loaded. You can continue the session without audio.');
+                    setAudioManualMode(true);
+                });
+            }
+
+            if (audioPlayButton) {
+                audioPlayButton.addEventListener('click', () => {
+                    playAudio();
+                });
+            }
             if (pauseButton) {
                 pauseButton.addEventListener('click', () => {
                     running = false;
@@ -311,6 +451,26 @@
                 });
             }
 
+            if (audioPauseButton) {
+                audioPauseButton.addEventListener('click', pauseAudio);
+            }
+            if (audioResumeButton) {
+                audioResumeButton.addEventListener('click', () => {
+                    playAudio();
+                });
+            }
+            if (audioStopButton) {
+                audioStopButton.addEventListener('click', stopAudio);
+            }
+
+            const submitForm = root.querySelector('form');
+            if (submitForm) {
+                submitForm.addEventListener('submit', () => {
+                    stopAudio();
+                    sessionStorage.removeItem('serinity:auto-play-audio');
+                });
+            }
+
                 timerIntervalId = window.setInterval(() => {
                 if (running) {
                     seconds += 1;
@@ -326,6 +486,7 @@
             }, 1000);
 
                 const cleanup = () => {
+                    stopAudio();
                     if (timerIntervalId !== null) {
                         window.clearInterval(timerIntervalId);
                     }
@@ -334,6 +495,16 @@
                     }
                     root.dataset.sessionInitialized = '0';
                 };
+
+                const shouldAutoplay = sessionStorage.getItem('serinity:auto-play-audio') === '1';
+                if (shouldAutoplay) {
+                    playAudio().finally(() => {
+                        sessionStorage.removeItem('serinity:auto-play-audio');
+                    });
+                } else {
+                    console.info('[Serinity] No preserved autoplay intent found; trying normal playback.');
+                    playAudio();
+                }
 
                 document.addEventListener('turbo:before-cache', cleanup, { once: true });
                 window.addEventListener('pagehide', cleanup, { once: true });

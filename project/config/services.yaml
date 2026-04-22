@@ -59,6 +59,11 @@ parameters:
     app.ntfy_doctor_topic: '%env(string:NTFY_DOCTOR_TOPIC)%'
     app.ntfy_enabled: '%env(bool:NTFY_ENABLED)%'
     app.ntfy_cooldown_seconds: '%env(int:NTFY_COOLDOWN_SECONDS)%'
+    app.youtube_api_key: '%env(string:YOUTUBE_API_KEY)%'
+    app.user_lat: '%env(float:USER_LAT)%'
+    app.user_lon: '%env(float:USER_LON)%'
+    app.gemini_api_key: '%env(string:GEMINI_API_KEY)%'
+    app.gemini_model: '%env(string:GEMINI_MODEL)%'
 
 services:
     # default configuration for services in *this* file
@@ -195,6 +200,24 @@ services:
         arguments:
             $googleRedirectUri: '%app.google_redirect_uri%'
 
+    App\Controller\User\ExerciceController:
+        arguments:
+            $defaultLatitude: '%app.user_lat%'
+            $defaultLongitude: '%app.user_lon%'
+
+    App\Service\User\YouTubeRecommendationService:
+        arguments:
+            $apiKey: '%app.youtube_api_key%'
+
+    App\Service\User\GeminiClient:
+        arguments:
+            $apiKey: '%app.gemini_api_key%'
+            $model: '%app.gemini_model%'
+
+    App\Service\User\CoachCacheService:
+        arguments:
+            $cachePool: '@cache.app'
+            $environment: '%kernel.environment%'
     App\Service\AccountAccessService:
         arguments:
             $banDurationMinutes: '%app.account_ban_duration_minutes%'

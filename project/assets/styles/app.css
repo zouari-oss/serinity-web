@@ -3202,6 +3202,307 @@ pre {
   min-width: 220px;
 }
 
+.ac-exercise-recommendation-shell {
+    border-color: #cfe1df;
+    background:
+        radial-gradient(circle at top right, rgba(136, 189, 188, 0.18), transparent 34%),
+        linear-gradient(180deg, #ffffff 0%, #f6fbfb 100%);
+}
+.ac-exercise-recommendation-head {
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.ac-exercise-recommendation-clock {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: .55rem .9rem;
+    border: 1px solid #cfe1df;
+    border-radius: 999px;
+    background: #eef8f7;
+    color: #2f6f6d;
+    font-size: .88rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+}
+.ac-exercise-recommendation-card {
+    border: 1px solid #cfe1df;
+    border-radius: 16px;
+    padding: 1.1rem;
+    background: linear-gradient(135deg, #eaf7f6 0%, #ffffff 100%);
+    display: grid;
+    gap: 1rem;
+}
+.ac-plan-form {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-bottom: .25rem;
+}
+.ac-plan-form-copy {
+    display: grid;
+    gap: .65rem;
+}
+.ac-plan-actions {
+    display: grid;
+    gap: .5rem;
+    justify-items: stretch;
+    min-width: 138px;
+}
+.ac-plan-actions .ac-ghost-btn {
+    width: 100%;
+}
+.ac-plan-fatigue-group {
+    display: flex;
+    gap: .55rem;
+    flex-wrap: wrap;
+}
+.ac-plan-fatigue-option {
+    position: relative;
+}
+.ac-plan-fatigue-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+.ac-plan-fatigue-option span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 96px;
+    padding: .6rem .9rem;
+    border-radius: 999px;
+    border: 1px solid #cfe1df;
+    background: rgba(255, 255, 255, .78);
+    color: #466766;
+    font-size: .9rem;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+.ac-plan-fatigue-option input:checked + span {
+    background: #2f6f6d;
+    color: #ffffff;
+    border-color: #2f6f6d;
+}
+.ac-exercise-recommendation-meta {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    flex-wrap: wrap;
+}
+.ac-exercise-recommendation-meta .ac-badge {
+    text-transform: none;
+}
+.ac-exercise-weather-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: .35rem .75rem;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid #cfe1df;
+    color: #587170;
+    font-size: .8rem;
+    font-weight: 600;
+}
+.ac-exercise-recommendation-kicker {
+    color: #2f6f6d;
+    font-size: .88rem;
+    font-weight: 700;
+    letter-spacing: .01em;
+}
+.ac-exercise-recommendation-copy {
+    display: grid;
+    gap: .45rem;
+}
+.ac-exercise-recommendation-copy h4 {
+    font-size: 1.3rem;
+    color: #1f4746;
+}
+.ac-exercise-recommendation-details {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .8rem;
+}
+.ac-exercise-recommendation-details > div {
+    border: 1px solid #d7e8e6;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .78);
+    padding: .8rem .9rem;
+    display: grid;
+    gap: .3rem;
+}
+.ac-exercise-detail-label {
+    color: #6a8483;
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+.ac-plan-support-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .9rem;
+}
+.ac-plan-support-card {
+    border: 1px solid #d7e8e6;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .78);
+    padding: .95rem 1rem;
+    display: grid;
+    gap: .45rem;
+}
+.ac-plan-support-card h5 {
+    margin: 0;
+    color: #1f4746;
+    font-size: 1rem;
+}
+.ac-plan-support-card p {
+    margin: 0;
+}
+.ac-coach-shell {
+    border-color: #cfe1df;
+    background:
+        radial-gradient(circle at top right, rgba(136, 189, 188, 0.14), transparent 34%),
+        linear-gradient(180deg, #ffffff 0%, #f6fbfb 100%);
+}
+.ac-coach-head {
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.ac-coach-summary {
+    color: #1f4746;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin: 0;
+}
+.ac-coach-list-card {
+    align-content: start;
+}
+.ac-coach-list {
+    display: grid;
+    gap: .75rem;
+    margin: 0;
+    padding-left: 1.1rem;
+    color: var(--text);
+}
+.ac-coach-list li::marker {
+    color: #2f6f6d;
+}
+.ac-coach-list-grid,
+.ac-coach-plan-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: .8rem;
+}
+.ac-coach-plan-grid .ac-plan-support-card {
+    align-content: start;
+}
+.ac-plan-video-section {
+    display: grid;
+    gap: .8rem;
+}
+.ac-plan-video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: .8rem;
+}
+.ac-plan-video-card {
+    display: grid;
+    gap: .7rem;
+    border: 1px solid #d7e8e6;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .78);
+    padding: .75rem;
+    color: inherit;
+    text-decoration: none;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+.ac-plan-video-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(47, 111, 109, 0.08);
+}
+.ac-plan-video-card img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 10px;
+}
+.ac-plan-video-copy {
+    display: grid;
+    gap: .25rem;
+}
+.ac-plan-video-copy strong {
+    color: #1f4746;
+    line-height: 1.4;
+}
+.ac-plan-video-copy span {
+    color: #65807f;
+    font-size: .88rem;
+}
+.ac-exercise-quote-card {
+    border: 1px solid #d9e9e8;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .84);
+    padding: 1rem 1.1rem;
+    display: grid;
+    gap: .55rem;
+}
+.ac-exercise-quote-text {
+    color: #315655;
+    font-size: 1rem;
+    line-height: 1.7;
+}
+.ac-exercise-quote-author {
+    color: #65807f;
+    font-size: .9rem;
+    font-weight: 700;
+}
+
+[data-theme="dark"] .ac-exercise-recommendation-shell {
+    background:
+        radial-gradient(circle at top right, rgba(47, 111, 109, 0.28), transparent 34%),
+        linear-gradient(180deg, #0f2c3b 0%, #112f3f 100%);
+    border-color: #1e4f62;
+}
+[data-theme="dark"] .ac-exercise-recommendation-clock,
+[data-theme="dark"] .ac-exercise-weather-pill,
+[data-theme="dark"] .ac-exercise-recommendation-details > div,
+[data-theme="dark"] .ac-plan-support-card,
+[data-theme="dark"] .ac-plan-video-card,
+[data-theme="dark"] .ac-exercise-quote-card,
+[data-theme="dark"] .ac-exercise-recommendation-card {
+    background: #143748;
+    border-color: #1e4f62;
+}
+[data-theme="dark"] .ac-plan-fatigue-option span {
+    background: #143748;
+    border-color: #1e4f62;
+    color: #d9edf5;
+}
+[data-theme="dark"] .ac-plan-fatigue-option input:checked + span {
+    background: #2f6f6d;
+    border-color: #2f6f6d;
+    color: #ffffff;
+}
+[data-theme="dark"] .ac-exercise-recommendation-clock,
+[data-theme="dark"] .ac-exercise-recommendation-kicker,
+[data-theme="dark"] .ac-exercise-recommendation-copy h4,
+[data-theme="dark"] .ac-plan-support-card h5,
+[data-theme="dark"] .ac-plan-video-copy strong {
+    color: #b7e1de;
+}
+[data-theme="dark"] .ac-exercise-detail-label,
+[data-theme="dark"] .ac-exercise-quote-author,
+[data-theme="dark"] .ac-exercise-weather-pill,
+[data-theme="dark"] .ac-plan-video-copy span {
+    color: #9ac6d6;
+}
+[data-theme="dark"] .ac-exercise-quote-text {
+    color: #d9edf5;
+}
+
 @keyframes slideInRight {
   from {
     transform: translateX(100%);
@@ -3227,26 +3528,42 @@ pre {
 }
 
 @media (max-width: 1100px) {
+    .ac-cards,
+    .ac-cards-two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 
-  .ac-cards,
-  .ac-cards-two {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+    .ac-plan-support-grid {
+        grid-template-columns: 1fr;
+    }
 
-  .ac-mood-history-filters {
-    grid-template-columns: 1fr 1fr;
-  }
+    .ac-mood-history-filters {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
 @media (max-width: 860px) {
-  .ac-mood-history-head {
-    display: grid;
-    justify-content: stretch;
-  }
+    .ac-mood-history-head {
+        display: grid;
+        justify-content: stretch;
+    }
 
-  .ac-mood-history-head .ac-mood-history-filters {
-    max-width: none;
-  }
+    .ac-mood-history-head .ac-mood-history-filters {
+        max-width: none;
+    }
+
+    .ac-plan-form {
+        align-items: stretch;
+    }
+
+    .ac-plan-fatigue-group {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .ac-exercise-recommendation-details {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 640px) {

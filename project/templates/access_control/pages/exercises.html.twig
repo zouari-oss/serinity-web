@@ -21,6 +21,17 @@
             <article class="ac-stat-card"><h3>Completion rate</h3><p>{{ summary.completionRate|default(0) }}%</p></article>
         </section>
 
+        <section class="ac-cards ac-cards-two">
+            <article class="ac-card">
+                <h3>Exercises by type</h3>
+                <div id="admin_exercise_type_chart" style="width:100%; height:320px; min-height:320px;"></div>
+            </article>
+            <article class="ac-card">
+                <h3>Session status distribution</h3>
+                <div id="admin_session_status_chart" style="width:100%; height:320px; min-height:320px;"></div>
+            </article>
+        </section>
+
         <section class="ac-card">
             <h3>Create exercice</h3>
             <form method="post" action="{{ path('ac_ui_exercises_create') }}" class="ac-form ac-grid-two">
@@ -75,6 +86,12 @@
                                         <button class="ac-icon-btn" type="button" title="Preview" data-action="modal#open" data-modal-id-param="preview-exercice-modal-{{ ex.id }}">
                                             <span class="material-symbols-outlined">visibility</span>
                                         </button>
+                                        <a class="ac-icon-btn" href="{{ path('ac_ui_exercises_edit', { id: ex.id }) }}" title="Edit">
+                                            <span class="material-symbols-outlined">edit</span>
+                                        </a>
+                                        <a class="ac-icon-btn" href="{{ path('ac_ui_exercises_resources', { id: ex.id }) }}" title="Manage resources">
+                                            <span class="material-symbols-outlined">folder_managed</span>
+                                        </a>
                                         <button class="ac-icon-btn" type="button" title="Add resource" data-action="modal#open" data-modal-id-param="add-resource-modal-{{ ex.id }}">
                                             <span class="material-symbols-outlined">add_circle</span>
                                         </button>
@@ -95,7 +112,10 @@
                                     {% else %}
                                         <strong>Resources:</strong>
                                         {% for resource in ex.resources %}
-                                            <span style="margin-left:.5rem;">{{ resource.title }} ({{ resource.resourceType }})</span>
+                                            <span style="margin-left:.5rem;">
+                                                {{ resource.title }} ({{ resource.resourceType }})
+                                                <a href="{{ path('ac_ui_exercise_resource_edit', { id: resource.id }) }}">Edit</a>
+                                            </span>
                                         {% endfor %}
                                     {% endif %}
                                 </td>
@@ -105,6 +125,9 @@
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+            <div class="ac-row-end" style="margin-top:1rem;">
+                {{ knp_pagination_render(exercices) }}
             </div>
         </section>
 
@@ -146,4 +169,12 @@
         {% endfor %}
     </div>
 </div>
+{% endblock %}
+
+{% block body_javascripts %}
+    {{ parent() }}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        {{ gc_draw([exerciseTypeChart, sessionStatusChart], ['admin_exercise_type_chart', 'admin_session_status_chart']) }}
+    </script>
 {% endblock %}

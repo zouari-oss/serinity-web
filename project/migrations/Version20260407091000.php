@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS sommeil (
     INDEX idx_sommeil_qualite (qualite),
     PRIMARY KEY(id),
     CONSTRAINT FK_SOMMEIL_USER FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_uca1400_ai_ci` ENGINE = InnoDB
+) DEFAULT CHARACTER SET utf8mb4 ENGINE = InnoDB
 SQL);
 
         $this->addSql(<<<'SQL'
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS reves (
     INDEX IDX_REVES_SOMMEIL (sommeil_id),
     PRIMARY KEY(id),
     CONSTRAINT FK_REVES_SOMMEIL FOREIGN KEY (sommeil_id) REFERENCES sommeil (id) ON DELETE CASCADE
-) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_uca1400_ai_ci` ENGINE = InnoDB
+) DEFAULT CHARACTER SET utf8mb4 ENGINE = InnoDB
 SQL);
 
         $this->addSql('DROP TABLE IF EXISTS sleep_dream');

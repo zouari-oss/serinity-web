@@ -81,7 +81,8 @@ final class AuthController extends AbstractApiController
             $dto,
             $this->requestFingerprintService->build($request),
         );
-        $status = ($result->data['error'] ?? null) === 'account_disabled'
+        $error = $result->data['error'] ?? null;
+        $status = in_array($error, ['account_disabled', 'account_banned'], true)
             ? 403
             : ($result->success ? 200 : 401);
         $response = $this->json($result->toArray(), $status);

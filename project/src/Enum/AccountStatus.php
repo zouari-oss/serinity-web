@@ -8,4 +8,5 @@ enum AccountStatus: string
 {
     case ACTIVE = 'ACTIVE';
     case DISABLED = 'DISABLED';
+    case BANNED = 'BANNED';
 }

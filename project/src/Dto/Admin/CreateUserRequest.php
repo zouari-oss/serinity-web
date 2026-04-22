@@ -28,7 +28,7 @@ final readonly class CreateUserRequest
         #[Assert\Choice(choices: ['ADMIN', 'THERAPIST', 'PATIENT'], message: 'Invalid role')]
         public string $role,
 
-        #[Assert\Choice(choices: ['ACTIVE', 'DISABLED'], message: 'Invalid account status')]
+        #[Assert\Choice(choices: ['ACTIVE', 'DISABLED', 'BANNED'], message: 'Invalid account status')]
         public string $accountStatus = 'ACTIVE',
     ) {
     }

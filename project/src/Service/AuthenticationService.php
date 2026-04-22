@@ -37,6 +37,7 @@ final readonly class AuthenticationService
         private TwoFactorPendingLoginStore $twoFactorPendingLoginStore,
         private TwoFactorCheckRateLimiter $twoFactorCheckRateLimiter,
         private EmailVerificationService $emailVerificationService,
+        private AccountAccessService $accountAccessService,
     ) {
     }
 
@@ -105,10 +106,9 @@ final readonly class AuthenticationService
             return ServiceResult::failure('Invalid credentials.');
         }
 
-        if ($user->getAccountStatus() === AccountStatus::DISABLED->value) {
-            return ServiceResult::failure('Please verify your email before signing in.', [
-                'error' => 'account_disabled',
-            ]);
+        $eligibilityResult = $this->accountAccessService->checkLoginEligibility($user);
+        if ($eligibilityResult !== null) {
+            return $eligibilityResult;
         }
 
         if (!$this->passwordHasher->isPasswordValid($user, $request->password)) {

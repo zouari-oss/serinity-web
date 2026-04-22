@@ -101,6 +101,14 @@
                                     </button>
                                     <button class="ac-icon-btn ac-danger"
                                             type="button"
+                                            title="Ban user" 
+                                            data-user-id="{{ user.id }}"
+                                            data-user-email="{{ user.email|e('html_attr') }}"
+                                            data-action="click->user-actions#banUser">
+                                        <span class="material-symbols-outlined">block</span>
+                                    </button>
+                                    <button class="ac-icon-btn ac-danger"
+                                            type="button"
                                             title="Delete user" 
                                             data-user-id="{{ user.id }}"
                                             data-user-email="{{ user.email|e('html_attr') }}"

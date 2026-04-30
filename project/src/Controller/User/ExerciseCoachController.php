@@ -31,8 +31,7 @@ final class ExerciseCoachController extends AbstractUserUiController
         private readonly Environment $twig,
         private readonly LoggerInterface $logger,
         private readonly MailerInterface $mailer,
-    ) {
-    }
+    ) {}
 
     #[Route('', name: 'user_ui_exercises_coach', methods: ['GET'])]
     public function index(Request $request): Response
@@ -105,7 +104,7 @@ final class ExerciseCoachController extends AbstractUserUiController
         $data = $form->getData();
         $recipientEmail = is_array($data) ? (string) ($data['recipientEmail'] ?? '') : '';
 
-        $email = (new Email())
+        $email = new Email()
             ->from('dahmenmalek8@gmail.com')
             ->to($recipientEmail)
             ->subject('Your Serinity Coaching Plan')

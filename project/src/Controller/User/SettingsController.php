@@ -19,8 +19,7 @@ final class SettingsController extends AbstractUserUiController
     public function __construct(
         private readonly UserDashboardService $userDashboardService,
         private readonly UserProfileService $userProfileService,
-    ) {
-    }
+    ) {}
 
     #[Route('/settings', name: 'user_ui_settings', methods: ['GET', 'POST'])]
     public function settings(Request $request): Response

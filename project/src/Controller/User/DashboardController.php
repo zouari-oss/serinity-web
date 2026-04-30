@@ -26,8 +26,7 @@ final class DashboardController extends AbstractUserUiController
         private readonly RecoveryPlanService $recoveryPlanService,
         private readonly MoodEntryRepository $moodEntryRepository,
         private readonly ZenQuotesClient $zenQuotesClient,
-    ) {
-    }
+    ) {}
 
     #[Route('/dashboard', name: 'user_ui_dashboard', methods: ['GET'])]
     public function dashboard(): Response

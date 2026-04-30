@@ -28,8 +28,7 @@ final readonly class GoogleAuthService
         private JwtService $jwtService,
         private TokenGenerator $tokenGenerator,
         private AccountAccessService $accountAccessService,
-    ) {
-    }
+    ) {}
 
     public function authenticateOrRegister(string $googleId, string $email, bool $emailVerified, ?string $name = null): ServiceResult
     {
@@ -90,7 +89,7 @@ final readonly class GoogleAuthService
     private function createUserAndLogin(string $googleId, string $email, ?string $name): ServiceResult
     {
         $now = new \DateTimeImmutable();
-        $user = (new User())
+        $user = new User()
             ->setId($this->tokenGenerator->generateUuidV4())
             ->setEmail($email)
             ->setGoogleId($googleId)
@@ -103,7 +102,7 @@ final readonly class GoogleAuthService
         $user->setPassword($this->passwordHasher->hashPassword($user, bin2hex(random_bytes(32))));
 
         [$firstName, $lastName] = $this->splitName($name);
-        $profile = (new Profile())
+        $profile = new Profile()
             ->setId($this->tokenGenerator->generateUuidV4())
             ->setUsername($this->generateUsername($email))
             ->setFirstName($firstName)

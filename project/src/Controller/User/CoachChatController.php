@@ -16,9 +16,7 @@ final class CoachChatController extends AbstractUserUiController
 {
     private const SESSION_COACH_REPORT_KEY = 'serinity.latest_coach_report';
 
-    public function __construct(private readonly CoachChatService $coachChatService)
-    {
-    }
+    public function __construct(private readonly CoachChatService $coachChatService) {}
 
     #[Route('/chat', name: 'user_exercise_coach_chat', methods: ['POST'])]
     public function chat(Request $request): JsonResponse

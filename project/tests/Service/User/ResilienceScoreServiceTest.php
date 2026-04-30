@@ -38,7 +38,7 @@ final class ResilienceScoreServiceTest extends TestCase
 
     private function buildUser(): User
     {
-        return (new User())
+        return new User()
             ->setId('test-user')
             ->setEmail('test@example.com')
             ->setPassword('secret')
@@ -52,7 +52,7 @@ final class ResilienceScoreServiceTest extends TestCase
 
     private function buildEntry(User $user, int $moodLevel, string $date): MoodEntry
     {
-        return (new MoodEntry())
+        return new MoodEntry()
             ->setUser($user)
             ->setEntryDate(new \DateTimeImmutable($date))
             ->setMomentType('MOMENT')

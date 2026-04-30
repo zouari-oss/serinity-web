@@ -3,235 +3,241 @@
 
 {% block content %}
 <div class="ac-app-layout">
-    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
-    <div
-        class="ac-main"
-        data-controller="user-mood"
-        data-user-mood-create-url-value="{{ path('api_user_mood_create') }}"
-        data-user-mood-history-url-value="{{ path('api_user_mood_history') }}"
-        data-user-mood-summary-url-value="{{ path('api_user_mood_summary') }}"
-        data-user-mood-update-url-template-value="{{ path('api_user_mood_update', { id: '__id__' }) }}"
-        data-user-mood-delete-url-template-value="{{ path('api_user_mood_delete', { id: '__id__' }) }}"
-    >
-        {% include 'access_control/components/_topbar.html.twig' with { title: 'Mood', subtitle: 'Track your day and moments', username: userName } %}
+  {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+  <div class="ac-main" data-controller="user-mood" data-user-mood-create-url-value="{{ path('api_user_mood_create') }}"
+    data-user-mood-history-url-value="{{ path('api_user_mood_history') }}"
+    data-user-mood-summary-url-value="{{ path('api_user_mood_summary') }}"
+    data-user-mood-update-url-template-value="{{ path('api_user_mood_update', { id: '__id__' }) }}"
+    data-user-mood-delete-url-template-value="{{ path('api_user_mood_delete', { id: '__id__' }) }}">
+    {% include 'access_control/components/_topbar.html.twig' with { title: 'Mood', subtitle: 'Track your day and
+    moments', username: userName } %}
 
-        <div class="ac-mood-shell">
-            <section class="ac-cards ac-mood-kpis">
-                <article class="ac-stat-card ac-mood-kpi-card">
-                    <h3>Entries (7 days)</h3>
-                    <p data-user-mood-target="weeklyCount">0</p>
-                </article>
-                <article class="ac-stat-card ac-mood-kpi-card">
-                    <h3>Average mood</h3>
-                    <p data-user-mood-target="weeklyAverage">--</p>
-                </article>
-                <article class="ac-stat-card ac-mood-kpi-card">
-                    <h3>Most used type</h3>
-                    <p data-user-mood-target="mostUsedType">No data</p>
-                </article>
-                <article class="ac-stat-card ac-mood-kpi-card">
-                    <h3>Range</h3>
-                    <p data-user-mood-target="summaryRange">--</p>
-                </article>
-            </section>
+    <div class="ac-mood-shell">
+      <section class="ac-cards ac-mood-kpis">
+        <article class="ac-stat-card ac-mood-kpi-card">
+          <h3>Entries (7 days)</h3>
+          <p data-user-mood-target="weeklyCount">0</p>
+        </article>
+        <article class="ac-stat-card ac-mood-kpi-card">
+          <h3>Average mood</h3>
+          <p data-user-mood-target="weeklyAverage">--</p>
+        </article>
+        <article class="ac-stat-card ac-mood-kpi-card">
+          <h3>Most used type</h3>
+          <p data-user-mood-target="mostUsedType">No data</p>
+        </article>
+        <article class="ac-stat-card ac-mood-kpi-card">
+          <h3>Range</h3>
+          <p data-user-mood-target="summaryRange">--</p>
+        </article>
+      </section>
 
-            <section class="ac-card ac-grid-two ac-mood-highlights">
-                <div class="ac-col-span-2 ac-row-between">
-                    <h3>Mood highlights</h3>
-                </div>
-                <article class="ac-mood-highlight">
-                    <span class="material-symbols-outlined">sentiment_satisfied</span>
-                    <div>
-                        <strong>Top emotion</strong>
-                        <p data-user-mood-target="topEmotion">No data</p>
-                    </div>
-                </article>
-                <article class="ac-mood-highlight">
-                    <span class="material-symbols-outlined">tactic</span>
-                    <div>
-                        <strong>Top influence</strong>
-                        <p data-user-mood-target="topInfluence">No data</p>
-                    </div>
-                </article>
-            </section>
-
-            <section class="ac-card ac-grid-two ac-mood-highlights">
-                <div class="ac-col-span-2 ac-row-between">
-                    <h3>Insights</h3>
-                    <div class="ac-row-end">
-                        <a class="ac-btn ac-btn-primary" href="{{ path('user_ui_mood_insights') }}">View insights</a>
-                        <a class="ac-btn ac-btn-primary" href="{{ path('user_ui_mood_recovery_plan') }}">View recovery plan</a>
-                    </div>
-                </div>
-                <article class="ac-mood-highlight">
-                    <span class="material-symbols-outlined">warning</span>
-                    <div>
-                        <strong>Critical status</strong>
-                        <p data-user-mood-target="criticalStatus">stable</p>
-                    </div>
-                </article>
-                <article class="ac-mood-highlight">
-                    <span class="material-symbols-outlined">monitoring</span>
-                    <div>
-                        <strong>Resilience snapshot</strong>
-                        <p><span data-user-mood-target="resilienceScore">0</span>/100 — <span data-user-mood-target="resilienceLabel">Stable</span></p>
-                    </div>
-                </article>
-                <article class="ac-col-span-2 ac-mood-highlight">
-                    <span class="material-symbols-outlined">insights</span>
-                    <div>
-                        <strong>Summary</strong>
-                        <p data-user-mood-target="insightSummary">Recent indicators look stable.</p>
-                    </div>
-                </article>
-            </section>
-
-            <section class="ac-card ac-mood-entry-card">
-                <div class="ac-row-between ac-mood-entry-head">
-                    <h3>New mood entry</h3>
-                    <span class="ac-mood-form-meta">1 = very low, 5 = very high</span>
-                </div>
-                <form class="ac-form ac-grid-two" data-user-mood-target="form" data-action="submit->user-mood#submitEntry">
-                    <fieldset class="ac-col-span-2 ac-mood-form-block">
-                        <legend class="ac-label">Entry type</legend>
-                        <label>
-                            <span class="ac-label">Moment / day</span>
-                            <select class="ac-input" name="momentType" required>
-                                <option value="MOMENT">Moment</option>
-                                <option value="DAY">Day</option>
-                            </select>
-                        </label>
-                    </fieldset>
-
-                    <fieldset class="ac-col-span-2 ac-mood-form-block">
-                        <legend class="ac-label">Mood level</legend>
-                        <label class="ac-col-span-2">
-                            <input class="ac-input ac-mood-slider" name="moodLevel" type="range" min="1" max="5" step="1" value="3" data-action="input->user-mood#updateMoodLevelLabel">
-                            <div class="ac-mood-level-scale">
-                                <span>1</span>
-                                <strong data-user-mood-target="moodLevelValue">3</strong>
-                                <span>5</span>
-                            </div>
-                        </label>
-                    </fieldset>
-
-                    <fieldset class="ac-col-span-2 ac-mood-form-block">
-                        <legend class="ac-label">Emotions (choose at least 1)</legend>
-                        <div class="ac-mood-chip-grid">
-                            {% for emotion in emotionOptions %}
-                                <label class="ac-check ac-mood-chip">
-                                    <input type="checkbox" name="emotionKeys" value="{{ emotion.key }}">
-                                    <span>{{ emotion.label }}</span>
-                                </label>
-                            {% endfor %}
-                        </div>
-                    </fieldset>
-
-                    <fieldset class="ac-col-span-2 ac-mood-form-block">
-                        <legend class="ac-label">Influences (choose at least 1)</legend>
-                        <div class="ac-mood-chip-grid">
-                            {% for influence in influenceOptions %}
-                                <label class="ac-check ac-mood-chip">
-                                    <input type="checkbox" name="influenceKeys" value="{{ influence.key }}">
-                                    <span>{{ influence.label }}</span>
-                                </label>
-                            {% endfor %}
-                        </div>
-                    </fieldset>
-
-                    <div class="ac-row-end ac-col-span-2">
-                        <button class="ac-btn ac-btn-primary" data-user-mood-target="submitButton" type="submit">Save entry</button>
-                    </div>
-                </form>
-            </section>
-
-            <section class="ac-card ac-mood-history-card">
-                <div class="ac-row-between ac-mood-history-head">
-                    <h3>History</h3>
-                    <form class="ac-mood-history-filters" data-action="submit->user-mood#applyFilters">
-                        <input class="ac-input" data-user-mood-target="filterSearch" type="search" placeholder="Search mood, emotion, influence">
-                        <select class="ac-input" data-user-mood-target="filterMomentType">
-                            <option value="">All types</option>
-                            <option value="MOMENT">Moment</option>
-                            <option value="DAY">Day</option>
-                        </select>
-                        <input class="ac-input" data-user-mood-target="filterFromDate" type="date">
-                        <button class="ac-btn ac-btn-primary" type="submit">Apply</button>
-                    </form>
-                </div>
-                <div class="ac-row-between ac-mood-history-meta">
-                    <p data-user-mood-target="historyMeta">Loading history...</p>
-                    <div class="ac-row-end">
-                        <button class="ac-ghost-btn" data-user-mood-target="prevPageButton" data-action="user-mood#prevPage" type="button">Previous</button>
-                        <span data-user-mood-target="pageLabel">Page 1</span>
-                        <button class="ac-ghost-btn" data-user-mood-target="nextPageButton" data-action="user-mood#nextPage" type="button">Next</button>
-                    </div>
-                </div>
-                <div class="ac-mood-history-list" data-user-mood-target="historyList"></div>
-                <p class="ac-mood-history-empty" data-user-mood-target="historyEmpty" hidden>No mood entries yet.</p>
-            </section>
+      <section class="ac-card ac-grid-two ac-mood-highlights">
+        <div class="ac-col-span-2 ac-row-between">
+          <h3>Mood highlights</h3>
         </div>
+        <article class="ac-mood-highlight">
+          <span class="material-symbols-outlined">sentiment_satisfied</span>
+          <div>
+            <strong>Top emotion</strong>
+            <p data-user-mood-target="topEmotion">No data</p>
+          </div>
+        </article>
+        <article class="ac-mood-highlight">
+          <span class="material-symbols-outlined">tactic</span>
+          <div>
+            <strong>Top influence</strong>
+            <p data-user-mood-target="topInfluence">No data</p>
+          </div>
+        </article>
+      </section>
 
-        <div class="ac-modal ac-journal-modal ac-mood-edit-modal" data-user-mood-target="editModal" data-action="click->user-mood#closeEditModal" hidden>
-            <div class="ac-modal-content">
-                <div class="ac-row-between">
-                    <h3>Edit mood entry</h3>
-                    <button class="ac-ghost-btn" type="button" data-action="user-mood#closeEditModal" aria-label="Close edit dialog">
-                        <span class="material-symbols-outlined">close</span>
-                    </button>
-                </div>
-                <form class="ac-form ac-grid-two" data-user-mood-target="editForm" data-action="submit->user-mood#submitEdit">
-                    <input type="hidden" name="entryId" data-user-mood-target="editEntryId">
-                    <fieldset class="ac-col-span-2 ac-mood-form-block">
-                        <legend class="ac-label">Entry type</legend>
-                        <label>
-                            <span class="ac-label">Moment / day</span>
-                            <select class="ac-input" name="momentType" required>
-                                <option value="MOMENT">Moment</option>
-                                <option value="DAY">Day</option>
-                            </select>
-                        </label>
-                    </fieldset>
-                    <fieldset class="ac-col-span-2 ac-mood-form-block">
-                        <legend class="ac-label">Mood level</legend>
-                        <label class="ac-col-span-2">
-                            <input class="ac-input ac-mood-slider" name="moodLevel" type="range" min="1" max="5" step="1" value="3" data-action="input->user-mood#updateEditMoodLevelLabel">
-                            <div class="ac-mood-level-scale">
-                                <span>1</span>
-                                <strong data-user-mood-target="editMoodLevelValue">3</strong>
-                                <span>5</span>
-                            </div>
-                        </label>
-                    </fieldset>
-                    <fieldset class="ac-col-span-2 ac-mood-form-block">
-                        <legend class="ac-label">Emotions (choose at least 1)</legend>
-                        <div class="ac-mood-chip-grid">
-                            {% for emotion in emotionOptions %}
-                                <label class="ac-check ac-mood-chip">
-                                    <input type="checkbox" name="emotionKeys" value="{{ emotion.key }}">
-                                    <span>{{ emotion.label }}</span>
-                                </label>
-                            {% endfor %}
-                        </div>
-                    </fieldset>
-                    <fieldset class="ac-col-span-2 ac-mood-form-block">
-                        <legend class="ac-label">Influences (choose at least 1)</legend>
-                        <div class="ac-mood-chip-grid">
-                            {% for influence in influenceOptions %}
-                                <label class="ac-check ac-mood-chip">
-                                    <input type="checkbox" name="influenceKeys" value="{{ influence.key }}">
-                                    <span>{{ influence.label }}</span>
-                                </label>
-                            {% endfor %}
-                        </div>
-                    </fieldset>
-                    <div class="ac-row-end ac-col-span-2">
-                        <button class="ac-ghost-btn" type="button" data-action="user-mood#closeEditModal">Cancel</button>
-                        <button class="ac-btn ac-btn-primary" data-user-mood-target="editSubmitButton" type="submit">Save changes</button>
-                    </div>
-                </form>
+      <section class="ac-card ac-grid-two ac-mood-highlights">
+        <div class="ac-col-span-2 ac-row-between">
+          <h3>Insights</h3>
+          <div class="ac-row-end">
+            <a class="ac-btn ac-btn-primary" href="{{ path('user_ui_mood_insights') }}">View insights</a>
+            <a class="ac-btn ac-btn-primary" href="{{ path('user_ui_mood_recovery_plan') }}">View recovery plan</a>
+          </div>
+        </div>
+        <article class="ac-mood-highlight">
+          <span class="material-symbols-outlined">warning</span>
+          <div>
+            <strong>Critical status</strong>
+            <p data-user-mood-target="criticalStatus">stable</p>
+          </div>
+        </article>
+        <article class="ac-mood-highlight">
+          <span class="material-symbols-outlined">monitoring</span>
+          <div>
+            <strong>Resilience snapshot</strong>
+            <p><span data-user-mood-target="resilienceScore">0</span>/100 — <span
+                data-user-mood-target="resilienceLabel">Stable</span></p>
+          </div>
+        </article>
+        <article class="ac-col-span-2 ac-mood-highlight">
+          <span class="material-symbols-outlined">insights</span>
+          <div>
+            <strong>Summary</strong>
+            <p data-user-mood-target="insightSummary">Recent indicators look stable.</p>
+          </div>
+        </article>
+      </section>
+
+      <section class="ac-card ac-mood-entry-card">
+        <div class="ac-row-between ac-mood-entry-head">
+          <h3>New mood entry</h3>
+          <span class="ac-mood-form-meta">1 = very low, 5 = very high</span>
+        </div>
+        <form class="ac-form ac-grid-two" data-user-mood-target="form" data-action="submit->user-mood#submitEntry">
+          <fieldset class="ac-col-span-2 ac-mood-form-block">
+            <legend class="ac-label">Entry type</legend>
+            <label>
+              <span class="ac-label">Moment / day</span>
+              <select class="ac-input" name="momentType" required>
+                <option value="MOMENT">Moment</option>
+                <option value="DAY">Day</option>
+              </select>
+            </label>
+          </fieldset>
+
+          <fieldset class="ac-col-span-2 ac-mood-form-block">
+            <legend class="ac-label">Mood level</legend>
+            <label class="ac-col-span-2">
+              <input class="ac-input ac-mood-slider" name="moodLevel" type="range" min="1" max="5" step="1" value="3"
+                data-action="input->user-mood#updateMoodLevelLabel">
+              <div class="ac-mood-level-scale">
+                <span>1</span>
+                <strong data-user-mood-target="moodLevelValue">3</strong>
+                <span>5</span>
+              </div>
+            </label>
+          </fieldset>
+
+          <fieldset class="ac-col-span-2 ac-mood-form-block">
+            <legend class="ac-label">Emotions (choose at least 1)</legend>
+            <div class="ac-mood-chip-grid">
+              {% for emotion in emotionOptions %}
+              <label class="ac-check ac-mood-chip">
+                <input type="checkbox" name="emotionKeys" value="{{ emotion.key }}">
+                <span>{{ emotion.label }}</span>
+              </label>
+              {% endfor %}
             </div>
+          </fieldset>
+
+          <fieldset class="ac-col-span-2 ac-mood-form-block">
+            <legend class="ac-label">Influences (choose at least 1)</legend>
+            <div class="ac-mood-chip-grid">
+              {% for influence in influenceOptions %}
+              <label class="ac-check ac-mood-chip">
+                <input type="checkbox" name="influenceKeys" value="{{ influence.key }}">
+                <span>{{ influence.label }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </fieldset>
+
+          <div class="ac-row-end ac-col-span-2">
+            <button class="ac-btn ac-btn-primary" data-user-mood-target="submitButton" type="submit">Save entry</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="ac-card ac-mood-history-card">
+        <div class="ac-row-between ac-mood-history-head">
+          <h3>History</h3>
+          <form class="ac-mood-history-filters" data-action="submit->user-mood#applyFilters">
+            <input class="ac-input" data-user-mood-target="filterSearch" type="search"
+              placeholder="Search mood, emotion, influence">
+            <select class="ac-input" data-user-mood-target="filterMomentType">
+              <option value="">All types</option>
+              <option value="MOMENT">Moment</option>
+              <option value="DAY">Day</option>
+            </select>
+            <input class="ac-input" data-user-mood-target="filterFromDate" type="date">
+            <button class="ac-btn ac-btn-primary" type="submit">Apply</button>
+          </form>
         </div>
+        <div class="ac-row-between ac-mood-history-meta">
+          <p data-user-mood-target="historyMeta">Loading history...</p>
+          <div class="ac-row-end">
+            <button class="ac-ghost-btn" data-user-mood-target="prevPageButton" data-action="user-mood#prevPage"
+              type="button">Previous</button>
+            <span data-user-mood-target="pageLabel">Page 1</span>
+            <button class="ac-ghost-btn" data-user-mood-target="nextPageButton" data-action="user-mood#nextPage"
+              type="button">Next</button>
+          </div>
+        </div>
+        <div class="ac-mood-history-list" data-user-mood-target="historyList"></div>
+        <p class="ac-mood-history-empty" data-user-mood-target="historyEmpty" hidden>No mood entries yet.</p>
+      </section>
     </div>
+
+    <div class="ac-modal ac-journal-modal ac-mood-edit-modal" data-user-mood-target="editModal"
+      data-action="click->user-mood#closeEditModal" hidden>
+      <div class="ac-modal-content">
+        <div class="ac-row-between">
+          <h3>Edit mood entry</h3>
+          <button class="ac-ghost-btn" type="button" data-action="user-mood#closeEditModal"
+            aria-label="Close edit dialog">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <form class="ac-form ac-grid-two" data-user-mood-target="editForm" data-action="submit->user-mood#submitEdit">
+          <input type="hidden" name="entryId" data-user-mood-target="editEntryId">
+          <fieldset class="ac-col-span-2 ac-mood-form-block">
+            <legend class="ac-label">Entry type</legend>
+            <label>
+              <span class="ac-label">Moment / day</span>
+              <select class="ac-input" name="momentType" required>
+                <option value="MOMENT">Moment</option>
+                <option value="DAY">Day</option>
+              </select>
+            </label>
+          </fieldset>
+          <fieldset class="ac-col-span-2 ac-mood-form-block">
+            <legend class="ac-label">Mood level</legend>
+            <label class="ac-col-span-2">
+              <input class="ac-input ac-mood-slider" name="moodLevel" type="range" min="1" max="5" step="1" value="3"
+                data-action="input->user-mood#updateEditMoodLevelLabel">
+              <div class="ac-mood-level-scale">
+                <span>1</span>
+                <strong data-user-mood-target="editMoodLevelValue">3</strong>
+                <span>5</span>
+              </div>
+            </label>
+          </fieldset>
+          <fieldset class="ac-col-span-2 ac-mood-form-block">
+            <legend class="ac-label">Emotions (choose at least 1)</legend>
+            <div class="ac-mood-chip-grid">
+              {% for emotion in emotionOptions %}
+              <label class="ac-check ac-mood-chip">
+                <input type="checkbox" name="emotionKeys" value="{{ emotion.key }}">
+                <span>{{ emotion.label }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </fieldset>
+          <fieldset class="ac-col-span-2 ac-mood-form-block">
+            <legend class="ac-label">Influences (choose at least 1)</legend>
+            <div class="ac-mood-chip-grid">
+              {% for influence in influenceOptions %}
+              <label class="ac-check ac-mood-chip">
+                <input type="checkbox" name="influenceKeys" value="{{ influence.key }}">
+                <span>{{ influence.label }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </fieldset>
+          <div class="ac-row-end ac-col-span-2">
+            <button class="ac-ghost-btn" type="button" data-action="user-mood#closeEditModal">Cancel</button>
+            <button class="ac-btn ac-btn-primary" data-user-mood-target="editSubmitButton" type="submit">Save
+              changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

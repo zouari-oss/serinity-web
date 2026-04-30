@@ -33,8 +33,7 @@ final class AuthController extends AbstractApiController
         private readonly RequestFingerprintService $requestFingerprintService,
         private readonly string $googleRedirectUri,
         private readonly LoggerInterface $logger,
-    ) {
-    }
+    ) {}
 
     #[Route('/register', name: 'api_auth_register', methods: ['POST'])]
     #[Route('/signup', name: 'api_auth_signup', methods: ['POST'])]

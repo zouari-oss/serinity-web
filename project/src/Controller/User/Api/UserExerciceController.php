@@ -22,8 +22,7 @@ final class UserExerciceController extends AbstractApiController
 {
     public function __construct(
         private readonly UserExerciceService $userExerciceService,
-    ) {
-    }
+    ) {}
 
     #[Route('/assigned', name: 'assigned', methods: ['GET'])]
     public function assigned(): JsonResponse

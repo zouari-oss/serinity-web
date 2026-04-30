@@ -24,8 +24,7 @@ final class AvatarController extends AbstractApiController
         private readonly AvatarGenerationRateLimiter $rateLimiter,
         private readonly AvatarGenerationPendingStore $pendingStore,
         private readonly MessageBusInterface $messageBus,
-    ) {
-    }
+    ) {}
 
     #[Route('/generate', name: 'generate', methods: ['POST'])]
     public function generate(Request $request): JsonResponse

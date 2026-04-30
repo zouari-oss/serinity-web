@@ -30,7 +30,7 @@ class UserRepository extends ServiceEntityRepository
 
     /**
      * Find users with pagination and optional filters.
-     * 
+     *
      * @param array{email?: string, role?: string, accountStatus?: string} $filters
      * @return array{users: User[], total: int, page: int, limit: int, totalPages: int}
      */

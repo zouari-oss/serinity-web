@@ -21,7 +21,7 @@ final class TestMailCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $email = (new Email())
+        $email = new Email()
             ->from('dahmenmalek8@gmail.com')
             ->to('bendahmen23@gmail.com')
             ->subject('SMTP Test Serinity')

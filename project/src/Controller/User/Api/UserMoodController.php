@@ -23,8 +23,7 @@ final class UserMoodController extends AbstractApiController
 {
     public function __construct(
         private readonly UserMoodService $userMoodService,
-    ) {
-    }
+    ) {}
 
     #[Route('', name: 'create', methods: ['POST'])]
     public function create(Request $request, ValidatorInterface $validator): JsonResponse

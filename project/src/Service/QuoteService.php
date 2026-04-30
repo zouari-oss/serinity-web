@@ -13,8 +13,7 @@ final readonly class QuoteService
 
     public function __construct(
         private ZenQuotesClient $zenQuotesClient,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{text:string,author:string}

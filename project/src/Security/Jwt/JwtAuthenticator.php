@@ -25,8 +25,7 @@ final class JwtAuthenticator extends AbstractAuthenticator
         private readonly JwtService $jwtService,
         private readonly UserRepository $userRepository,
         private readonly RouterInterface $router,
-    ) {
-    }
+    ) {}
 
     public function supports(Request $request): ?bool
     {

@@ -13,7 +13,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * UserChecker to enforce account status rules.
- * 
+ *
  * DISABLED users are blocked from authentication (considered "banned").
  * This integrates with Symfony's security layer to enforce status at login.
  */
@@ -21,7 +21,7 @@ final class AccountStatusUserChecker implements UserCheckerInterface
 {
     /**
      * Check user account status before authentication.
-     * 
+     *
      * @throws AccountStatusException if user account is DISABLED
      */
     public function checkPreAuth(UserInterface $user): void
@@ -38,7 +38,7 @@ final class AccountStatusUserChecker implements UserCheckerInterface
 
     /**
      * Check user account status after authentication.
-     * 
+     *
      * Currently no post-authentication checks needed.
      * Can be extended in the future for session-based restrictions.
      */

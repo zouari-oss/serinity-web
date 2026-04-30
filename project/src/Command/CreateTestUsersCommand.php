@@ -116,7 +116,7 @@ final class CreateTestUsersCommand extends Command
 
         $now = new \DateTimeImmutable();
 
-        $user = (new User())
+        $user = new User()
             ->setId(Uuid::v4()->toRfc4122())
             ->setEmail(mb_strtolower(trim($email)))
             ->setRole($role->value)
@@ -127,7 +127,7 @@ final class CreateTestUsersCommand extends Command
             ->setUpdatedAt($now);
         $user->setPassword($this->passwordHasher->hashPassword($user, $plainPassword));
 
-        $profile = (new Profile())
+        $profile = new Profile()
             ->setId(Uuid::v4()->toRfc4122())
             ->setUsername($this->ensureUniqueUsername($username))
             ->setUser($user)

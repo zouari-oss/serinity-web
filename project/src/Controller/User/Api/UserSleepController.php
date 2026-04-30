@@ -19,8 +19,7 @@ final class UserSleepController extends AbstractApiController
 {
     public function __construct(
         private readonly UserSleepService $userSleepService,
-    ) {
-    }
+    ) {}
 
     #[Route('/sessions', name: 'sessions', methods: ['GET'])]
     public function sessions(Request $request): JsonResponse

@@ -16,8 +16,7 @@ final readonly class AccountAccessService
     public function __construct(
         private EntityManagerInterface $entityManager,
         private int $banDurationMinutes,
-    ) {
-    }
+    ) {}
 
     public function checkLoginEligibility(User $user): ?ServiceResult
     {

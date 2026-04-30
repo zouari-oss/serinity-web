@@ -17,8 +17,7 @@ final readonly class GenerateAnimeAvatarMessageHandler
         private UserRepository $userRepository,
         private UserProfileService $userProfileService,
         private AvatarGenerationPendingStore $pendingStore,
-    ) {
-    }
+    ) {}
 
     public function __invoke(GenerateAnimeAvatarMessage $message): void
     {

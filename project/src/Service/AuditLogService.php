@@ -16,15 +16,14 @@ final readonly class AuditLogService
         private EntityManagerInterface $entityManager,
         private RequestStack $requestStack,
         private TokenGenerator $tokenGenerator,
-    ) {
-    }
+    ) {}
 
     public function log(AuthSession $session, AuditAction $action): void
     {
         $request = $this->requestStack->getCurrentRequest();
         $userAgent = (string) ($request?->headers->get('User-Agent') ?? '');
 
-        $audit = (new AuditLog())
+        $audit = new AuditLog()
             ->setId($this->tokenGenerator->generateUuidV4())
             ->setAction($action->value)
             ->setCreatedAt(new \DateTimeImmutable())

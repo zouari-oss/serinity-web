@@ -17,8 +17,7 @@ final class SleepController extends AbstractApiController
 {
     public function __construct(
         private readonly AdminSleepService $adminSleepService,
-    ) {
-    }
+    ) {}
 
     #[Route('/summary', name: 'summary', methods: ['GET'])]
     public function summary(): JsonResponse
@@ -68,4 +67,3 @@ final class SleepController extends AbstractApiController
         return $trimmed === '' ? null : $trimmed;
     }
 }
-

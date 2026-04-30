@@ -4,218 +4,233 @@
 
 {% block body %}
 <div class="home-page">
-    <!-- Navigation -->
-    <nav class="home-navbar" data-controller="navbar-menu">
-        <div class="container">
-            <div class="navbar-content">
-                <div class="navbar-brand">
-                    <img src="{{ asset('assets/logo/serinity-logo-without-bg-and-app-name.png') }}" alt="Serinity" class="navbar-logo">
-                    <span class="navbar-title">Serinity</span>
-                </div>
-                <button type="button" class="navbar-menu-btn" aria-label="Open navigation menu" data-action="click->navbar-menu#toggle">
-                    <span class="material-symbols-outlined">menu</span>
-                </button>
-                <div class="navbar-links" data-controller="home-session" data-navbar-menu-target="links">
-                    <a href="#features" class="nav-link">Features</a>
-                    <a href="#about" class="nav-link">About</a>
-                    <a href="#download" class="nav-link">Download</a>
-                    {% set hasLoggedSession = app.user or app.request.cookies.get('access_token') %}
-                    {% if hasLoggedSession %}
-                        {% set dashboardRoute = app.user ? (is_granted('ROLE_ADMIN') ? 'ac_ui_dashboard' : 'user_ui_dashboard') : 'ac_ui_dashboard_legacy' %}
-                        <div class="nav-dropdown">
-                            <button type="button" class="nav-link-btn nav-dropdown-trigger" data-action="click->home-session#toggleMenu">
-                                <span class="material-symbols-outlined">account_circle</span>
-                                <span class="material-symbols-outlined">expand_more</span>
-                            </button>
-                            <div class="nav-dropdown-menu" data-home-session-target="menu" hidden>
-                                <a href="{{ path(dashboardRoute) }}" class="nav-dropdown-item">
-                                    <span class="material-symbols-outlined">dashboard</span>
-                                    <span>Dashboard</span>
-                                </a>
-                                <button type="button" class="nav-dropdown-item nav-dropdown-item-danger" data-action="click->home-session#logout">
-                                    <span class="material-symbols-outlined">logout</span>
-                                    <span>Logout</span>
-                                </button>
-                            </div>
-                        </div>
-                    {% else %}
-                        <a href="{{ path('ac_ui_login') }}" class="nav-link-btn">Sign In</a>
-                    {% endif %}
-                </div>
-            </div>
+  <!-- Navigation -->
+  <nav class="home-navbar" data-controller="navbar-menu">
+    <div class="container">
+      <div class="navbar-content">
+        <div class="navbar-brand">
+          <img src="{{ asset('assets/logo/serinity-logo-without-bg-and-app-name.png') }}" alt="Serinity"
+            class="navbar-logo">
+          <span class="navbar-title">Serinity</span>
         </div>
-    </nav>
+        <button type="button" class="navbar-menu-btn" aria-label="Open navigation menu"
+          data-action="click->navbar-menu#toggle">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div class="navbar-links" data-controller="home-session" data-navbar-menu-target="links">
+          <a href="#features" class="nav-link">Features</a>
+          <a href="#about" class="nav-link">About</a>
+          <a href="#download" class="nav-link">Download</a>
+          {% set hasLoggedSession = app.user or app.request.cookies.get('access_token') %}
+          {% if hasLoggedSession %}
+          {% set dashboardRoute = app.user ? (is_granted('ROLE_ADMIN') ? 'ac_ui_dashboard' : 'user_ui_dashboard') :
+          'ac_ui_dashboard_legacy' %}
+          <div class="nav-dropdown">
+            <button type="button" class="nav-link-btn nav-dropdown-trigger"
+              data-action="click->home-session#toggleMenu">
+              <span class="material-symbols-outlined">account_circle</span>
+              <span class="material-symbols-outlined">expand_more</span>
+            </button>
+            <div class="nav-dropdown-menu" data-home-session-target="menu" hidden>
+              <a href="{{ path(dashboardRoute) }}" class="nav-dropdown-item">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span>Dashboard</span>
+              </a>
+              <button type="button" class="nav-dropdown-item nav-dropdown-item-danger"
+                data-action="click->home-session#logout">
+                <span class="material-symbols-outlined">logout</span>
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
+          {% else %}
+          <a href="{{ path('ac_ui_login') }}" class="nav-link-btn">Sign In</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
 
-    <!-- Hero Section -->
-    <section class="hero-section home-reveal">
-        <div class="container">
-            <div class="hero-content">
-                <h1 class="hero-title">Your Journey to Mental Wellness</h1>
-                <p class="hero-subtitle">A comprehensive platform dedicated to psychotherapy and personal development, designed for individuals and mental health professionals.</p>
-                <div class="hero-actions">
-                    <a href="{{ path('ac_ui_login', {'mode': 'signup'}) }}" class="btn-primary">Get Started Free</a>
-                    <a href="#features" class="btn-secondary">Learn More</a>
-                </div>
-            </div>
-            <div class="hero-image">
-                <img src="{{ asset('assets/logo/serinity-logo-without-bg-and-app-name.png') }}" alt="Serinity Platform" class="hero-logo">
-            </div>
+  <!-- Hero Section -->
+  <section class="hero-section home-reveal">
+    <div class="container">
+      <div class="hero-content">
+        <h1 class="hero-title">Your Journey to Mental Wellness</h1>
+        <p class="hero-subtitle">A comprehensive platform dedicated to psychotherapy and personal development, designed
+          for individuals and mental health professionals.</p>
+        <div class="hero-actions">
+          <a href="{{ path('ac_ui_login', {'mode': 'signup'}) }}" class="btn-primary">Get Started Free</a>
+          <a href="#features" class="btn-secondary">Learn More</a>
         </div>
-    </section>
+      </div>
+      <div class="hero-image">
+        <img src="{{ asset('assets/logo/serinity-logo-without-bg-and-app-name.png') }}" alt="Serinity Platform"
+          class="hero-logo">
+      </div>
+    </div>
+  </section>
 
-    <!-- Features Section -->
-    <section id="features" class="features-section home-reveal">
-        <div class="container">
-            <h2 class="section-title">Key Features</h2>
-            <p class="section-subtitle">Comprehensive tools for mental health and personal growth</p>
-            
-            <div class="features-grid">
-                <div class="feature-card home-reveal-card">
-                    <div class="feature-icon">
-                        <span class="material-symbols-outlined">psychology</span>
-                    </div>
-                    <h3>AI-Powered Insights</h3>
-                    <p>Facial recognition authentication, NLP emotion detection, and intelligent appointment scheduling powered by advanced AI.</p>
-                </div>
-                
-                <div class="feature-card home-reveal-card">
-                    <div class="feature-icon">
-                        <span class="material-symbols-outlined">sentiment_satisfied</span>
-                    </div>
-                    <h3>Mood & Journal</h3>
-                    <p>Daily mood tracking with guided emotional questions and personal journaling with NLP-based analysis.</p>
-                </div>
-                
-                <div class="feature-card home-reveal-card">
-                    <div class="feature-icon">
-                        <span class="material-symbols-outlined">bedtime</span>
-                    </div>
-                    <h3>Sleep Tracking</h3>
-                    <p>Analyze your sleep cycles, log dreams, and understand their emotional impact on your well-being.</p>
-                </div>
-                
-                <div class="feature-card home-reveal-card">
-                    <div class="feature-icon">
-                        <span class="material-symbols-outlined">self_improvement</span>
-                    </div>
-                    <h3>Exercises & Resources</h3>
-                    <p>Access guided relaxation, meditation exercises, and multimedia resources to support your journey.</p>
-                </div>
-                
-                <div class="feature-card home-reveal-card">
-                    <div class="feature-icon">
-                        <span class="material-symbols-outlined">groups</span>
-                    </div>
-                    <h3>Support Network</h3>
-                    <p>Connect with others in a secure community forum for peer support and shared experiences.</p>
-                </div>
-                
-                <div class="feature-card home-reveal-card">
-                    <div class="feature-icon">
-                        <span class="material-symbols-outlined">calendar_month</span>
-                    </div>
-                    <h3>Professional Therapy</h3>
-                    <p>Schedule appointments with therapists, manage availability, and conduct online consultations.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+  <!-- Features Section -->
+  <section id="features" class="features-section home-reveal">
+    <div class="container">
+      <h2 class="section-title">Key Features</h2>
+      <p class="section-subtitle">Comprehensive tools for mental health and personal growth</p>
 
-    <!-- About Section -->
-    <section id="about" class="about-section home-reveal">
-        <div class="container">
-            <div class="about-content">
-                <h2 class="section-title">About Serinity</h2>
-                <p class="about-text">Serinity is a comprehensive mental health platform that combines modern technology with therapeutic best practices. Our platform serves both individuals seeking personal development and mental health professionals providing care.</p>
-                <p class="about-text">With integrated Artificial Intelligence, we provide personalized emotional analysis, intelligent recommendations, and professional therapeutic tools to improve mental well-being through tracking, analysis, and guidance.</p>
-                <div class="about-stats">
-                    <div class="stat-item">
-                        <div class="stat-number">AI-Powered</div>
-                        <div class="stat-label">Emotional Analysis</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">Secure</div>
-                        <div class="stat-label">Private Platform</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">24/7</div>
-                        <div class="stat-label">Access Anywhere</div>
-                    </div>
-                </div>
-            </div>
+      <div class="features-grid">
+        <div class="feature-card home-reveal-card">
+          <div class="feature-icon">
+            <span class="material-symbols-outlined">psychology</span>
+          </div>
+          <h3>AI-Powered Insights</h3>
+          <p>Facial recognition authentication, NLP emotion detection, and intelligent appointment scheduling powered by
+            advanced AI.</p>
         </div>
-    </section>
 
-    <!-- Download Section -->
-    <section id="download" class="download-section home-reveal">
-        <div class="container">
-            <h2 class="section-title">Get Started Today</h2>
-            <p class="section-subtitle">Available on desktop and web platforms</p>
-            <div class="download-options">
-                <a href="https://github.com/zouari-oss/serinity-desktop/releases" target="_blank" class="download-card home-reveal-card">
-                    <div class="download-icon">
-                        <span class="material-symbols-outlined">computer</span>
-                    </div>
-                    <h3>Desktop Application</h3>
-                    <p>Download for Windows, macOS, and Linux</p>
-                    <span class="download-link">View Releases →</span>
-                </a>
-                <a href="{{ path('ac_ui_login', {'mode': 'signup'}) }}" class="download-card home-reveal-card">
-                    <div class="download-icon">
-                        <span class="material-symbols-outlined">language</span>
-                    </div>
-                    <h3>Web Application</h3>
-                    <p>Access from any browser, anywhere</p>
-                    <span class="download-link">Get Started →</span>
-                </a>
-            </div>
+        <div class="feature-card home-reveal-card">
+          <div class="feature-icon">
+            <span class="material-symbols-outlined">sentiment_satisfied</span>
+          </div>
+          <h3>Mood & Journal</h3>
+          <p>Daily mood tracking with guided emotional questions and personal journaling with NLP-based analysis.</p>
         </div>
-    </section>
 
-    <!-- Footer -->
-    <footer class="home-footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <div class="footer-brand">
-                        <img src="{{ asset('assets/logo/serinity-logo-without-bg-and-app-name.png') }}" alt="Serinity" class="footer-logo">
-                        <span class="footer-title">Serinity</span>
-                    </div>
-                    <p class="footer-text">Your journey to mental wellness starts here.</p>
-                </div>
-                
-                <div class="footer-section">
-                    <h4>Platform</h4>
-                    <ul class="footer-links">
-                        <li><a href="#features">Features</a></li>
-                        <li><a href="#about">About</a></li>
-                        <li><a href="#download">Download</a></li>
-                        <li><a href="{{ path('ac_ui_login') }}">Sign In</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h4>Resources</h4>
-                    <ul class="footer-links">
-                        <li><a href="https://github.com/zouari-oss/serinity-desktop" target="_blank">GitHub</a></li>
-                        <li><a href="https://github.com/zouari-oss/serinity-desktop/releases" target="_blank">Releases</a></li>
-                        <li><a href="https://github.com/zouari-oss/serinity-desktop/blob/main/LICENSE" target="_blank">License</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h4>Contact</h4>
-                    <ul class="footer-links">
-                        <li><a href="mailto:zouariomar20@gmail.com">zouariomar20@gmail.com</a></li>
-                        <li><a href="mailto:ghaithbensalah1999@gmail.com">ghaithbensalah1999@gmail.com</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; 2026 Serinity. Licensed under GPL-3.0. Open Source Software.</p>
-            </div>
+        <div class="feature-card home-reveal-card">
+          <div class="feature-icon">
+            <span class="material-symbols-outlined">bedtime</span>
+          </div>
+          <h3>Sleep Tracking</h3>
+          <p>Analyze your sleep cycles, log dreams, and understand their emotional impact on your well-being.</p>
         </div>
-    </footer>
+
+        <div class="feature-card home-reveal-card">
+          <div class="feature-icon">
+            <span class="material-symbols-outlined">self_improvement</span>
+          </div>
+          <h3>Exercises & Resources</h3>
+          <p>Access guided relaxation, meditation exercises, and multimedia resources to support your journey.</p>
+        </div>
+
+        <div class="feature-card home-reveal-card">
+          <div class="feature-icon">
+            <span class="material-symbols-outlined">groups</span>
+          </div>
+          <h3>Support Network</h3>
+          <p>Connect with others in a secure community forum for peer support and shared experiences.</p>
+        </div>
+
+        <div class="feature-card home-reveal-card">
+          <div class="feature-icon">
+            <span class="material-symbols-outlined">calendar_month</span>
+          </div>
+          <h3>Professional Therapy</h3>
+          <p>Schedule appointments with therapists, manage availability, and conduct online consultations.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="about-section home-reveal">
+    <div class="container">
+      <div class="about-content">
+        <h2 class="section-title">About Serinity</h2>
+        <p class="about-text">Serinity is a comprehensive mental health platform that combines modern technology with
+          therapeutic best practices. Our platform serves both individuals seeking personal development and mental
+          health professionals providing care.</p>
+        <p class="about-text">With integrated Artificial Intelligence, we provide personalized emotional analysis,
+          intelligent recommendations, and professional therapeutic tools to improve mental well-being through tracking,
+          analysis, and guidance.</p>
+        <div class="about-stats">
+          <div class="stat-item">
+            <div class="stat-number">AI-Powered</div>
+            <div class="stat-label">Emotional Analysis</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">Secure</div>
+            <div class="stat-label">Private Platform</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">Access Anywhere</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download Section -->
+  <section id="download" class="download-section home-reveal">
+    <div class="container">
+      <h2 class="section-title">Get Started Today</h2>
+      <p class="section-subtitle">Available on desktop and web platforms</p>
+      <div class="download-options">
+        <a href="https://github.com/zouari-oss/serinity-desktop/releases" target="_blank"
+          class="download-card home-reveal-card">
+          <div class="download-icon">
+            <span class="material-symbols-outlined">computer</span>
+          </div>
+          <h3>Desktop Application</h3>
+          <p>Download for Windows, macOS, and Linux</p>
+          <span class="download-link">View Releases →</span>
+        </a>
+        <a href="{{ path('ac_ui_login', {'mode': 'signup'}) }}" class="download-card home-reveal-card">
+          <div class="download-icon">
+            <span class="material-symbols-outlined">language</span>
+          </div>
+          <h3>Web Application</h3>
+          <p>Access from any browser, anywhere</p>
+          <span class="download-link">Get Started →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="home-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <div class="footer-brand">
+            <img src="{{ asset('assets/logo/serinity-logo-without-bg-and-app-name.png') }}" alt="Serinity"
+              class="footer-logo">
+            <span class="footer-title">Serinity</span>
+          </div>
+          <p class="footer-text">Your journey to mental wellness starts here.</p>
+        </div>
+
+        <div class="footer-section">
+          <h4>Platform</h4>
+          <ul class="footer-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#download">Download</a></li>
+            <li><a href="{{ path('ac_ui_login') }}">Sign In</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Resources</h4>
+          <ul class="footer-links">
+            <li><a href="https://github.com/zouari-oss/serinity-desktop" target="_blank">GitHub</a></li>
+            <li><a href="https://github.com/zouari-oss/serinity-desktop/releases" target="_blank">Releases</a></li>
+            <li><a href="https://github.com/zouari-oss/serinity-desktop/blob/main/LICENSE" target="_blank">License</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Contact</h4>
+          <ul class="footer-links">
+            <li><a href="mailto:zouariomar20@gmail.com">zouariomar20@gmail.com</a></li>
+            <li><a href="mailto:ghaithbensalah1999@gmail.com">ghaithbensalah1999@gmail.com</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 Serinity. Licensed under GPL-3.0. Open Source Software.</p>
+      </div>
+    </div>
+  </footer>
 </div>
 {% endblock %}

@@ -13,8 +13,7 @@ final readonly class ImageUploadService
         private HttpClientInterface $httpClient,
         private string $imageRequestUrl,
         private string $imageApiKey,
-    ) {
-    }
+    ) {}
 
     public function uploadProfileImage(UploadedFile $file): string
     {

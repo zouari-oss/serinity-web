@@ -20,8 +20,7 @@ final readonly class TwoFactorService
         private EntityManagerInterface $entityManager,
         private TotpAuthenticatorInterface $totpAuthenticator,
         private TwoFactorCryptoService $twoFactorCryptoService,
-    ) {
-    }
+    ) {}
 
     public function startSetup(User $user): ServiceResult
     {

@@ -21,8 +21,7 @@ final class FaceAuthController extends AbstractApiController
 {
     public function __construct(
         private readonly FaceAuthenticationService $faceAuthenticationService,
-    ) {
-    }
+    ) {}
 
     #[Route('/enable', name: 'api_auth_face_enable', methods: ['POST'])]
     public function enable(Request $request): JsonResponse

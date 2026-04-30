@@ -55,8 +55,7 @@ final class AccessControlUiController extends AbstractController
         private readonly UserProfileService $userProfileService,
         private readonly EntityManagerInterface $entityManager,
         private readonly PaginatorInterface $paginator,
-    ) {
-    }
+    ) {}
 
     #[Route('/login', name: 'ac_ui_login', methods: ['GET'])]
     #[Route('/register', name: 'ac_ui_register', methods: ['GET'])]
@@ -256,7 +255,7 @@ final class AccessControlUiController extends AbstractController
 
             if ($profile === null) {
                 $now = new \DateTimeImmutable();
-                $profile = (new Profile())
+                $profile = new Profile()
                     ->setId(Uuid::v4()->toRfc4122())
                     ->setUser($user)
                     ->setCreatedAt($now)
@@ -842,7 +841,7 @@ final class AccessControlUiController extends AbstractController
                     if ((int) $exists > 0) {
                         $this->addFlash('error', 'This emotion already exists.');
                     } else {
-                        $emotion = (new MoodEmotion())->setName($name);
+                        $emotion = new MoodEmotion()->setName($name);
                         $this->entityManager->persist($emotion);
                         $this->entityManager->flush();
                         $this->addFlash('success', 'Emotion created successfully.');
@@ -968,7 +967,7 @@ final class AccessControlUiController extends AbstractController
                     if ((int) $exists > 0) {
                         $this->addFlash('error', 'This influence already exists.');
                     } else {
-                        $influence = (new MoodInfluence())->setName($name);
+                        $influence = new MoodInfluence()->setName($name);
                         $this->entityManager->persist($influence);
                         $this->entityManager->flush();
                         $this->addFlash('success', 'Influence created successfully.');

@@ -16,8 +16,7 @@ final class AdminSleepUiController extends AbstractController
 {
     public function __construct(
         private readonly AdminSleepService $adminSleepService,
-    ) {
-    }
+    ) {}
 
     #[Route('/admin/sleep', name: 'ac_ui_sleep_legacy', methods: ['GET'])]
     public function legacyRedirect(): Response

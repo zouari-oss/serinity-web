@@ -28,8 +28,7 @@ final readonly class PasswordResetService
         private int $rateLimitAttempts,
         private int $rateLimitWindowSeconds,
         private int $maxResendAttempts,
-    ) {
-    }
+    ) {}
 
     public function requestResetCode(string $email, ?string $ipAddress = null, bool $resend = false): ServiceResult
     {
@@ -61,7 +60,7 @@ final readonly class PasswordResetService
         }
 
         $code = $this->tokenGenerator->generateNumericCode(6);
-        $expiresAt = (new \DateTimeImmutable())->modify(sprintf('+%d minutes', $this->codeTtlMinutes));
+        $expiresAt = new \DateTimeImmutable()->modify(sprintf('+%d minutes', $this->codeTtlMinutes));
         $this->storeResetCodeState($normalizedEmail, $code, $expiresAt);
 
         $recipientName = $user->getProfile()?->getUsername() ?: 'there';
@@ -130,12 +129,12 @@ final readonly class PasswordResetService
         $now = time();
         $windowStart = $now - $this->rateLimitWindowSeconds;
 
-        $attempts = $this->cache->get($cacheKey, static fn (ItemInterface $item): array => []);
+        $attempts = $this->cache->get($cacheKey, static fn(ItemInterface $item): array => []);
         if (!is_array($attempts)) {
             $attempts = [];
         }
 
-        $attempts = array_values(array_filter($attempts, static fn (mixed $timestamp): bool => is_int($timestamp) && $timestamp >= $windowStart));
+        $attempts = array_values(array_filter($attempts, static fn(mixed $timestamp): bool => is_int($timestamp) && $timestamp >= $windowStart));
 
         if (count($attempts) >= $this->rateLimitAttempts) {
             return false;
@@ -192,7 +191,7 @@ final readonly class PasswordResetService
 
     private function isCodeValid(string $email, string $code, \DateTimeImmutable $now): bool
     {
-        $state = $this->cache->get($this->resetCodeCacheKey($email), static fn (ItemInterface $item): array => []);
+        $state = $this->cache->get($this->resetCodeCacheKey($email), static fn(ItemInterface $item): array => []);
         if (!is_array($state)) {
             return false;
         }
@@ -228,7 +227,7 @@ final readonly class PasswordResetService
             return true;
         }
 
-        $attempts = $this->cache->get($key, static fn (ItemInterface $item): int => 0);
+        $attempts = $this->cache->get($key, static fn(ItemInterface $item): int => 0);
         if (!is_int($attempts)) {
             $attempts = 0;
         }

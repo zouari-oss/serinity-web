@@ -16,8 +16,7 @@ final readonly class SessionService
         private EntityManagerInterface $entityManager,
         private AuthSessionRepository $authSessionRepository,
         private TokenGenerator $tokenGenerator,
-    ) {
-    }
+    ) {}
 
     public function revokeActiveSessions(User $user): void
     {
@@ -31,11 +30,11 @@ final readonly class SessionService
         $role = UserRole::tryFrom($user->getRole()) ?? UserRole::PATIENT;
         $days = $role === UserRole::ADMIN ? 1 : 7;
 
-        $session = (new AuthSession())
+        $session = new AuthSession()
             ->setId($this->tokenGenerator->generateUuidV4())
             ->setRefreshToken($this->tokenGenerator->generateRefreshToken())
             ->setCreatedAt(new \DateTimeImmutable())
-            ->setExpiresAt((new \DateTimeImmutable())->modify(sprintf('+%d day', $days)))
+            ->setExpiresAt(new \DateTimeImmutable()->modify(sprintf('+%d day', $days)))
             ->setRevoked(false)
             ->setUser($user);
 

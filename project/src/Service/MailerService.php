@@ -19,8 +19,7 @@ final readonly class MailerService
         private string $encryption,
         private string $fromEmail,
         private string $fromName,
-    ) {
-    }
+    ) {}
 
     public function sendTemplateHtmlEmail(
         string $to,

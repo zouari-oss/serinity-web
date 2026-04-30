@@ -17,8 +17,7 @@ final class SleepController extends AbstractUserUiController
 {
     public function __construct(
         private readonly UserSleepService $userSleepService,
-    ) {
-    }
+    ) {}
 
     #[Route('/sommeil/list', name: 'app_sommeil_list', methods: ['GET'])]
     #[Route('/user/sommeil/list', name: 'user_ui_sommeil_list', methods: ['GET'])]

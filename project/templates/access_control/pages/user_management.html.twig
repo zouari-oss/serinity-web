@@ -3,248 +3,238 @@
 
 {% block content %}
 <div class="ac-app-layout">
-    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
-    <div class="ac-main" data-controller="user-actions edit-user modal">
-        {% include 'access_control/components/_topbar.html.twig' with { title: 'User management', subtitle: 'Manage roles and accounts', username: userName } %}
-        <section class="ac-card">
-            <div class="ac-row-between" style="margin-bottom: 1rem;">
-                <h3>Users ({{ pagination.total }} total)</h3>
-                <button class="ac-btn" data-action="click->modal#open" data-modal-id-param="create-user-modal">Add user</button>
-            </div>
-            <form method="get" action="{{ path('ac_ui_users') }}" class="ac-form" data-controller="user-filters" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                <input type="hidden" name="page" value="1">
-                <label style="display: flex; flex-direction: column; gap: 0.5rem;">
-                    <span style="font-size: 0.875rem; font-weight: 500;">Email</span>
-                    <input class="ac-input" name="email" type="text" placeholder="Search by email..." value="{{ filters.email ?? '' }}" data-action="input->user-filters#onInput">
-                </label>
-                <label style="display: flex; flex-direction: column; gap: 0.5rem;">
-                    <span style="font-size: 0.875rem; font-weight: 500;">Role</span>
-                    <select class="ac-input" name="role" data-action="change->user-filters#onChange">
-                        <option value="">All roles</option>
-                        <option value="THERAPIST" {{ filters.role == 'THERAPIST' ? 'selected' : '' }}>Therapist</option>
-                        <option value="PATIENT" {{ filters.role == 'PATIENT' ? 'selected' : '' }}>Patient</option>
-                    </select>
-                </label>
-                <label style="display: flex; flex-direction: column; gap: 0.5rem;">
-                    <span style="font-size: 0.875rem; font-weight: 500;">Status</span>
-                    <select class="ac-input" name="accountStatus" data-action="change->user-filters#onChange">
-                        <option value="">All statuses</option>
-                        <option value="ACTIVE" {{ filters.accountStatus == 'ACTIVE' ? 'selected' : '' }}>Active</option>
-                        <option value="DISABLED" {{ filters.accountStatus == 'DISABLED' ? 'selected' : '' }}>Disabled</option>
-                    </select>
-                </label>
-            </form>
-            
-            {% if users is empty %}
-                <p style="padding: 2rem; text-align: center; color: var(--ac-text-muted, #6b7280);">No users found</p>
-            {% else %}
-                <div class="ac-table-container">
-                    <table class="ac-table">
-                        <thead>
-                            <tr>
-                                <th>Username</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                                <th>Presence</th>
-                                <th style="text-align: right;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for user in users %}
-                            <tr data-user-id="{{ user.id }}">
-                                <td>{{ user.username }}</td>
-                                <td>{{ user.email }}</td>
-                                <td><span class="ac-badge ac-badge-{{ user.role|lower }}">{{ user.role }}</span></td>
-                                <td>
-                                    <span class="ac-badge ac-badge-{{ user.accountStatus == 'ACTIVE' ? 'success' : 'danger' }}">
-                                        {{ user.accountStatus }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="ac-badge ac-badge-{{ user.presenceStatus == 'ONLINE' ? 'success' : 'secondary' }}">
-                                        {{ user.presenceStatus }}
-                                    </span>
-                                </td>
-                                <td style="text-align: right;">
-                                    <button class="ac-icon-btn"
-                                            type="button"
-                                            title="Preview profile"
-                                            data-user-id="{{ user.id }}"
-                                            data-user-username="{{ user.username|e('html_attr') }}"
-                                            data-user-email="{{ user.email|e('html_attr') }}"
-                                            data-user-role="{{ user.role }}"
-                                            data-user-account-status="{{ user.accountStatus }}"
-                                            data-user-presence-status="{{ user.presenceStatus }}"
-                                            data-user-first-name="{{ user.firstName|e('html_attr') }}"
-                                            data-user-last-name="{{ user.lastName|e('html_attr') }}"
-                                            data-user-country="{{ user.country|e('html_attr') }}"
-                                            data-user-state="{{ user.state|e('html_attr') }}"
-                                            data-user-about-me="{{ user.aboutMe|e('html_attr') }}"
-                                            data-user-profile-image-url="{{ user.profileImageUrl|e('html_attr') }}"
-                                            data-action="click->user-actions#openPreview">
-                                        <span class="material-symbols-outlined">visibility</span>
-                                    </button>
-                                    <button class="ac-icon-btn" 
-                                            title="Edit user" 
-                                            data-user-id="{{ user.id }}"
-                                            data-action="click->edit-user#openEditModal">
-                                        <span class="material-symbols-outlined">edit</span>
-                                    </button>
-                                    <button class="ac-icon-btn"
-                                            type="button"
-                                            title="Toggle status" 
-                                            data-user-id="{{ user.id }}"
-                                            data-user-email="{{ user.email|e('html_attr') }}"
-                                            data-action="click->user-actions#toggleStatus">
-                                        <span class="material-symbols-outlined">toggle_off</span>
-                                    </button>
-                                    <button class="ac-icon-btn ac-danger"
-                                            type="button"
-                                            title="Ban user" 
-                                            data-user-id="{{ user.id }}"
-                                            data-user-email="{{ user.email|e('html_attr') }}"
-                                            data-action="click->user-actions#banUser">
-                                        <span class="material-symbols-outlined">block</span>
-                                    </button>
-                                    <button class="ac-icon-btn ac-danger"
-                                            type="button"
-                                            title="Delete user" 
-                                            data-user-id="{{ user.id }}"
-                                            data-user-email="{{ user.email|e('html_attr') }}"
-                                            data-action="click->user-actions#deleteUser">
-                                        <span class="material-symbols-outlined">delete</span>
-                                    </button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+  {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+  <div class="ac-main" data-controller="user-actions edit-user modal">
+    {% include 'access_control/components/_topbar.html.twig' with { title: 'User management', subtitle: 'Manage roles
+    and accounts', username: userName } %}
+    <section class="ac-card">
+      <div class="ac-row-between" style="margin-bottom: 1rem;">
+        <h3>Users ({{ pagination.total }} total)</h3>
+        <button class="ac-btn" data-action="click->modal#open" data-modal-id-param="create-user-modal">Add user</button>
+      </div>
+      <form method="get" action="{{ path('ac_ui_users') }}" class="ac-form" data-controller="user-filters"
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <input type="hidden" name="page" value="1">
+        <label style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <span style="font-size: 0.875rem; font-weight: 500;">Email</span>
+          <input class="ac-input" name="email" type="text" placeholder="Search by email..."
+            value="{{ filters.email ?? '' }}" data-action="input->user-filters#onInput">
+        </label>
+        <label style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <span style="font-size: 0.875rem; font-weight: 500;">Role</span>
+          <select class="ac-input" name="role" data-action="change->user-filters#onChange">
+            <option value="">All roles</option>
+            <option value="THERAPIST" {{ filters.role=='THERAPIST' ? 'selected' : '' }}>Therapist</option>
+            <option value="PATIENT" {{ filters.role=='PATIENT' ? 'selected' : '' }}>Patient</option>
+          </select>
+        </label>
+        <label style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <span style="font-size: 0.875rem; font-weight: 500;">Status</span>
+          <select class="ac-input" name="accountStatus" data-action="change->user-filters#onChange">
+            <option value="">All statuses</option>
+            <option value="ACTIVE" {{ filters.accountStatus=='ACTIVE' ? 'selected' : '' }}>Active</option>
+            <option value="DISABLED" {{ filters.accountStatus=='DISABLED' ? 'selected' : '' }}>Disabled</option>
+          </select>
+        </label>
+      </form>
 
-                {# Pagination #}
-                {% if pagination.totalPages > 1 %}
-                <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem;">
-                    {% if pagination.page > 1 %}
-                        <a href="{{ path('ac_ui_users', {page: pagination.page - 1, email: filters.email, role: filters.role, accountStatus: filters.accountStatus}) }}" 
-                           class="ac-ghost-btn">Previous</a>
-                    {% endif %}
-                    
-                    <span style="padding: 0.5rem 1rem; display: flex; align-items: center;">
-                        Page {{ pagination.page }} of {{ pagination.totalPages }}
-                    </span>
-                    
-                    {% if pagination.page < pagination.totalPages %}
-                        <a href="{{ path('ac_ui_users', {page: pagination.page + 1, email: filters.email, role: filters.role, accountStatus: filters.accountStatus}) }}" 
-                           class="ac-ghost-btn">Next</a>
-                    {% endif %}
-                </div>
-                {% endif %}
-            {% endif %}
-        </section>
+      {% if users is empty %}
+      <p style="padding: 2rem; text-align: center; color: var(--ac-text-muted, #6b7280);">No users found</p>
+      {% else %}
+      <div class="ac-table-container">
+        <table class="ac-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Presence</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr data-user-id="{{ user.id }}">
+              <td>{{ user.username }}</td>
+              <td>{{ user.email }}</td>
+              <td><span class="ac-badge ac-badge-{{ user.role|lower }}">{{ user.role }}</span></td>
+              <td>
+                <span class="ac-badge ac-badge-{{ user.accountStatus == 'ACTIVE' ? 'success' : 'danger' }}">
+                  {{ user.accountStatus }}
+                </span>
+              </td>
+              <td>
+                <span class="ac-badge ac-badge-{{ user.presenceStatus == 'ONLINE' ? 'success' : 'secondary' }}">
+                  {{ user.presenceStatus }}
+                </span>
+              </td>
+              <td style="text-align: right;">
+                <button class="ac-icon-btn" type="button" title="Preview profile" data-user-id="{{ user.id }}"
+                  data-user-username="{{ user.username|e('html_attr') }}"
+                  data-user-email="{{ user.email|e('html_attr') }}" data-user-role="{{ user.role }}"
+                  data-user-account-status="{{ user.accountStatus }}"
+                  data-user-presence-status="{{ user.presenceStatus }}"
+                  data-user-first-name="{{ user.firstName|e('html_attr') }}"
+                  data-user-last-name="{{ user.lastName|e('html_attr') }}"
+                  data-user-country="{{ user.country|e('html_attr') }}"
+                  data-user-state="{{ user.state|e('html_attr') }}"
+                  data-user-about-me="{{ user.aboutMe|e('html_attr') }}"
+                  data-user-profile-image-url="{{ user.profileImageUrl|e('html_attr') }}"
+                  data-action="click->user-actions#openPreview">
+                  <span class="material-symbols-outlined">visibility</span>
+                </button>
+                <button class="ac-icon-btn" title="Edit user" data-user-id="{{ user.id }}"
+                  data-action="click->edit-user#openEditModal">
+                  <span class="material-symbols-outlined">edit</span>
+                </button>
+                <button class="ac-icon-btn" type="button" title="Toggle status" data-user-id="{{ user.id }}"
+                  data-user-email="{{ user.email|e('html_attr') }}" data-action="click->user-actions#toggleStatus">
+                  <span class="material-symbols-outlined">toggle_off</span>
+                </button>
+                <button class="ac-icon-btn ac-danger" type="button" title="Ban user" data-user-id="{{ user.id }}"
+                  data-user-email="{{ user.email|e('html_attr') }}" data-action="click->user-actions#banUser">
+                  <span class="material-symbols-outlined">block</span>
+                </button>
+                <button class="ac-icon-btn ac-danger" type="button" title="Delete user" data-user-id="{{ user.id }}"
+                  data-user-email="{{ user.email|e('html_attr') }}" data-action="click->user-actions#deleteUser">
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
-        <div class="ac-modal" id="create-user-modal" hidden>
-            <div class="ac-modal-content">
-                <h3>Create user</h3>
-                <form class="ac-form" method="post" action="{{ path('api_admin_users_create') }}" data-action="submit->user-actions#createUser">
-                    <label>Email<input class="ac-input" name="email" type="email" required></label>
-                    <label>Password<input class="ac-input" name="password" type="password" required></label>
-                    <label>Confirm password<input class="ac-input" name="confirmPassword" type="password" required></label>
-                    <label>Role
-                        <select class="ac-input" name="role">
-                            <option value="PATIENT">Patient</option>
-                            <option value="THERAPIST">Therapist</option>
-                            <option value="ADMIN">Admin</option>
-                        </select>
-                    </label>
-                    <div class="ac-row-end">
-                        <button class="ac-ghost-btn" type="button" data-action="modal#close">Cancel</button>
-                        <button class="ac-btn" type="submit">Save</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+      {# Pagination #}
+      {% if pagination.totalPages > 1 %}
+      <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem;">
+        {% if pagination.page > 1 %}
+        <a href="{{ path('ac_ui_users', {page: pagination.page - 1, email: filters.email, role: filters.role, accountStatus: filters.accountStatus}) }}"
+          class="ac-ghost-btn">Previous</a>
+        {% endif %}
 
-        <div class="ac-modal" id="edit-user-modal" hidden>
-            <div class="ac-modal-content">
-                <h3>Edit user</h3>
-                <form class="ac-form" data-edit-user-target="form" data-action="submit->edit-user#submitEdit">
-                    <input type="hidden" data-edit-user-target="userId">
-                    
-                    <label>
-                        <span class="ac-label">Email</span>
-                        <input class="ac-input" name="email" type="email" data-edit-user-target="email" required>
-                    </label>
-                    
-                    <label>
-                        <span class="ac-label">Role</span>
-                        <select class="ac-input" name="role" data-edit-user-target="role" required>
-                            <option value="ADMIN">Admin</option>
-                            <option value="THERAPIST">Therapist</option>
-                            <option value="PATIENT">Patient</option>
-                        </select>
-                    </label>
-                    
-                    <label>
-                        <span class="ac-label">Account Status</span>
-                        <select class="ac-input" name="accountStatus" data-edit-user-target="status" required>
-                            <option value="ACTIVE">Active</option>
-                            <option value="DISABLED">Disabled</option>
-                        </select>
-                    </label>
-                    
-                    <label>
-                        <span class="ac-label">New Password (optional)</span>
-                        <input class="ac-input" name="password" type="password" placeholder="Leave blank to keep current">
-                    </label>
-                    
-                    <div class="ac-row-end">
-                        <button class="ac-ghost-btn" type="button" data-action="click->edit-user#closeModal">Cancel</button>
-                        <button class="ac-btn" type="submit">Save changes</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        <span style="padding: 0.5rem 1rem; display: flex; align-items: center;">
+          Page {{ pagination.page }} of {{ pagination.totalPages }}
+        </span>
 
-        <div class="ac-modal" id="preview-user-modal" hidden>
-            <div class="ac-modal-content">
-                <h3>User preview</h3>
-                <div class="ac-form ac-grid-two">
-                    <label>Profile image
-                        <div style="margin-top: .5rem;">
-                            <img id="preview-user-image" src="" alt="Profile image" style="max-width: 120px; max-height: 120px; border-radius: 12px; border: 1px solid var(--border);" hidden>
-                            <p id="preview-user-image-empty" style="color: var(--muted); margin: 0;">No profile image</p>
-                        </div>
-                    </label>
-                    <label>Username<input class="ac-input" id="preview-user-username" type="text" readonly></label>
-                    <label>Email<input class="ac-input" id="preview-user-email" type="text" readonly></label>
-                    <label>Role<input class="ac-input" id="preview-user-role" type="text" readonly></label>
-                    <label>Status<input class="ac-input" id="preview-user-status" type="text" readonly></label>
-                    <label>Presence<input class="ac-input" id="preview-user-presence" type="text" readonly></label>
-                    <label>First name<input class="ac-input" id="preview-user-first-name" type="text" readonly></label>
-                    <label>Last name<input class="ac-input" id="preview-user-last-name" type="text" readonly></label>
-                    <label>Country<input class="ac-input" id="preview-user-country" type="text" readonly></label>
-                    <label>State<input class="ac-input" id="preview-user-state" type="text" readonly></label>
-                    <label class="ac-col-span-2">About
-                        <textarea class="ac-input" id="preview-user-about" rows="4" readonly></textarea>
-                    </label>
-                    <div class="ac-row-end ac-col-span-2">
-                        <button class="ac-ghost-btn" type="button" data-action="modal#close">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {% if pagination.page < pagination.totalPages %} <a
+          href="{{ path('ac_ui_users', {page: pagination.page + 1, email: filters.email, role: filters.role, accountStatus: filters.accountStatus}) }}"
+          class="ac-ghost-btn">Next</a>
+          {% endif %}
+      </div>
+      {% endif %}
+      {% endif %}
+    </section>
 
-        <div class="ac-modal" id="confirm-user-action-modal" hidden>
-            <div class="ac-modal-content">
-                <h3 id="confirm-user-action-title">Confirm action</h3>
-                <p id="confirm-user-action-message" style="color: var(--muted); margin-bottom: 1rem;"></p>
-                <div class="ac-row-end">
-                    <button class="ac-ghost-btn" type="button" data-action="click->user-actions#cancelPendingAction modal#close">Cancel</button>
-                    <button class="ac-btn ac-danger" id="confirm-user-action-button" type="button" data-action="click->user-actions#confirmPendingAction">Confirm</button>
-                </div>
-            </div>
-        </div>
+    <div class="ac-modal" id="create-user-modal" hidden>
+      <div class="ac-modal-content">
+        <h3>Create user</h3>
+        <form class="ac-form" method="post" action="{{ path('api_admin_users_create') }}"
+          data-action="submit->user-actions#createUser">
+          <label>Email<input class="ac-input" name="email" type="email" required></label>
+          <label>Password<input class="ac-input" name="password" type="password" required></label>
+          <label>Confirm password<input class="ac-input" name="confirmPassword" type="password" required></label>
+          <label>Role
+            <select class="ac-input" name="role">
+              <option value="PATIENT">Patient</option>
+              <option value="THERAPIST">Therapist</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+          </label>
+          <div class="ac-row-end">
+            <button class="ac-ghost-btn" type="button" data-action="modal#close">Cancel</button>
+            <button class="ac-btn" type="submit">Save</button>
+          </div>
+        </form>
+      </div>
     </div>
+
+    <div class="ac-modal" id="edit-user-modal" hidden>
+      <div class="ac-modal-content">
+        <h3>Edit user</h3>
+        <form class="ac-form" data-edit-user-target="form" data-action="submit->edit-user#submitEdit">
+          <input type="hidden" data-edit-user-target="userId">
+
+          <label>
+            <span class="ac-label">Email</span>
+            <input class="ac-input" name="email" type="email" data-edit-user-target="email" required>
+          </label>
+
+          <label>
+            <span class="ac-label">Role</span>
+            <select class="ac-input" name="role" data-edit-user-target="role" required>
+              <option value="ADMIN">Admin</option>
+              <option value="THERAPIST">Therapist</option>
+              <option value="PATIENT">Patient</option>
+            </select>
+          </label>
+
+          <label>
+            <span class="ac-label">Account Status</span>
+            <select class="ac-input" name="accountStatus" data-edit-user-target="status" required>
+              <option value="ACTIVE">Active</option>
+              <option value="DISABLED">Disabled</option>
+            </select>
+          </label>
+
+          <label>
+            <span class="ac-label">New Password (optional)</span>
+            <input class="ac-input" name="password" type="password" placeholder="Leave blank to keep current">
+          </label>
+
+          <div class="ac-row-end">
+            <button class="ac-ghost-btn" type="button" data-action="click->edit-user#closeModal">Cancel</button>
+            <button class="ac-btn" type="submit">Save changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="ac-modal" id="preview-user-modal" hidden>
+      <div class="ac-modal-content">
+        <h3>User preview</h3>
+        <div class="ac-form ac-grid-two">
+          <label>Profile image
+            <div style="margin-top: .5rem;">
+              <img id="preview-user-image" src="" alt="Profile image"
+                style="max-width: 120px; max-height: 120px; border-radius: 12px; border: 1px solid var(--border);"
+                hidden>
+              <p id="preview-user-image-empty" style="color: var(--muted); margin: 0;">No profile image</p>
+            </div>
+          </label>
+          <label>Username<input class="ac-input" id="preview-user-username" type="text" readonly></label>
+          <label>Email<input class="ac-input" id="preview-user-email" type="text" readonly></label>
+          <label>Role<input class="ac-input" id="preview-user-role" type="text" readonly></label>
+          <label>Status<input class="ac-input" id="preview-user-status" type="text" readonly></label>
+          <label>Presence<input class="ac-input" id="preview-user-presence" type="text" readonly></label>
+          <label>First name<input class="ac-input" id="preview-user-first-name" type="text" readonly></label>
+          <label>Last name<input class="ac-input" id="preview-user-last-name" type="text" readonly></label>
+          <label>Country<input class="ac-input" id="preview-user-country" type="text" readonly></label>
+          <label>State<input class="ac-input" id="preview-user-state" type="text" readonly></label>
+          <label class="ac-col-span-2">About
+            <textarea class="ac-input" id="preview-user-about" rows="4" readonly></textarea>
+          </label>
+          <div class="ac-row-end ac-col-span-2">
+            <button class="ac-ghost-btn" type="button" data-action="modal#close">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ac-modal" id="confirm-user-action-modal" hidden>
+      <div class="ac-modal-content">
+        <h3 id="confirm-user-action-title">Confirm action</h3>
+        <p id="confirm-user-action-message" style="color: var(--muted); margin-bottom: 1rem;"></p>
+        <div class="ac-row-end">
+          <button class="ac-ghost-btn" type="button"
+            data-action="click->user-actions#cancelPendingAction modal#close">Cancel</button>
+          <button class="ac-btn ac-danger" id="confirm-user-action-button" type="button"
+            data-action="click->user-actions#confirmPendingAction">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

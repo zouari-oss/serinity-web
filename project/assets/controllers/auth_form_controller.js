@@ -159,11 +159,11 @@ export default class extends Controller {
     this.errorTarget.textContent = message;
     this.errorTarget.hidden = false;
     this.errorTarget.classList.remove('ac-slide-in-down');
-    
+
     // Trigger reflow for animation restart
     void this.errorTarget.offsetWidth;
     this.errorTarget.classList.add('ac-slide-in-down');
-    
+
     // Auto-hide after 5 seconds
     setTimeout(() => {
       this.hideError();

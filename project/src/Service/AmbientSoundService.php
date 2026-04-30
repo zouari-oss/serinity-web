@@ -56,8 +56,7 @@ final readonly class AmbientSoundService
     public function __construct(
         private HttpClientInterface $httpClient,
         private LoggerInterface $logger,
-    ) {
-    }
+    ) {}
 
     /**
      * @param array<string,mixed> $context

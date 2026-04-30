@@ -36,8 +36,7 @@ final class ExerciceController extends AbstractUserUiController
         private readonly PaginatorInterface $paginator,
         private readonly float $defaultLatitude,
         private readonly float $defaultLongitude,
-    ) {
-    }
+    ) {}
 
     #[Route('', name: 'user_ui_exercises', methods: ['GET'])]
     public function index(Request $request): Response

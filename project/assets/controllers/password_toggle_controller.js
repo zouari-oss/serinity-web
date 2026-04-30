@@ -10,7 +10,7 @@ export default class extends Controller {
 
     const hidden = input.type === 'password';
     input.type = hidden ? 'text' : 'password';
-    
+
     // Update icon
     const icon = btn.querySelector('[data-password-toggle-target="icon"]');
     if (icon) {

@@ -16,8 +16,7 @@ final class DashboardController extends AbstractController
 {
     public function __construct(
         private readonly DashboardService $dashboardService,
-    ) {
-    }
+    ) {}
 
     /**
      * Get dashboard statistics.

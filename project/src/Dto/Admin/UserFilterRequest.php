@@ -27,6 +27,9 @@ final readonly class UserFilterRequest
 
         #[Assert\Choice(choices: ['ACTIVE', 'DISABLED'], message: 'Invalid account status')]
         public ?string $accountStatus = null,
+
+        #[Assert\Choice(choices: ['SAFE', 'MEDIUM', 'DANGER'], message: 'Invalid risk level')]
+        public ?string $riskLevel = null,
     ) {
     }
 
@@ -47,6 +50,10 @@ final readonly class UserFilterRequest
 
         if ($this->accountStatus !== null) {
             $filters['accountStatus'] = $this->accountStatus;
+        }
+
+        if ($this->riskLevel !== null) {
+            $filters['riskLevel'] = $this->riskLevel;
         }
 
         return $filters;

@@ -31,7 +31,7 @@ class UserRepository extends ServiceEntityRepository
     /**
      * Find users with pagination and optional filters.
      * 
-     * @param array{email?: string, role?: string, accountStatus?: string} $filters
+     * @param array{email?: string, role?: string, accountStatus?: string, riskLevel?: string} $filters
      * @return array{users: User[], total: int, page: int, limit: int, totalPages: int}
      */
     public function findPaginated(int $page = 1, int $limit = 20, array $filters = []): array
@@ -54,6 +54,11 @@ class UserRepository extends ServiceEntityRepository
         if (!empty($filters['accountStatus'])) {
             $qb->andWhere('u.accountStatus = :accountStatus')
                ->setParameter('accountStatus', $filters['accountStatus']);
+        }
+
+        if (!empty($filters['riskLevel'])) {
+            $qb->andWhere('u.riskLevel = :riskLevel')
+                ->setParameter('riskLevel', $filters['riskLevel']);
         }
 
         // Count total before pagination
@@ -173,7 +178,7 @@ class UserRepository extends ServiceEntityRepository
     /**
      * Find non-admin users with pagination and optional filters.
      *
-     * @param array{email?: string, role?: string, accountStatus?: string} $filters
+     * @param array{email?: string, role?: string, accountStatus?: string, riskLevel?: string} $filters
      * @return array{users: User[], total: int, page: int, limit: int, totalPages: int}
      */
     public function findPaginatedNonAdmin(int $page = 1, int $limit = 20, array $filters = []): array
@@ -197,6 +202,11 @@ class UserRepository extends ServiceEntityRepository
         if (!empty($filters['accountStatus'])) {
             $qb->andWhere('u.accountStatus = :accountStatus')
                 ->setParameter('accountStatus', $filters['accountStatus']);
+        }
+
+        if (!empty($filters['riskLevel'])) {
+            $qb->andWhere('u.riskLevel = :riskLevel')
+                ->setParameter('riskLevel', $filters['riskLevel']);
         }
 
         $countQb = clone $qb;

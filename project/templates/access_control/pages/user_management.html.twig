@@ -33,6 +33,15 @@
                         <option value="DISABLED" {{ filters.accountStatus == 'DISABLED' ? 'selected' : '' }}>Disabled</option>
                     </select>
                 </label>
+                <label style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <span style="font-size: 0.875rem; font-weight: 500;">Risk level</span>
+                    <select class="ac-input" name="riskLevel" data-action="change->user-filters#onChange">
+                        <option value="">All risk levels</option>
+                        <option value="SAFE" {{ filters.riskLevel == 'SAFE' ? 'selected' : '' }}>SAFE</option>
+                        <option value="MEDIUM" {{ filters.riskLevel == 'MEDIUM' ? 'selected' : '' }}>MEDIUM</option>
+                        <option value="DANGER" {{ filters.riskLevel == 'DANGER' ? 'selected' : '' }}>DANGER</option>
+                    </select>
+                </label>
             </form>
             
             {% if users is empty %}
@@ -47,6 +56,7 @@
                                 <th>Role</th>
                                 <th>Status</th>
                                 <th>Presence</th>
+                                <th>Risk Level</th>
                                 <th style="text-align: right;">Actions</th>
                             </tr>
                         </thead>
@@ -65,6 +75,17 @@
                                     <span class="ac-badge ac-badge-{{ user.presenceStatus == 'ONLINE' ? 'success' : 'secondary' }}">
                                         {{ user.presenceStatus }}
                                     </span>
+                                </td>
+                                <td>
+                                    {% if user.riskLevel == 'SAFE' %}
+                                        <span class="ac-badge ac-badge-success">SAFE</span>
+                                    {% elseif user.riskLevel == 'DANGER' %}
+                                        <span class="ac-badge ac-badge-danger">DANGER</span>
+                                    {% elseif user.riskLevel == 'MEDIUM' %}
+                                        <span class="ac-badge ac-badge-warning">MEDIUM</span>
+                                    {% else %}
+                                        <span class="ac-badge ac-badge-secondary">N/A</span>
+                                    {% endif %}
                                 </td>
                                 <td style="text-align: right;">
                                     <button class="ac-icon-btn"
@@ -126,7 +147,7 @@
                 {% if pagination.totalPages > 1 %}
                 <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem;">
                     {% if pagination.page > 1 %}
-                        <a href="{{ path('ac_ui_users', {page: pagination.page - 1, email: filters.email, role: filters.role, accountStatus: filters.accountStatus}) }}" 
+                        <a href="{{ path('ac_ui_users', {page: pagination.page - 1, email: filters.email, role: filters.role, accountStatus: filters.accountStatus, riskLevel: filters.riskLevel}) }}" 
                            class="ac-ghost-btn">Previous</a>
                     {% endif %}
                     
@@ -135,7 +156,7 @@
                     </span>
                     
                     {% if pagination.page < pagination.totalPages %}
-                        <a href="{{ path('ac_ui_users', {page: pagination.page + 1, email: filters.email, role: filters.role, accountStatus: filters.accountStatus}) }}" 
+                        <a href="{{ path('ac_ui_users', {page: pagination.page + 1, email: filters.email, role: filters.role, accountStatus: filters.accountStatus, riskLevel: filters.riskLevel}) }}" 
                            class="ac-ghost-btn">Next</a>
                     {% endif %}
                 </div>

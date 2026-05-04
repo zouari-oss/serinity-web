@@ -79,6 +79,9 @@ parameters:
     app.mood_ml_api_prediction_route: '%env(string:MOOD_ML_API_PREDICTION_ROUTE)%'
     app.mood_ml_api_key: '%env(string:MOOD_ML_API_KEY)%'
     app.mood_ml_api_timeout: '%env(float:MOOD_ML_API_TIMEOUT)%'
+    app.user_risk_detection_url: '%env(string:USER_RISK_DETECTION_URL)%'
+    app.user_risk_api_timeout: '%env(float:USER_RISK_API_TIMEOUT)%'
+    app.user_risk_cache_ttl_seconds: '%env(int:USER_RISK_CACHE_TTL_SECONDS)%'
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -257,6 +260,14 @@ services:
             $apiKey: '%app.mood_ml_api_key%'
             $timeout: '%app.mood_ml_api_timeout%'
             $httpClient: '@http_client'
+
+    App\Service\Risk\UserRiskService:
+        arguments:
+            $riskDetectionUrl: '%app.user_risk_detection_url%'
+            $timeoutSeconds: '%app.user_risk_api_timeout%'
+            $cacheTtlSeconds: '%app.user_risk_cache_ttl_seconds%'
+            $httpClient: '@http_client'
+            $cachePool: '@cache.app'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

@@ -16,6 +16,7 @@ use App\Enum\UserRole;
 use App\Repository\AuthSessionRepository;
 use App\Repository\ProfileRepository;
 use App\Repository\UserRepository;
+use App\Service\Risk\UserRiskService;
 use App\Service\Security\TwoFactorCheckRateLimiter;
 use App\Service\Security\TwoFactorPendingLoginStore;
 use Doctrine\ORM\EntityManagerInterface;
@@ -38,6 +39,7 @@ final readonly class AuthenticationService
         private TwoFactorCheckRateLimiter $twoFactorCheckRateLimiter,
         private EmailVerificationService $emailVerificationService,
         private AccountAccessService $accountAccessService,
+        private UserRiskService $userRiskService,
     ) {
     }
 
@@ -133,6 +135,8 @@ final readonly class AuthenticationService
         $session = $this->sessionService->createSession($user);
         $this->auditLogService->log($session, AuditAction::USER_LOGIN);
         $this->entityManager->flush();
+        $this->userRiskService->evaluateAndStore($user, true);
+        $this->entityManager->flush();
 
         return ServiceResult::success('Login successful.', $this->buildAuthPayload($user, $session->getRefreshToken(), $request->rememberMe));
     }
@@ -180,6 +184,8 @@ final readonly class AuthenticationService
         $session = $this->sessionService->createSession($user);
         $this->auditLogService->log($session, AuditAction::USER_LOGIN);
         $this->entityManager->flush();
+        $this->userRiskService->evaluateAndStore($user, true);
+        $this->entityManager->flush();
 
         return ServiceResult::success('Login successful.', [
             ...$this->buildAuthPayload($user, $session->getRefreshToken(), $challenge['rememberMe']),
@@ -192,6 +198,8 @@ final readonly class AuthenticationService
         $this->sessionService->revokeActiveSessions($user);
         $session = $this->sessionService->createSession($user);
         $this->auditLogService->log($session, AuditAction::USER_LOGIN);
+        $this->entityManager->flush();
+        $this->userRiskService->evaluateAndStore($user, true);
         $this->entityManager->flush();
 
         return $this->buildAuthPayload($user, $session->getRefreshToken(), $rememberMe);

@@ -1,0 +1,99 @@
+{% set isEdit = sommeil is defined and sommeil is not null %}
+
+{{ form_start(form, {
+    action: isEdit
+    ? path('app_sommeil_edit', {id: sommeil.id})
+    : path('app_sommeil_new'),
+    method: 'POST',
+    attr: { novalidate: 'novalidate' }
+}) }}
+
+{# ── En-tête ── #}
+<div class="ac-row-between" style="margin-bottom: 1.25rem;">
+    <div>
+        <h3 style="font-size: 1rem; font-weight: 700; margin: 0;">
+            {{ isEdit ? 'Modifier la nuit' : 'Nouvelle nuit' }}
+        </h3>
+        <p style="color: var(--color-text-muted); font-size: 0.85rem; margin-top: 0.2rem;">
+            {{ isEdit ? (sommeil.dateNuit ? sommeil.dateNuit|date('d/m/Y') : 'Édition') : 'Enregistrez votre nuit de sommeil' }}
+        </p>
+    </div>
+</div>
+
+{% for message in app.flashes('error') %}
+    <div class="ac-inline-error" style="margin-bottom: 1rem;">{{ message }}</div>
+{% endfor %}
+
+{{ form_errors(form) }}
+
+{# ── Section Horaires ── #}
+<div class="ac-card" style="margin-bottom: 1rem;">
+    <h4 style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+               letter-spacing: 0.05em; color: var(--color-text-muted); margin-bottom: 1rem;">
+        ⏰ Horaires
+    </h4>
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem;">
+        <label><span class="ac-label">{{ form_label(form.dateNuit) }}</span>{{ form_widget(form.dateNuit, {'attr': {'class': 'ac-input'}}) }}{{ form_errors(form.dateNuit) }}</label>
+        <label><span class="ac-label">{{ form_label(form.heureCoucher) }}</span>{{ form_widget(form.heureCoucher, {'attr': {'class': 'ac-input'}}) }}{{ form_errors(form.heureCoucher) }}</label>
+        <label><span class="ac-label">{{ form_label(form.heureReveil) }}</span>{{ form_widget(form.heureReveil, {'attr': {'class': 'ac-input'}}) }}{{ form_errors(form.heureReveil) }}</label>
+        <label><span class="ac-label">{{ form_label(form.dureeSommeil) }}</span>{{ form_widget(form.dureeSommeil, {'attr': {'class': 'ac-input'}}) }}{{ form_errors(form.dureeSommeil) }}</label>
+    </div>
+</div>
+
+{# ── Section Qualité ── #}
+<div class="ac-card" style="margin-bottom: 1rem;">
+    <h4 style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+               letter-spacing: 0.05em; color: var(--color-text-muted); margin-bottom: 1rem;">
+        ⭐ Qualité &amp; ressenti
+    </h4>
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem;">
+        <label><span class="ac-label">{{ form_label(form.qualite) }}</span>{{ form_widget(form.qualite, {'attr': {'class': 'ac-input'}}) }}{{ form_errors(form.qualite) }}</label>
+        <label><span class="ac-label">{{ form_label(form.humeurReveil) }}</span>{{ form_widget(form.humeurReveil, {'attr': {'class': 'ac-input'}}) }}{{ form_errors(form.humeurReveil) }}</label>
+        <label style="grid-column: 1 / -1;"><span class="ac-label">{{ form_label(form.interruptions) }}</span>{{ form_widget(form.interruptions, {'attr': {'class': 'ac-input'}}) }}{{ form_errors(form.interruptions) }}</label>
+    </div>
+</div>
+
+{# ── Section Environnement ── #}
+<div class="ac-card" style="margin-bottom: 1rem;">
+    <h4 style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+               letter-spacing: 0.05em; color: var(--color-text-muted); margin-bottom: 1rem;">
+        🏠 Environnement
+    </h4>
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem;">
+        <label><span class="ac-label">{{ form_label(form.environnement) }}</span>{{ form_widget(form.environnement, {'attr': {'class': 'ac-input'}}) }}{{ form_errors(form.environnement) }}</label>
+        <label><span class="ac-label">{{ form_label(form.temperature) }}</span>{{ form_widget(form.temperature, {'attr': {'class': 'ac-input'}}) }}{{ form_errors(form.temperature) }}</label>
+        <label style="grid-column: 1 / -1;"><span class="ac-label">{{ form_label(form.bruitNiveau) }}</span>{{ form_widget(form.bruitNiveau, {'attr': {'class': 'ac-input'}}) }}{{ form_errors(form.bruitNiveau) }}</label>
+    </div>
+</div>
+
+{# ── Section Notes ── #}
+<div class="ac-card" style="margin-bottom: 1.25rem;">
+    <h4 style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+               letter-spacing: 0.05em; color: var(--color-text-muted); margin-bottom: 1rem;">
+        📝 Notes
+    </h4>
+    <label>
+        <span class="ac-label">{{ form_label(form.commentaire) }}</span>
+        {{ form_widget(form.commentaire, {'attr': {'class': 'ac-input', 'rows': '3'}}) }}
+        {{ form_errors(form.commentaire) }}
+    </label>
+</div>
+
+{# ── Actions ── #}
+<div class="ac-row-end">
+    {% if modal_mode|default(false) %}
+        <button type="button" class="ac-ghost-btn" onclick="closeSommeilModal()">Annuler</button>
+    {% else %}
+        {% if isEdit %}
+            <a href="{{ path('app_sommeil_show', {id: sommeil.id}) }}" class="ac-ghost-btn">Annuler</a>
+        {% else %}
+            <a href="{{ path('app_sommeil_list') }}" class="ac-ghost-btn">Annuler</a>
+        {% endif %}
+    {% endif %}
+    <button type="submit" class="ac-btn ac-btn-primary">
+        <span class="material-symbols-outlined" style="font-size:16px;">check</span>
+        {{ isEdit ? 'Sauvegarder' : 'Enregistrer' }}
+    </button>
+</div>
+
+{{ form_end(form) }}

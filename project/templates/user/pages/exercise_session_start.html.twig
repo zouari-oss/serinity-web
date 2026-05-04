@@ -1,545 +1,521 @@
 {% extends 'access_control/layout.html.twig' %}
 {% block title %}Session started | Serinity{% endblock %}
 {% block stylesheets %}
-{{ parent() }}
-<style>
-  .ac-breathing-card {
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1rem;
-    background: var(--surface-soft);
-    margin-bottom: 1rem;
-  }
-
-  .ac-breathing-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: .75rem;
-    margin-bottom: .75rem;
-  }
-
-  .ac-breathing-stage {
-    position: relative;
-    display: grid;
-    place-items: center;
-    min-height: 220px;
-    margin-bottom: .75rem;
-  }
-
-  .ac-breathing-orbit {
-    position: absolute;
-    width: 170px;
-    height: 170px;
-    border-radius: 999px;
-    border: 1px dashed rgba(37, 99, 235, .35);
-    animation: acOrbitSpin 10s linear infinite;
-    pointer-events: none;
-  }
-
-  .ac-breathing-circle {
-    width: 138px;
-    height: 138px;
-    border-radius: 999px;
-    display: grid;
-    place-items: center;
-    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, .8), rgba(37, 99, 235, .2));
-    box-shadow: 0 16px 36px rgba(37, 99, 235, .22);
-    transform: scale(1);
-    transition: transform .45s ease, background .45s ease, box-shadow .45s ease;
-  }
-
-  .ac-breathing-circle.is-inhale {
-    transform: scale(1.1);
-    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, .92), rgba(37, 99, 235, .28));
-    box-shadow: 0 18px 42px rgba(37, 99, 235, .3);
-  }
-
-  .ac-breathing-circle.is-hold {
-    transform: scale(1.08);
-    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, .9), rgba(96, 165, 250, .24));
-    box-shadow: 0 18px 42px rgba(56, 189, 248, .28);
-  }
-
-  .ac-breathing-circle.is-exhale {
-    transform: scale(.92);
-    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, .9), rgba(16, 185, 129, .2));
-    box-shadow: 0 12px 28px rgba(16, 185, 129, .28);
-  }
-
-  .ac-breathing-circle.is-paused {
-    transform: scale(.96);
-    filter: grayscale(.2);
-  }
-
-  .ac-breathing-inner {
-    text-align: center;
-    padding: .4rem;
-  }
-
-  .ac-breathing-label {
-    display: block;
-    font-size: .86rem;
-    color: var(--muted);
-    margin-bottom: .2rem;
-    transition: opacity .22s ease;
-  }
-
-  .ac-breathing-label.is-changing {
-    opacity: .35;
-  }
-
-  .ac-breathing-count {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--text);
-  }
-
-  @keyframes acOrbitSpin {
-    from {
-      transform: rotate(0deg);
-    }
-
-    to {
-      transform: rotate(360deg);
-    }
-  }
-</style>
+    {{ parent() }}
+    <style>
+        .ac-breathing-card {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1rem;
+            background: var(--surface-soft);
+            margin-bottom: 1rem;
+        }
+        .ac-breathing-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: .75rem;
+            margin-bottom: .75rem;
+        }
+        .ac-breathing-stage {
+            position: relative;
+            display: grid;
+            place-items: center;
+            min-height: 220px;
+            margin-bottom: .75rem;
+        }
+        .ac-breathing-orbit {
+            position: absolute;
+            width: 170px;
+            height: 170px;
+            border-radius: 999px;
+            border: 1px dashed rgba(37, 99, 235, .35);
+            animation: acOrbitSpin 10s linear infinite;
+            pointer-events: none;
+        }
+        .ac-breathing-circle {
+            width: 138px;
+            height: 138px;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.8), rgba(37,99,235,.2));
+            box-shadow: 0 16px 36px rgba(37, 99, 235, .22);
+            transform: scale(1);
+            transition: transform .45s ease, background .45s ease, box-shadow .45s ease;
+        }
+        .ac-breathing-circle.is-inhale {
+            transform: scale(1.1);
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.92), rgba(37,99,235,.28));
+            box-shadow: 0 18px 42px rgba(37, 99, 235, .3);
+        }
+        .ac-breathing-circle.is-hold {
+            transform: scale(1.08);
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.9), rgba(96,165,250,.24));
+            box-shadow: 0 18px 42px rgba(56, 189, 248, .28);
+        }
+        .ac-breathing-circle.is-exhale {
+            transform: scale(.92);
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.9), rgba(16,185,129,.2));
+            box-shadow: 0 12px 28px rgba(16, 185, 129, .28);
+        }
+        .ac-breathing-circle.is-paused {
+            transform: scale(.96);
+            filter: grayscale(.2);
+        }
+        .ac-breathing-inner {
+            text-align: center;
+            padding: .4rem;
+        }
+        .ac-breathing-label {
+            display: block;
+            font-size: .86rem;
+            color: var(--muted);
+            margin-bottom: .2rem;
+            transition: opacity .22s ease;
+        }
+        .ac-breathing-label.is-changing {
+            opacity: .35;
+        }
+        .ac-breathing-count {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        @keyframes acOrbitSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
 <div class="ac-app-layout">
-  {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
-  <div class="ac-main">
-    {% include 'access_control/components/_topbar.html.twig' with { title: 'Session active', subtitle:
-    session.exercice.title, username: userName } %}
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Session active', subtitle: session.exercice.title, username: userName } %}
 
-    <section class="ac-card" data-session-root data-target-seconds="{{ (session.exercice.durationMinutes ?? 1) * 60 }}">
-      <div class="ac-row-between" style="margin-bottom: 1rem;">
-        <div>
-          <h3 style="margin:0;">{{ session.exercice.title }}</h3>
-          <p class="ac-muted" style="margin:.2rem 0 0;" data-session-copy>Session is running. Keep your pace.</p>
-        </div>
-        <div class="ac-badge ac-badge-warning" data-session-status>Running</div>
-      </div>
-
-      <div class="ac-cards" style="margin-bottom: 1rem;">
-        <article class="ac-stat-card">
-          <h3>Elapsed</h3>
-          <p data-session-timer>00:00</p>
-        </article>
-        <article class="ac-stat-card">
-          <h3>Target</h3>
-          <p>{{ session.exercice.durationMinutes }} min</p>
-        </article>
-        <article class="ac-stat-card">
-          <h3>Progress</h3>
-          <p data-session-progress>0%</p>
-        </article>
-      </div>
-
-      <div style="margin-bottom: 1rem;">
-        <div
-          style="height: .5rem; width: 100%; border-radius: 999px; background: rgba(17, 24, 39, .08); overflow: hidden;">
-          <div data-session-progress-fill
-            style="height:100%; width:0; background: linear-gradient(90deg, var(--primary), #5b93ff); transition: width .2s ease;">
-          </div>
-        </div>
-        <p class="ac-muted" style="margin:.5rem 0 0;" data-session-note>
-          Session started. You can pause and resume at any moment.
-        </p>
-      </div>
-
-      <div class="ac-row-end" style="gap:.5rem; margin-bottom:1rem;">
-        <button class="ac-ghost-btn" type="button" data-session-pause>Pause</button>
-        <button class="ac-ghost-btn" type="button" data-session-resume hidden>Resume</button>
-      </div>
-
-      <div class="ac-card" style="margin:0 0 1rem; padding:1rem;">
-        <div class="ac-row-between" style="gap:.75rem; align-items:center; margin-bottom:.75rem;">
-          <div>
-            <p class="ac-muted" style="margin:0;">Ambient sound</p>
-            <h4 style="margin:.2rem 0 0;">{{ audioMood }} soundtrack</h4>
-          </div>
-          <span class="ac-badge ac-badge-secondary">{{ audioType|default('ambient')|capitalize }}</span>
-        </div>
-
-        <audio id="ambient-audio" loop preload="auto" playsinline {% if audioUrl %}data-audio-url="{{ audioUrl }}" {%
-          endif %}>
-          {% if audioUrl %}
-          <source src="{{ audioUrl }}" type="audio/mpeg">
-          {% endif %}
-        </audio>
-
-        <p class="ac-muted" style="margin:0 0 .75rem;" data-audio-status>
-          Relaxing background music will start automatically when playback is allowed.
-        </p>
-
-        <div class="ac-row-end" style="gap:.5rem;">
-          <button class="ac-btn ac-btn-primary" type="button" data-audio-play hidden>Play ambient music</button>
-          <button class="ac-ghost-btn" type="button" data-audio-pause>Pause music</button>
-          <button class="ac-ghost-btn" type="button" data-audio-resume>Resume music</button>
-          <button class="ac-ghost-btn" type="button" data-audio-stop>Stop music</button>
-        </div>
-      </div>
-
-      <div class="ac-breathing-card">
-        <div class="ac-breathing-head">
-          <div>
-            <p class="ac-muted" style="margin:0;">Guided breathing</p>
-            <h4 style="margin:.2rem 0 0;">Breathing circle</h4>
-          </div>
-          <span class="ac-badge ac-badge-secondary" data-breath-cycle>Cycle 1</span>
-        </div>
-        <div class="ac-breathing-stage">
-          <div class="ac-breathing-orbit" aria-hidden="true"></div>
-          <div class="ac-breathing-circle is-inhale" data-breath-circle>
-            <div class="ac-breathing-inner">
-              <span class="ac-breathing-label" data-breath-label>Inhale deeply</span>
-              <strong class="ac-breathing-count" data-breath-count>4s</strong>
+        <section class="ac-card" data-session-root data-target-seconds="{{ (session.exercice.durationMinutes ?? 1) * 60 }}">
+            <div class="ac-row-between" style="margin-bottom: 1rem;">
+                <div>
+                    <h3 style="margin:0;">{{ session.exercice.title }}</h3>
+                    <p class="ac-muted" style="margin:.2rem 0 0;" data-session-copy>Session is running. Keep your pace.</p>
+                </div>
+                <div class="ac-badge ac-badge-warning" data-session-status>Running</div>
             </div>
-          </div>
-        </div>
-        <p class="ac-muted" style="margin:0;" data-breath-note>Inhale slowly and settle your rhythm.</p>
-      </div>
 
-      <form method="post" action="{{ path('user_ui_exercises_session_finish', { id: session.controlId }) }}"
-        class="ac-form">
-        <input type="hidden" name="activeSeconds" value="0" data-session-active-seconds>
-        <label>Feedback (optional)
-          <textarea class="ac-input" name="feedback" rows="3" placeholder="How did the session go?"></textarea>
-        </label>
-        <div class="ac-row-end" style="gap:.5rem;">
-          <a class="ac-ghost-btn" href="{{ path('user_ui_exercises_sessions') }}">See my sessions</a>
-          <button class="ac-btn ac-btn-primary" type="submit">Finish session</button>
-        </div>
-      </form>
-    </section>
-  </div>
+            <div class="ac-cards" style="margin-bottom: 1rem;">
+                <article class="ac-stat-card">
+                    <h3>Elapsed</h3>
+                    <p data-session-timer>00:00</p>
+                </article>
+                <article class="ac-stat-card">
+                    <h3>Target</h3>
+                    <p>{{ session.exercice.durationMinutes }} min</p>
+                </article>
+                <article class="ac-stat-card">
+                    <h3>Progress</h3>
+                    <p data-session-progress>0%</p>
+                </article>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <div style="height: .5rem; width: 100%; border-radius: 999px; background: rgba(17, 24, 39, .08); overflow: hidden;">
+                    <div data-session-progress-fill style="height:100%; width:0; background: linear-gradient(90deg, var(--primary), #5b93ff); transition: width .2s ease;"></div>
+                </div>
+                <p class="ac-muted" style="margin:.5rem 0 0;" data-session-note>
+                    Session started. You can pause and resume at any moment.
+                </p>
+            </div>
+
+            <div class="ac-row-end" style="gap:.5rem; margin-bottom:1rem;">
+                <button class="ac-ghost-btn" type="button" data-session-pause>Pause</button>
+                <button class="ac-ghost-btn" type="button" data-session-resume hidden>Resume</button>
+            </div>
+
+            <div class="ac-card" style="margin:0 0 1rem; padding:1rem;">
+                <div class="ac-row-between" style="gap:.75rem; align-items:center; margin-bottom:.75rem;">
+                    <div>
+                        <p class="ac-muted" style="margin:0;">Ambient sound</p>
+                        <h4 style="margin:.2rem 0 0;">{{ audioMood }} soundtrack</h4>
+                    </div>
+                    <span class="ac-badge ac-badge-secondary">{{ audioType|default('ambient')|capitalize }}</span>
+                </div>
+
+                <audio id="ambient-audio" loop preload="auto" playsinline {% if audioUrl %}data-audio-url="{{ audioUrl }}"{% endif %}>
+                    {% if audioUrl %}
+                        <source src="{{ audioUrl }}" type="audio/mpeg">
+                    {% endif %}
+                </audio>
+
+                <p class="ac-muted" style="margin:0 0 .75rem;" data-audio-status>
+                    Relaxing background music will start automatically when playback is allowed.
+                </p>
+
+                <div class="ac-row-end" style="gap:.5rem;">
+                    <button class="ac-btn ac-btn-primary" type="button" data-audio-play hidden>Play ambient music</button>
+                    <button class="ac-ghost-btn" type="button" data-audio-pause>Pause music</button>
+                    <button class="ac-ghost-btn" type="button" data-audio-resume>Resume music</button>
+                    <button class="ac-ghost-btn" type="button" data-audio-stop>Stop music</button>
+                </div>
+            </div>
+
+            <div class="ac-breathing-card">
+                <div class="ac-breathing-head">
+                    <div>
+                        <p class="ac-muted" style="margin:0;">Guided breathing</p>
+                        <h4 style="margin:.2rem 0 0;">Breathing circle</h4>
+                    </div>
+                    <span class="ac-badge ac-badge-secondary" data-breath-cycle>Cycle 1</span>
+                </div>
+                <div class="ac-breathing-stage">
+                    <div class="ac-breathing-orbit" aria-hidden="true"></div>
+                    <div class="ac-breathing-circle is-inhale" data-breath-circle>
+                        <div class="ac-breathing-inner">
+                            <span class="ac-breathing-label" data-breath-label>Inhale deeply</span>
+                            <strong class="ac-breathing-count" data-breath-count>4s</strong>
+                        </div>
+                    </div>
+                </div>
+                <p class="ac-muted" style="margin:0;" data-breath-note>Inhale slowly and settle your rhythm.</p>
+            </div>
+
+            <form method="post" action="{{ path('user_ui_exercises_session_finish', { id: session.controlId }) }}" class="ac-form">
+                <input type="hidden" name="activeSeconds" value="0" data-session-active-seconds>
+                <label>Feedback (optional)
+                    <textarea class="ac-input" name="feedback" rows="3" placeholder="How did the session go?"></textarea>
+                </label>
+                <div class="ac-row-end" style="gap:.5rem;">
+                    <a class="ac-ghost-btn" href="{{ path('user_ui_exercises_sessions') }}">See my sessions</a>
+                    <button class="ac-btn ac-btn-primary" type="submit">Finish session</button>
+                </div>
+            </form>
+        </section>
+    </div>
 </div>
 {% endblock %}
 
 {% block javascripts %}
-{{ parent() }}
-<script>
-  (() => {
-    const initSessionPage = () => {
-      const root = document.querySelector('[data-session-root]');
-      if (!root || root.dataset.sessionInitialized === '1') {
-        return;
-      }
-      root.dataset.sessionInitialized = '1';
+    {{ parent() }}
+    <script>
+        (() => {
+            const initSessionPage = () => {
+            const root = document.querySelector('[data-session-root]');
+                if (!root || root.dataset.sessionInitialized === '1') {
+                return;
+            }
+                root.dataset.sessionInitialized = '1';
 
-      const timerNode = root.querySelector('[data-session-timer]');
-      const progressNode = root.querySelector('[data-session-progress]');
-      const progressFillNode = root.querySelector('[data-session-progress-fill]');
-      const statusNode = root.querySelector('[data-session-status]');
-      const copyNode = root.querySelector('[data-session-copy]');
-      const noteNode = root.querySelector('[data-session-note]');
-      const activeSecondsField = root.querySelector('[data-session-active-seconds]');
-      const pauseButton = root.querySelector('[data-session-pause]');
-      const resumeButton = root.querySelector('[data-session-resume]');
-      const ambientAudioNode = document.getElementById('ambient-audio');
-      const audioStatusNode = root.querySelector('[data-audio-status]');
-      const audioPlayButton = root.querySelector('[data-audio-play]');
-      const audioPauseButton = root.querySelector('[data-audio-pause]');
-      const audioResumeButton = root.querySelector('[data-audio-resume]');
-      const audioStopButton = root.querySelector('[data-audio-stop]');
-      const breathCircleNode = root.querySelector('[data-breath-circle]');
-      const breathLabelNode = root.querySelector('[data-breath-label]');
-      const breathCountNode = root.querySelector('[data-breath-count]');
-      const breathNoteNode = root.querySelector('[data-breath-note]');
-      const breathCycleNode = root.querySelector('[data-breath-cycle]');
-      const target = parseInt(root.getAttribute('data-target-seconds') || '0', 10);
-      let seconds = 0;
-      let running = true;
-      let breathElapsed = 0;
-      let timerIntervalId = null;
-      let breathIntervalId = null;
-      const breathingStages = [
-        {key: 'inhale', className: 'is-inhale', label: 'Inhale deeply', note: 'Inhale slowly and settle your rhythm.', duration: 4},
-        {key: 'hold', className: 'is-hold', label: 'Hold gently', note: 'Keep still for a short pause.', duration: 2},
-        {key: 'exhale', className: 'is-exhale', label: 'Exhale softly', note: 'Release tension and relax your shoulders.', duration: 4},
-      ];
+            const timerNode = root.querySelector('[data-session-timer]');
+            const progressNode = root.querySelector('[data-session-progress]');
+            const progressFillNode = root.querySelector('[data-session-progress-fill]');
+            const statusNode = root.querySelector('[data-session-status]');
+            const copyNode = root.querySelector('[data-session-copy]');
+            const noteNode = root.querySelector('[data-session-note]');
+            const activeSecondsField = root.querySelector('[data-session-active-seconds]');
+            const pauseButton = root.querySelector('[data-session-pause]');
+            const resumeButton = root.querySelector('[data-session-resume]');
+            const ambientAudioNode = document.getElementById('ambient-audio');
+            const audioStatusNode = root.querySelector('[data-audio-status]');
+            const audioPlayButton = root.querySelector('[data-audio-play]');
+            const audioPauseButton = root.querySelector('[data-audio-pause]');
+            const audioResumeButton = root.querySelector('[data-audio-resume]');
+            const audioStopButton = root.querySelector('[data-audio-stop]');
+            const breathCircleNode = root.querySelector('[data-breath-circle]');
+            const breathLabelNode = root.querySelector('[data-breath-label]');
+            const breathCountNode = root.querySelector('[data-breath-count]');
+            const breathNoteNode = root.querySelector('[data-breath-note]');
+            const breathCycleNode = root.querySelector('[data-breath-cycle]');
+            const target = parseInt(root.getAttribute('data-target-seconds') || '0', 10);
+            let seconds = 0;
+            let running = true;
+            let breathElapsed = 0;
+                let timerIntervalId = null;
+                let breathIntervalId = null;
+            const breathingStages = [
+                { key: 'inhale', className: 'is-inhale', label: 'Inhale deeply', note: 'Inhale slowly and settle your rhythm.', duration: 4 },
+                { key: 'hold', className: 'is-hold', label: 'Hold gently', note: 'Keep still for a short pause.', duration: 2 },
+                { key: 'exhale', className: 'is-exhale', label: 'Exhale softly', note: 'Release tension and relax your shoulders.', duration: 4 },
+            ];
 
-      const getBreathingStage = () => {
-        const cycleDuration = breathingStages.reduce((sum, stage) => sum + stage.duration, 0);
-        const cyclePosition = breathElapsed % cycleDuration;
-        let accumulated = 0;
-        for (const stage of breathingStages) {
-          accumulated += stage.duration;
-          if (cyclePosition < accumulated) {
-            return stage;
-          }
-        }
+            const getBreathingStage = () => {
+                const cycleDuration = breathingStages.reduce((sum, stage) => sum + stage.duration, 0);
+                const cyclePosition = breathElapsed % cycleDuration;
+                let accumulated = 0;
+                for (const stage of breathingStages) {
+                    accumulated += stage.duration;
+                    if (cyclePosition < accumulated) {
+                        return stage;
+                    }
+                }
 
-        return breathingStages[0];
-      };
+                return breathingStages[0];
+            };
 
-      const updateBreathingUI = () => {
-        if (!breathCircleNode) {
-          return;
-        }
-        const stage = getBreathingStage();
-        breathCircleNode.classList.remove('is-inhale', 'is-hold', 'is-exhale');
-        if (running) {
-          breathCircleNode.classList.add(stage.className);
-        } else {
-          breathCircleNode.classList.add('is-paused');
-        }
-        breathCircleNode.classList.toggle('is-paused', !running);
+            const updateBreathingUI = () => {
+                if (!breathCircleNode) {
+                    return;
+                }
+                const stage = getBreathingStage();
+                breathCircleNode.classList.remove('is-inhale', 'is-hold', 'is-exhale');
+                if (running) {
+                    breathCircleNode.classList.add(stage.className);
+                } else {
+                    breathCircleNode.classList.add('is-paused');
+                }
+                breathCircleNode.classList.toggle('is-paused', !running);
 
-        if (breathLabelNode) {
-          breathLabelNode.classList.add('is-changing');
-          window.clearTimeout(breathLabelNode._fadeTimer);
-          window.setTimeout(() => {
-            breathLabelNode.textContent = running ? stage.label : 'Paused';
-          }, 110);
-          breathLabelNode._fadeTimer = window.setTimeout(() => {
-            breathLabelNode.classList.remove('is-changing');
-          }, 280);
-        }
-        if (breathCountNode) {
-          breathCountNode.textContent = running ? `${stage.duration}s` : '--';
-        }
-        if (breathNoteNode) {
-          breathNoteNode.textContent = running ? stage.note : 'Breathing pause. Resume when ready.';
-        }
-        if (breathCycleNode) {
-          const cycleDuration = breathingStages.reduce((sum, stageItem) => sum + stageItem.duration, 0);
-          const cycle = Math.floor(breathElapsed / cycleDuration) + 1;
-          breathCycleNode.textContent = `Cycle ${cycle}`;
-        }
-      };
+                if (breathLabelNode) {
+                    breathLabelNode.classList.add('is-changing');
+                    window.clearTimeout(breathLabelNode._fadeTimer);
+                    window.setTimeout(() => {
+                        breathLabelNode.textContent = running ? stage.label : 'Paused';
+                    }, 110);
+                    breathLabelNode._fadeTimer = window.setTimeout(() => {
+                        breathLabelNode.classList.remove('is-changing');
+                    }, 280);
+                }
+                if (breathCountNode) {
+                    breathCountNode.textContent = running ? `${stage.duration}s` : '--';
+                }
+                if (breathNoteNode) {
+                    breathNoteNode.textContent = running ? stage.note : 'Breathing pause. Resume when ready.';
+                }
+                if (breathCycleNode) {
+                    const cycleDuration = breathingStages.reduce((sum, stageItem) => sum + stageItem.duration, 0);
+                    const cycle = Math.floor(breathElapsed / cycleDuration) + 1;
+                    breathCycleNode.textContent = `Cycle ${cycle}`;
+                }
+            };
 
-      const updateAudioStatus = (message) => {
-        if (audioStatusNode) {
-          audioStatusNode.textContent = message;
-        }
-      };
+            const updateAudioStatus = (message) => {
+                if (audioStatusNode) {
+                    audioStatusNode.textContent = message;
+                }
+            };
 
-      const setAudioManualMode = (enabled) => {
-        if (audioPlayButton) {
-          audioPlayButton.hidden = !enabled;
-        }
-      };
+            const setAudioManualMode = (enabled) => {
+                if (audioPlayButton) {
+                    audioPlayButton.hidden = !enabled;
+                }
+            };
 
-      const resolveAudioSource = () => {
-        if (!ambientAudioNode) {
-          console.warn('[Serinity] Ambient audio element not found.');
-          return '';
-        }
+            const resolveAudioSource = () => {
+                if (!ambientAudioNode) {
+                    console.warn('[Serinity] Ambient audio element not found.');
+                    return '';
+                }
 
-        const currentSourceNode = ambientAudioNode.querySelector('source');
-        const currentSource = currentSourceNode ? currentSourceNode.getAttribute('src') || '' : '';
-        const datasetSource = ambientAudioNode.dataset.audioUrl || '';
-        const finalSource = currentSource || datasetSource || '';
+                const currentSourceNode = ambientAudioNode.querySelector('source');
+                const currentSource = currentSourceNode ? currentSourceNode.getAttribute('src') || '' : '';
+                const datasetSource = ambientAudioNode.dataset.audioUrl || '';
+                const finalSource = currentSource || datasetSource || '';
 
-        if (currentSourceNode && currentSourceNode.getAttribute('src') !== finalSource) {
-          currentSourceNode.setAttribute('src', finalSource);
-        }
-        if (ambientAudioNode.getAttribute('src') !== finalSource) {
-          ambientAudioNode.setAttribute('src', finalSource);
-        }
-        if (finalSource !== '') {
-          ambientAudioNode.load();
-        }
+                if (currentSourceNode && currentSourceNode.getAttribute('src') !== finalSource) {
+                    currentSourceNode.setAttribute('src', finalSource);
+                }
+                if (ambientAudioNode.getAttribute('src') !== finalSource) {
+                    ambientAudioNode.setAttribute('src', finalSource);
+                }
+                if (finalSource !== '') {
+                    ambientAudioNode.load();
+                }
 
-        console.info('[Serinity] Ambient audio source resolved.', {
-          audioElementFound: true,
-          audioSource: finalSource,
-        });
+                console.info('[Serinity] Ambient audio source resolved.', {
+                    audioElementFound: true,
+                    audioSource: finalSource,
+                });
 
-        return finalSource;
-      };
+                return finalSource;
+            };
 
-      function playAudio() {
-        const source = resolveAudioSource();
-        if (!ambientAudioNode || source === '') {
-          updateAudioStatus('Ambient music is unavailable right now.');
-          console.warn('[Serinity] Ambient audio playback skipped because no source URL was available.');
-          setAudioManualMode(false);
-          return Promise.resolve();
-        }
+            function playAudio() {
+                const source = resolveAudioSource();
+                if (!ambientAudioNode || source === '') {
+                    updateAudioStatus('Ambient music is unavailable right now.');
+                    console.warn('[Serinity] Ambient audio playback skipped because no source URL was available.');
+                    setAudioManualMode(false);
+                    return Promise.resolve();
+                }
 
-        console.info('[Serinity] Attempting ambient audio playback.', {
-          source,
-          autoplayIntent: sessionStorage.getItem('serinity:auto-play-audio') === '1',
-        });
+                console.info('[Serinity] Attempting ambient audio playback.', {
+                    source,
+                    autoplayIntent: sessionStorage.getItem('serinity:auto-play-audio') === '1',
+                });
 
-        return ambientAudioNode.play()
-          .then(() => {
-            updateAudioStatus('Relaxing ambient music is playing.');
-            console.info('[Serinity] Ambient audio autoplay succeeded.');
-            setAudioManualMode(false);
-          })
-          .catch((error) => {
-            updateAudioStatus('Autoplay was blocked. Tap Play ambient music to start.');
-            console.warn('[Serinity] Ambient audio autoplay failed.', error);
-            setAudioManualMode(true);
-          });
-      }
+                return ambientAudioNode.play()
+                    .then(() => {
+                        updateAudioStatus('Relaxing ambient music is playing.');
+                        console.info('[Serinity] Ambient audio autoplay succeeded.');
+                        setAudioManualMode(false);
+                    })
+                    .catch((error) => {
+                        updateAudioStatus('Autoplay was blocked. Tap Play ambient music to start.');
+                        console.warn('[Serinity] Ambient audio autoplay failed.', error);
+                        setAudioManualMode(true);
+                    });
+            }
 
-      function pauseAudio() {
-        if (!ambientAudioNode) {
-          return;
-        }
-        ambientAudioNode.pause();
-        updateAudioStatus('Ambient music is paused.');
-        console.info('[Serinity] Ambient audio paused.');
-      }
+            function pauseAudio() {
+                if (!ambientAudioNode) {
+                    return;
+                }
+                ambientAudioNode.pause();
+                updateAudioStatus('Ambient music is paused.');
+                console.info('[Serinity] Ambient audio paused.');
+            }
 
-      function stopAudio() {
-        if (!ambientAudioNode) {
-          return;
-        }
-        ambientAudioNode.pause();
-        ambientAudioNode.currentTime = 0;
-        updateAudioStatus('Ambient music stopped.');
-        console.info('[Serinity] Ambient audio stopped.');
-        setAudioManualMode(true);
-      }
+            function stopAudio() {
+                if (!ambientAudioNode) {
+                    return;
+                }
+                ambientAudioNode.pause();
+                ambientAudioNode.currentTime = 0;
+                updateAudioStatus('Ambient music stopped.');
+                console.info('[Serinity] Ambient audio stopped.');
+                setAudioManualMode(true);
+            }
 
-      const render = () => {
-        const minutes = Math.floor(seconds / 60);
-        const remain = seconds % 60;
-        const mm = String(minutes).padStart(2, '0');
-        const ss = String(remain).padStart(2, '0');
-        if (timerNode) {
-          timerNode.textContent = `${mm}:${ss}`;
-        }
-        if (activeSecondsField) {
-          activeSecondsField.value = String(seconds);
-        }
-        if (progressNode) {
-          const pct = target > 0 ? Math.min(100, Math.round((seconds / target) * 100)) : 0;
-          progressNode.textContent = `${pct}%`;
-          if (progressFillNode) {
-            progressFillNode.style.width = `${pct}%`;
-          }
-          if (noteNode) {
-            noteNode.textContent = !running
-              ? 'Session paused. Resume when you are ready.'
-              : (pct >= 100 ? 'Target reached. You can finish the session.' : 'Session in progress.');
-          }
-        }
-        if (statusNode) {
-          statusNode.textContent = running ? 'Running' : 'Paused';
-          statusNode.className = `ac-badge ${running ? 'ac-badge-warning' : 'ac-badge-secondary'}`;
-        }
-        if (copyNode) {
-          copyNode.textContent = running ? 'Session is running. Keep your pace.' : 'Session paused.';
-        }
+            const render = () => {
+                const minutes = Math.floor(seconds / 60);
+                const remain = seconds % 60;
+                const mm = String(minutes).padStart(2, '0');
+                const ss = String(remain).padStart(2, '0');
+                if (timerNode) {
+                    timerNode.textContent = `${mm}:${ss}`;
+                }
+                if (activeSecondsField) {
+                    activeSecondsField.value = String(seconds);
+                }
+                if (progressNode) {
+                    const pct = target > 0 ? Math.min(100, Math.round((seconds / target) * 100)) : 0;
+                    progressNode.textContent = `${pct}%`;
+                    if (progressFillNode) {
+                        progressFillNode.style.width = `${pct}%`;
+                    }
+                    if (noteNode) {
+                        noteNode.textContent = !running
+                            ? 'Session paused. Resume when you are ready.'
+                            : (pct >= 100 ? 'Target reached. You can finish the session.' : 'Session in progress.');
+                    }
+                }
+                if (statusNode) {
+                    statusNode.textContent = running ? 'Running' : 'Paused';
+                    statusNode.className = `ac-badge ${running ? 'ac-badge-warning' : 'ac-badge-secondary'}`;
+                }
+                if (copyNode) {
+                    copyNode.textContent = running ? 'Session is running. Keep your pace.' : 'Session paused.';
+                }
 
-        updateBreathingUI();
-      };
+                updateBreathingUI();
+            };
 
-      render();
-      resolveAudioSource();
+            render();
+            resolveAudioSource();
 
-      if (ambientAudioNode) {
-        ambientAudioNode.addEventListener('error', () => {
-          console.error('[Serinity] Ambient audio element reported a playback error.', {
-            currentSrc: ambientAudioNode.currentSrc,
-            networkState: ambientAudioNode.networkState,
-            readyState: ambientAudioNode.readyState,
-          });
-          updateAudioStatus('Ambient music could not be loaded. You can continue the session without audio.');
-          setAudioManualMode(true);
-        });
-      }
+            if (ambientAudioNode) {
+                ambientAudioNode.addEventListener('error', () => {
+                    console.error('[Serinity] Ambient audio element reported a playback error.', {
+                        currentSrc: ambientAudioNode.currentSrc,
+                        networkState: ambientAudioNode.networkState,
+                        readyState: ambientAudioNode.readyState,
+                    });
+                    updateAudioStatus('Ambient music could not be loaded. You can continue the session without audio.');
+                    setAudioManualMode(true);
+                });
+            }
 
-      if (audioPlayButton) {
-        audioPlayButton.addEventListener('click', () => {
-          playAudio();
-        });
-      }
-      if (pauseButton) {
-        pauseButton.addEventListener('click', () => {
-          running = false;
-          pauseButton.hidden = true;
-          if (resumeButton) {
-            resumeButton.hidden = false;
-          }
-          render();
-        });
-      }
-      if (resumeButton) {
-        resumeButton.addEventListener('click', () => {
-          running = true;
-          resumeButton.hidden = true;
-          if (pauseButton) {
-            pauseButton.hidden = false;
-          }
-          render();
-        });
-      }
+            if (audioPlayButton) {
+                audioPlayButton.addEventListener('click', () => {
+                    playAudio();
+                });
+            }
+            if (pauseButton) {
+                pauseButton.addEventListener('click', () => {
+                    running = false;
+                    pauseButton.hidden = true;
+                    if (resumeButton) {
+                        resumeButton.hidden = false;
+                    }
+                    render();
+                });
+            }
+            if (resumeButton) {
+                resumeButton.addEventListener('click', () => {
+                    running = true;
+                    resumeButton.hidden = true;
+                    if (pauseButton) {
+                        pauseButton.hidden = false;
+                    }
+                    render();
+                });
+            }
 
-      if (audioPauseButton) {
-        audioPauseButton.addEventListener('click', pauseAudio);
-      }
-      if (audioResumeButton) {
-        audioResumeButton.addEventListener('click', () => {
-          playAudio();
-        });
-      }
-      if (audioStopButton) {
-        audioStopButton.addEventListener('click', stopAudio);
-      }
+            if (audioPauseButton) {
+                audioPauseButton.addEventListener('click', pauseAudio);
+            }
+            if (audioResumeButton) {
+                audioResumeButton.addEventListener('click', () => {
+                    playAudio();
+                });
+            }
+            if (audioStopButton) {
+                audioStopButton.addEventListener('click', stopAudio);
+            }
 
-      const submitForm = root.querySelector('form');
-      if (submitForm) {
-        submitForm.addEventListener('submit', () => {
-          stopAudio();
-          sessionStorage.removeItem('serinity:auto-play-audio');
-        });
-      }
+            const submitForm = root.querySelector('form');
+            if (submitForm) {
+                submitForm.addEventListener('submit', () => {
+                    stopAudio();
+                    sessionStorage.removeItem('serinity:auto-play-audio');
+                });
+            }
 
-      timerIntervalId = window.setInterval(() => {
-        if (running) {
-          seconds += 1;
-        }
-        render();
-      }, 1000);
+                timerIntervalId = window.setInterval(() => {
+                if (running) {
+                    seconds += 1;
+                }
+                render();
+            }, 1000);
 
-      breathIntervalId = window.setInterval(() => {
-        if (running) {
-          breathElapsed += 1;
-          updateBreathingUI();
-        }
-      }, 1000);
+            breathIntervalId = window.setInterval(() => {
+                if (running) {
+                    breathElapsed += 1;
+                    updateBreathingUI();
+                }
+            }, 1000);
 
-      const cleanup = () => {
-        stopAudio();
-        if (timerIntervalId !== null) {
-          window.clearInterval(timerIntervalId);
-        }
-        if (breathIntervalId !== null) {
-          window.clearInterval(breathIntervalId);
-        }
-        root.dataset.sessionInitialized = '0';
-      };
+                const cleanup = () => {
+                    stopAudio();
+                    if (timerIntervalId !== null) {
+                        window.clearInterval(timerIntervalId);
+                    }
+                    if (breathIntervalId !== null) {
+                        window.clearInterval(breathIntervalId);
+                    }
+                    root.dataset.sessionInitialized = '0';
+                };
 
-      const shouldAutoplay = sessionStorage.getItem('serinity:auto-play-audio') === '1';
-      if (shouldAutoplay) {
-        playAudio().finally(() => {
-          sessionStorage.removeItem('serinity:auto-play-audio');
-        });
-      } else {
-        console.info('[Serinity] No preserved autoplay intent found; trying normal playback.');
-        playAudio();
-      }
+                const shouldAutoplay = sessionStorage.getItem('serinity:auto-play-audio') === '1';
+                if (shouldAutoplay) {
+                    playAudio().finally(() => {
+                        sessionStorage.removeItem('serinity:auto-play-audio');
+                    });
+                } else {
+                    console.info('[Serinity] No preserved autoplay intent found; trying normal playback.');
+                    playAudio();
+                }
 
-      document.addEventListener('turbo:before-cache', cleanup, {once: true});
-      window.addEventListener('pagehide', cleanup, {once: true});
-    };
+                document.addEventListener('turbo:before-cache', cleanup, { once: true });
+                window.addEventListener('pagehide', cleanup, { once: true });
+            };
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initSessionPage, {once: true});
-    } else {
-      initSessionPage();
-    }
-    document.addEventListener('turbo:load', initSessionPage);
-  })();
-</script>
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initSessionPage, { once: true });
+            } else {
+                initSessionPage();
+            }
+            document.addEventListener('turbo:load', initSessionPage);
+        })();
+    </script>
 {% endblock %}

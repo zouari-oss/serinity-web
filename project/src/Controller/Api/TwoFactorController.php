@@ -24,7 +24,8 @@ final class TwoFactorController extends AbstractApiController
         private readonly TwoFactorService $twoFactorService,
         private readonly AuthenticationService $authenticationService,
         private readonly RequestFingerprintService $requestFingerprintService,
-    ) {}
+    ) {
+    }
 
     #[Route('/enable', name: 'api_auth_2fa_enable', methods: ['POST'])]
     public function enable(): JsonResponse

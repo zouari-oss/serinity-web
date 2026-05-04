@@ -1,0 +1,69 @@
+<section class="ac-card" style="margin-bottom: 1.5rem;">
+    <form method="get" class="ac-form" style="display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end;">
+
+        <label style="flex: 2; min-width: 160px;">
+            <span class="ac-label">Recherche</span>
+            <input type="text" name="q" value="{{ filters.q|default('') }}"
+                   placeholder="Recherche dynamique..." class="ac-input">
+        </label>
+
+        <label style="flex: 1; min-width: 140px;">
+            <span class="ac-label">Type de rêve</span>
+            <input type="text" name="type" value="{{ filters.type|default('') }}"
+                   placeholder="Type de rêve" class="ac-input">
+        </label>
+
+        <label style="flex: 1; min-width: 140px;">
+            <span class="ac-label">Récurrence</span>
+            <select name="recurrent" class="ac-input">
+                <option value="">Tous</option>
+                <option value="1" {{ filters.recurrent|default('') == '1' ? 'selected' }}>Récurrent</option>
+                <option value="0" {{ filters.recurrent|default('') == '0' ? 'selected' }}>Non récurrent</option>
+            </select>
+        </label>
+
+        <label style="flex: 1; min-width: 130px;">
+            <span class="ac-label">Couleur</span>
+            <input type="text" name="couleur" value="{{ filters.couleur|default('') }}"
+                   placeholder="Couleur" class="ac-input">
+        </label>
+
+        <label style="flex: 1; min-width: 140px;">
+            <span class="ac-label">Cauchemars</span>
+            <select name="cauchemars" class="ac-input">
+                <option value="">Tous</option>
+                <option value="1" {{ filters.cauchemars|default('') == '1' ? 'selected' }}>Seulement cauchemars</option>
+            </select>
+        </label>
+
+        <label style="flex: 1; min-width: 130px;">
+            <span class="ac-label">Trier par</span>
+            <select name="sort" class="ac-input">
+                <option value="s.dateNuit"  {{ filters.sort|default('s.dateNuit') == 's.dateNuit'  ? 'selected' }}>Date</option>
+                <option value="r.intensite" {{ filters.sort|default('') == 'r.intensite' ? 'selected' }}>Intensité</option>
+                <option value="r.titre"     {{ filters.sort|default('') == 'r.titre'     ? 'selected' }}>Titre</option>
+                <option value="r.typeReve"  {{ filters.sort|default('') == 'r.typeReve'  ? 'selected' }}>Type</option>
+                <option value="r.humeur"    {{ filters.sort|default('') == 'r.humeur'    ? 'selected' }}>Humeur</option>
+            </select>
+        </label>
+
+        <input type="hidden" name="direction" value="{{ filters.direction|default('DESC') }}">
+
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; padding-top: 1.4rem;">
+            <button type="submit" class="ac-btn ac-btn-primary">
+                <span class="material-symbols-outlined" style="font-size:16px;">filter_list</span>
+                Filtrer
+            </button>
+            <a href="{{ path('app_reve_index') }}" class="ac-ghost-btn">Réinitialiser</a>
+            <a href="{{ path('app_reve_export_csv', app.request.query.all) }}" class="ac-ghost-btn">
+                <span class="material-symbols-outlined" style="font-size:16px;">table_view</span>
+                Excel
+            </a>
+            <a href="{{ path('app_reve_export_pdf', app.request.query.all) }}" target="_blank" class="ac-ghost-btn">
+                <span class="material-symbols-outlined" style="font-size:16px;">picture_as_pdf</span>
+                PDF
+            </a>
+        </div>
+
+    </form>
+</section>

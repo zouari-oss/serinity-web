@@ -1,0 +1,151 @@
+<main class="page-shell">
+    <div class="container stats-shell">
+        <section class="hero-shell hero-shell-forum mb-4 p-4 p-md-5">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <p class="text-uppercase fw-bold mb-1 small text-primary section-kicker">Serinity Community</p>
+                    <h1 class="display-6 fw-bold mb-2">Forum Posts</h1>
+                    <p class="m-0 text-muted">Share questions, support others, and track meaningful conversations.</p>
+                </div>
+                <div class="stats-chip-wrap">
+                    <span class="stats-chip">Threads: {{ threads|length }}</span>
+                    <span class="stats-chip">User: {{ currentUser.username }}</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="card-soft action-strip p-3 mb-3 d-flex flex-wrap gap-2 justify-content-between align-items-center">
+            <h2 class="h4 m-0">Browse Discussions</h2>
+            <a class="btn btn-primary btn-icon" href="{{ path('app_thread_new') }}">
+                <span class="btn-inner--icon"><i class="ni ni-fat-add"></i></span>
+                <span class="btn-inner--text">New Thread</span>
+            </a>
+        </section>
+
+        <form method="get" class="card-soft filter-strip p-3 mb-4 row g-2 align-items-end" id="feedFilterForm">
+            <div class="col-lg-6 col-md-6">
+                <label class="form-label">Search</label>
+                <div class="d-flex gap-2">
+                    <input type="text" name="q" value="{{ app.request.query.get('q') }}" class="form-control" placeholder="Search title...">
+                    <button class="btn btn-primary px-3" type="submit">Search</button>
+                    <a class="btn btn-outline-primary px-3 text-nowrap" href="{{ path('app_forum_suggested_thread') }}">Suggested Thread</a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4">
+                <label class="form-label">Sort by</label>
+                <select name="sort" class="form-select" onchange="this.form.requestSubmit()">
+                    <option value="newest" {{ currentSort == 'newest' ? 'selected' : '' }}>Newest First</option>
+                    <option value="oldest" {{ currentSort == 'oldest' ? 'selected' : '' }}>Oldest First</option>
+                    <option value="most_points" {{ currentSort == 'most_points' ? 'selected' : '' }}>Most Points</option>
+                    <option value="least_points" {{ currentSort == 'least_points' ? 'selected' : '' }}>Least Points</option>
+                    <option value="most_comments" {{ currentSort == 'most_comments' ? 'selected' : '' }}>Most Comments</option>
+                    <option value="least_comments" {{ currentSort == 'least_comments' ? 'selected' : '' }}>Least Comments</option>
+                    <option value="most_followers" {{ currentSort == 'most_followers' ? 'selected' : '' }}>Most Followers</option>
+                    <option value="least_followers" {{ currentSort == 'least_followers' ? 'selected' : '' }}>Least Followers</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-2 d-grid">
+                <a class="btn btn-outline-primary" href="{{ app.request.pathInfo }}">Reset</a>
+            </div>
+
+            <div class="col-12">
+                <div class="accordion" id="filtersAccordion">
+                    <div class="accordion-item border-0">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed py-2 px-0 bg-transparent shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#filtersCollapse" aria-expanded="false" aria-controls="filtersCollapse">
+                                Advanced Filters
+                            </button>
+                        </h2>
+                        <div id="filtersCollapse" class="accordion-collapse collapse">
+                            <div class="accordion-body px-0 pb-0">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label d-block">Status</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="status[]" value="open" id="status_open" {{ 'open' in activeStatuses ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="status_open">Open</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="status[]" value="locked" id="status_locked" {{ 'locked' in activeStatuses ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="status_locked">Locked</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label d-block">Type</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="type[]" value="discussion" id="type_discussion" {{ 'discussion' in activeTypes ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="type_discussion">Discussion</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="type[]" value="question" id="type_question" {{ 'question' in activeTypes ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="type_question">Question</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="type[]" value="announcement" id="type_announcement" {{ 'announcement' in activeTypes ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="type_announcement">Announcement</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label d-block">Categories</label>
+                                        <div class="category-scroll">
+                                            {% for category in categories %}
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="category[]" value="{{ category.id }}" id="category_{{ category.id }}" {{ category.id in activeCategories ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="category_{{ category.id }}">{{ category.name }}</label>
+                                                </div>
+                                            {% else %}
+                                                <p class="small text-muted mb-0">No categories</p>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 d-flex gap-2">
+                <button class="btn btn-outline-primary" type="submit">Apply Filters</button>
+            </div>
+        </form>
+
+        <div class="row g-3">
+            {% for thread in threads %}
+                <div class="col-12">
+                    <article class="card-soft thread-card {{ thread.isPinned ? 'thread-card-pinned' : '' }} p-3 p-md-4">
+                        {% if thread.isPinned %}
+                            <div class="pinned-flag mb-2">
+                                <i class="ni ni-pin-3"></i>
+                                <span>Pinned Spotlight</span>
+                            </div>
+                        {% endif %}
+                        <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+                            <div>
+                                <h2 class="h5 mb-1">
+                                    <a class="text-decoration-none text-dark" href="{{ path('app_forum_thread_detail', {id: thread.id}) }}">{{ thread.title }}</a>
+                                </h2>
+                                <p class="text-muted mb-2 small">By {{ thread.authorUsername ?: 'Unknown User' }} in {{ thread.category.name }} • {{ thread.createdAt|date('Y-m-d H:i') }}</p>
+                            </div>
+                            <span class="meta-pill {{ thread.status.value == 'open' ? 'meta-open' : (thread.status.value == 'locked' ? 'meta-locked' : 'meta-archived') }}">{{ thread.status.value|upper }}</span>
+                        </div>
+                        <p class="mb-3">{{ thread.content|slice(0, 240) }}{% if thread.content|length > 240 %}...{% endif %}</p>
+                        <div class="thread-meta-grid d-flex flex-wrap gap-2 small text-muted">
+                            <span class="thread-meta-item">Type: {{ thread.type.value }}</span>
+                            <span class="thread-meta-item">Likes: {{ thread.likeCount }}</span>
+                            <span class="thread-meta-item">Dislikes: {{ thread.dislikeCount }}</span>
+                            <span class="thread-meta-item">Replies: {{ thread.replyCount }}</span>
+                            <span class="thread-meta-item">Followers: {{ thread.followCount }}</span>
+                            {% if thread.isPinned %}<span class="badge badge-info">Pinned</span>{% endif %}
+                            {% if thread.authorId == currentUser.id %}<span class="badge badge-primary">Your Thread</span>{% endif %}
+                        </div>
+                    </article>
+                </div>
+            {% else %}
+                <p class="text-muted">No threads found.</p>
+            {% endfor %}
+        </div>
+    </div>
+</main>

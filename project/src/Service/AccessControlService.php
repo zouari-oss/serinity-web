@@ -31,7 +31,8 @@ final readonly class AccessControlService
         private SessionService $sessionService,
         private AuditLogService $auditLogService,
         private UserPasswordHasherInterface $passwordHasher,
-    ) {}
+    ) {
+    }
 
     public function signUp(SignUpRequest $request): ServiceResult
     {
@@ -52,7 +53,7 @@ final readonly class AccessControlService
         }
 
         $now = new \DateTimeImmutable();
-        $user = new User()
+        $user = (new User())
             ->setId(Uuid::v4()->toRfc4122())
             ->setEmail(mb_strtolower(trim($request->email)))
             ->setRole($role->value)
@@ -63,7 +64,7 @@ final readonly class AccessControlService
             ->setUpdatedAt($now);
         $user->setPassword($this->passwordHasher->hashPassword($user, $request->password));
 
-        $profile = new Profile()
+        $profile = (new Profile())
             ->setId(Uuid::v4()->toRfc4122())
             ->setUsername($this->generateUsername($user->getEmail()))
             ->setUser($user)

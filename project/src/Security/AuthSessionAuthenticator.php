@@ -18,7 +18,9 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 
 final class AuthSessionAuthenticator extends AbstractAuthenticator
 {
-    public function __construct(private readonly AuthSessionRepository $authSessionRepository) {}
+    public function __construct(private readonly AuthSessionRepository $authSessionRepository)
+    {
+    }
 
     public function supports(Request $request): ?bool
     {
@@ -47,7 +49,7 @@ final class AuthSessionAuthenticator extends AbstractAuthenticator
         }
 
         return new SelfValidatingPassport(
-            new UserBadge($session->getUser()->getUserIdentifier(), static fn() => $session->getUser()),
+            new UserBadge($session->getUser()->getUserIdentifier(), static fn () => $session->getUser()),
         );
     }
 

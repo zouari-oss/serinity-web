@@ -13,7 +13,8 @@ final readonly class TotpUserContext implements TwoFactorInterface
     public function __construct(
         private string $username,
         private string $secret,
-    ) {}
+    ) {
+    }
 
     public function isTotpAuthenticationEnabled(): bool
     {

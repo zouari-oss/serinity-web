@@ -1,0 +1,28 @@
+{% extends 'sleep/_layout.html.twig' %}
+{% block title %}Nouvelle nuit — Serinity Sleep{% endblock %}
+
+{% block sleep_content %}
+
+    <section class="ac-card" style="margin-bottom: 1.5rem;">
+        <div class="ac-row-between">
+            <div>
+                <h2>🌙 Nouvelle nuit</h2>
+                <p style="color: var(--color-text-muted); margin-top: 0.25rem;">
+                    Enregistrez votre nuit de sommeil.
+                </p>
+            </div>
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                <a href="{{ path('app_sommeil_list') }}" class="ac-ghost-btn">
+                    <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
+                    Retour
+                </a>
+            </div>
+        </div>
+    </section>
+
+    {% include 'sleep/sommeil/components/_form_modal.html.twig' with {
+        form: form,
+        modal_mode: false
+    } %}
+
+{% endblock %}

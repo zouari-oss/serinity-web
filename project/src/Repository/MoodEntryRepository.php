@@ -207,7 +207,7 @@ class MoodEntryRepository extends ServiceEntityRepository
             ->getQuery()
             ->getArrayResult();
 
-        return array_map(static fn(array $row): array => [
+        return array_map(static fn (array $row): array => [
             'label' => $row['label'],
             'usageCount' => (int) $row['usageCount'],
         ], $rows);
@@ -234,7 +234,7 @@ class MoodEntryRepository extends ServiceEntityRepository
             ->getQuery()
             ->getArrayResult();
 
-        return array_map(static fn(array $row): array => [
+        return array_map(static fn (array $row): array => [
             'label' => $row['label'],
             'usageCount' => (int) $row['usageCount'],
         ], $rows);

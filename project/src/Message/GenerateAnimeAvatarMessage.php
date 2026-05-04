@@ -8,5 +8,6 @@ final readonly class GenerateAnimeAvatarMessage
 {
     public function __construct(
         public string $userId,
-    ) {}
+    ) {
+    }
 }

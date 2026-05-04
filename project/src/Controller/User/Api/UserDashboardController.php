@@ -25,7 +25,8 @@ final class UserDashboardController extends AbstractApiController
     public function __construct(
         private readonly UserDashboardService $userDashboardService,
         private readonly UserProfileService $userProfileService,
-    ) {}
+    ) {
+    }
 
     #[Route('/me', name: 'me', methods: ['GET'])]
     public function me(Request $request): JsonResponse

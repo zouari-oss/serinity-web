@@ -1,0 +1,645 @@
+{% extends 'access_control/layout.html.twig' %}
+
+{% block title %}Admin Sommeil — Serinity{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .ac-main {
+            width: calc(100vw - 320px) !important;
+            max-width: calc(100vw - 320px) !important;
+            overflow-x: hidden !important;
+        }
+
+        .ac-content {
+            padding: 28px 32px !important;
+            max-width: 100% !important;
+            overflow-x: hidden !important;
+        }
+
+        .powerbi-card {
+            width: 100%;
+            background: var(--ac-surface, #fff);
+            border: 1px solid var(--ac-border);
+            border-radius: var(--ac-radius, 8px);
+            overflow: hidden;
+            margin-bottom: 1.25rem;
+        }
+
+        .powerbi-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.85rem 1.25rem;
+            border-bottom: 1px solid var(--ac-border);
+        }
+
+        .powerbi-card-title {
+            margin: 0;
+            font-size: 0.92rem;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .powerbi-badge {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: var(--ac-primary, #0076ff);
+            color: #fff;
+        }
+
+        .powerbi-frame-wrapper {
+            width: 100%;
+            height: 560px;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .powerbi-frame-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            display: block;
+        }
+
+        .ac-table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .ac-table {
+            width: 100% !important;
+            min-width: 900px !important;
+            table-layout: fixed !important;
+        }
+
+        .ac-table th,
+        .ac-table td {
+            padding: 14px 16px !important;
+            font-size: 14px !important;
+            white-space: nowrap !important;
+        }
+
+        .ac-table th:nth-child(1),
+        .ac-table td:nth-child(1) {
+            width: 55px !important;
+        }
+
+        .ac-col-actions {
+            width: 180px !important;
+            min-width: 180px !important;
+            text-align: center !important;
+        }
+
+        .ac-actions-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: nowrap;
+        }
+
+        .ac-actions-group .ac-btn,
+        .ac-actions-group button {
+            min-width: 72px !important;
+            height: 36px !important;
+            padding: 0 10px !important;
+            display: inline-flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            font-size: 13px !important;
+            line-height: 1 !important;
+            white-space: nowrap !important;
+            border-radius: 10px !important;
+            margin: 0 !important;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .section-heading h2 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .section-count {
+            font-size: 0.8rem;
+            opacity: 0.55;
+        }
+
+        .table-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .table-card-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table-card-header-left h2 {
+            margin: 0;
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+
+        .table-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .dot-sommeil { background: var(--ac-primary, #0076ff); }
+        .dot-reves { background: #8b5cf6; }
+
+        .table-count {
+            font-size: 0.78rem;
+            opacity: 0.5;
+        }
+
+        .table-card-header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .pagination-wrap {
+            margin: 18px 0 8px;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="ac-app-layout">
+        {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+
+        <div class="ac-main">
+            {% include 'access_control/components/_topbar.html.twig' with {
+                title: 'Sleep',
+                subtitle: 'Dashboard sommeil et rêves',
+                username: userName
+            } %}
+
+            <main class="ac-content" id="main-content">
+
+                <div style="margin-bottom: 1.5rem;">
+                    <h1 style="font-size: 1.3rem; font-weight: 700; margin: 0;">Gestion Sommeil &amp; Rêves</h1>
+                </div>
+
+                <section class="ac-cards" style="margin-bottom: 2rem;">
+                    <article class="ac-stat-card">
+                        <h3>Entrées Sommeil</h3>
+                        <p>{{ kpis.total_sommeils }}</p>
+                    </article>
+                    <article class="ac-stat-card">
+                        <h3>Rêves enregistrés</h3>
+                        <p>{{ kpis.total_reves }}</p>
+                    </article>
+                    <article class="ac-stat-card">
+                        <h3>Durée moyenne</h3>
+                        <p>{{ kpis.moyenne_duree }}h</p>
+                    </article>
+                    <article class="ac-stat-card">
+                        <h3>Qualité moy.</h3>
+                        <p>{{ kpis.moyenne_qualite }}%</p>
+                    </article>
+                </section>
+
+                <section style="margin-bottom: 2.5rem;">
+                    <div class="section-heading">
+                        <h2>Statistiques Sommeil</h2>
+                        <span class="section-count">{{ kpis.total_sommeils }} entrée(s)</span>
+                    </div>
+
+                    <div class="powerbi-card">
+                        <div class="powerbi-card-header">
+                            <span class="material-symbols-outlined" style="font-size: 20px; opacity: 0.65;">nights_stay</span>
+                            <h3 class="powerbi-card-title">Analyse Power BI — Sommeil</h3>
+                            <span class="powerbi-badge">Power BI</span>
+                        </div>
+                        <div class="powerbi-frame-wrapper">
+                            <iframe
+                                    title="sommeil"
+                                    src="https://app.powerbi.com/reportEmbed?reportId=0e045a52-f58f-44af-ae60-1134d355b44f&autoAuth=true&ctid=604f1a96-cbe8-43f8-abbf-f8eaf5d85730"
+                                    frameborder="0"
+                                    allowfullscreen="true"
+                                    loading="lazy">
+                            </iframe>
+                        </div>
+                    </div>
+
+                    <section class="ac-card">
+                        <div class="table-card-header">
+                            <div class="table-card-header-left">
+                                <span class="table-dot dot-sommeil"></span>
+                                <h2>Tableau Sommeil</h2>
+                                <span class="table-count" id="sleepCount">{{ kpis.total_sommeils }} entrée(s)</span>
+                            </div>
+                            <div class="table-card-header-right">
+                                <input type="search" id="sleepSearch" class="ac-input" placeholder="Rechercher..." aria-label="Rechercher une entrée sommeil" style="width: 180px;">
+                                <select id="sleepStatusFilter" class="ac-input">
+                                    <option value="">Tous les statuts</option>
+                                    <option value="bon">Bon</option>
+                                    <option value="moyen">Moyen</option>
+                                    <option value="à améliorer">À améliorer</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="ac-table-container">
+                            <table class="ac-table" id="sleepTable">
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Date</th>
+                                    <th>Durée</th>
+                                    <th>Qualité</th>
+                                    <th>Heure coucher</th>
+                                    <th>Heure réveil</th>
+                                    <th>Statut</th>
+                                    <th class="ac-col-actions">Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% if sommeils is defined and sommeils|length > 0 %}
+                                    {% for s in sommeils %}
+                                        <tr
+                                                data-id="{{ s.id }}"
+                                                data-date="{{ s.date_nuit ? s.date_nuit|date('Y-m-d') : '' }}"
+                                                data-duree="{{ s.duree }}"
+                                                data-qualite="{{ s.qualite_label|lower }}"
+                                                data-coucher="{{ s.heure_coucher }}"
+                                                data-reveil="{{ s.heure_reveil }}"
+                                                data-status="{{ s.statut_label|lower }}"
+                                        >
+                                            <td>{{ s.id }}</td>
+                                            <td>{{ s.date_nuit ? s.date_nuit|date('d/m/Y') : '-' }}</td>
+                                            <td>{{ s.duree }}h</td>
+                                            <td>{{ s.qualite_label }}</td>
+                                            <td>{{ s.heure_coucher }}</td>
+                                            <td>{{ s.heure_reveil }}</td>
+                                            <td>
+                                                <span class="ac-badge {{ s.statut_class }}">
+                                                    {{ s.statut_label }}
+                                                </span>
+                                            </td>
+                                            <td class="ac-col-actions">
+                                                <div class="ac-actions-group">
+                                                    <button type="button" class="ac-btn ac-btn-primary"
+                                                            onclick="openViewSommeilModal('{{ path('app_admin_sommeil_modal_sommeil_show', {'id': s.id}) }}')">
+                                                        <span class="material-symbols-outlined" style="font-size:15px;">visibility</span>
+                                                        Voir
+                                                    </button>
+
+                                                    <button type="button" class="ac-btn ac-btn-danger"
+                                                            onclick="openDeleteModal('{{ path('app_admin_sommeil_delete_sommeil', {'id': s.id}) }}', '{{ csrf_token('delete_sommeil_' ~ s.id) }}', 'cette nuit')">
+                                                        <span class="material-symbols-outlined" style="font-size:15px;">delete</span>
+                                                        Supprimer
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="8" style="text-align:center; padding: 2rem; opacity: 0.5;">Aucune entrée sommeil.</td>
+                                    </tr>
+                                {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {% if pagination_sommeils is defined and pagination_sommeils.pageCount > 1 %}
+                            <div class="pagination-wrap">
+                                {{ knp_pagination_render(pagination_sommeils) }}
+                            </div>
+                        {% endif %}
+                    </section>
+                </section>
+
+                <section style="margin-bottom: 2.5rem;">
+                    <div class="section-heading">
+                        <h2>Statistiques Rêves</h2>
+                        <span class="section-count">{{ kpis.total_reves }} rêve(s)</span>
+                    </div>
+
+                    <div class="powerbi-card">
+                        <div class="powerbi-card-header">
+                            <span class="material-symbols-outlined" style="font-size: 20px; opacity: 0.65;">menu_book</span>
+                            <h3 class="powerbi-card-title">Analyse Power BI — Rêves</h3>
+                            <span class="powerbi-badge">Power BI</span>
+                        </div>
+                        <div class="powerbi-frame-wrapper">
+                            <iframe
+                                    title="reve"
+                                    src="https://app.powerbi.com/reportEmbed?reportId=44ad7526-3b99-41e9-982b-426507d7ff64&autoAuth=true&ctid=604f1a96-cbe8-43f8-abbf-f8eaf5d85730"
+                                    frameborder="0"
+                                    allowfullscreen="true"
+                                    loading="lazy">
+                            </iframe>
+                        </div>
+                    </div>
+
+                    <section class="ac-card">
+                        <div class="table-card-header">
+                            <div class="table-card-header-left">
+                                <span class="table-dot dot-reves"></span>
+                                <h2>Tableau Rêves</h2>
+                                <span class="table-count" id="dreamCount">{{ kpis.total_reves }} rêve(s)</span>
+                            </div>
+                            <div class="table-card-header-right">
+                                <input type="search" id="dreamSearch" class="ac-input" placeholder="Rechercher..." aria-label="Rechercher un rêve" style="width: 180px;">
+                                <select id="dreamTypeFilter" class="ac-input">
+                                    <option value="">Tous les types</option>
+                                    <option value="normal">Normal</option>
+                                    <option value="lucide">Lucide</option>
+                                    <option value="cauchemar">Cauchemar</option>
+                                    <option value="prémonitoire">Prémonitoire</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="ac-table-container">
+                            <table class="ac-table" id="dreamTable">
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Date</th>
+                                    <th>Titre</th>
+                                    <th>Type</th>
+                                    <th>Humeur</th>
+                                    <th class="ac-col-actions">Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% if reves is defined and reves|length > 0 %}
+                                    {% for r in reves %}
+                                        <tr
+                                                data-id="{{ r.id }}"
+                                                data-date="{{ r.date_nuit ? r.date_nuit|date('Y-m-d') : '' }}"
+                                                data-title="{{ r.titre|lower }}"
+                                                data-type="{{ r.type_reve|lower }}"
+                                                data-humeur="{{ r.humeur|lower }}"
+                                        >
+                                            <td>{{ r.id }}</td>
+                                            <td>{{ r.date_nuit ? r.date_nuit|date('d/m/Y') : '-' }}</td>
+                                            <td><strong>{{ r.titre }}</strong></td>
+                                            <td>{{ r.type_reve }}</td>
+                                            <td>
+                                                <span class="ac-badge {{ r.humeur_class }}">
+                                                    {{ r.humeur }}
+                                                </span>
+                                            </td>
+                                            <td class="ac-col-actions">
+                                                <div class="ac-actions-group">
+                                                    <button type="button" class="ac-btn ac-btn-primary"
+                                                            onclick="openViewReveModal('{{ path('app_admin_sommeil_modal_reve_show', {'id': r.id}) }}')">
+                                                        <span class="material-symbols-outlined" style="font-size:15px;">visibility</span>
+                                                        Voir
+                                                    </button>
+
+                                                    <button type="button" class="ac-btn ac-btn-danger"
+                                                            onclick="openDeleteModal('{{ path('app_admin_sommeil_delete_reve', {'id': r.id}) }}', '{{ csrf_token('delete_reve_' ~ r.id) }}', 'ce rêve')">
+                                                        <span class="material-symbols-outlined" style="font-size:15px;">delete</span>
+                                                        Supprimer
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" style="text-align:center; padding: 2rem; opacity: 0.5;">Aucun rêve enregistré.</td>
+                                    </tr>
+                                {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {% if pagination_reves is defined and pagination_reves.pageCount > 1 %}
+                            <div class="pagination-wrap">
+                                {{ knp_pagination_render(pagination_reves) }}
+                            </div>
+                        {% endif %}
+                    </section>
+                </section>
+
+                <div class="ac-modal" id="viewSommeilModal" hidden>
+                    <div class="ac-modal-content" style="max-width: 680px; width: 100%;">
+                        <div class="ac-row-between" style="margin-bottom: 1rem;">
+                            <h3 style="font-size: 1rem; font-weight: 700;">Détail de la nuit</h3>
+                            <button type="button" class="ac-icon-btn" onclick="closeViewSommeilModal()" aria-label="Fermer">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <div id="viewSommeilBody" style="min-height: 120px;"></div>
+                    </div>
+                </div>
+
+                <div class="ac-modal" id="viewReveModal" hidden>
+                    <div class="ac-modal-content" style="max-width: 580px; width: 100%;">
+                        <div class="ac-row-between" style="margin-bottom: 1rem;">
+                            <h3 style="font-size: 1rem; font-weight: 700;">Détail du rêve</h3>
+                            <button type="button" class="ac-icon-btn" onclick="closeViewReveModal()" aria-label="Fermer">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <div id="viewReveBody" style="min-height: 120px;"></div>
+                    </div>
+                </div>
+
+                <div class="ac-modal" id="deleteModal" hidden>
+                    <div class="ac-modal-content">
+                        <div class="ac-row-between" style="margin-bottom: 1rem;">
+                            <h3 style="font-size: 1rem; font-weight: 700;" id="deleteModalTitle">Supprimer ?</h3>
+                            <button type="button" class="ac-icon-btn" onclick="closeDeleteModal()" aria-label="Fermer">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+
+                        <p id="deleteModalBody" style="color: var(--color-text-muted); margin-bottom: 1.25rem;">
+                            Cette action est irréversible.
+                        </p>
+
+                        <form id="deleteForm" method="post">
+                            <input type="hidden" name="_token" id="deleteToken" value="">
+                            <input type="hidden" name="_method" value="DELETE">
+
+                            <div class="ac-row-end">
+                                <button type="button" class="ac-ghost-btn" onclick="closeDeleteModal()">Annuler</button>
+                                <button type="submit" class="ac-danger-btn">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
+                                    Supprimer
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body_javascripts %}
+    {{ parent() }}
+
+    <script>
+        (() => {
+            function setupTable(config) {
+                const table = document.getElementById(config.tableId);
+                const tbody = table ? table.querySelector('tbody') : null;
+                const searchInput = document.getElementById(config.searchId);
+                const filterSelect = document.getElementById(config.filterId);
+                const countEl = document.getElementById(config.countId);
+
+                if (!table || !tbody) return;
+
+                const getRows = () => Array.from(tbody.querySelectorAll('tr')).filter(
+                    row => row.dataset.id
+                );
+
+                function updateCount() {
+                    const visibleRows = getRows().filter(row => row.style.display !== 'none').length;
+                    if (countEl) countEl.textContent = config.countLabel(visibleRows);
+                }
+
+                function applyFilters() {
+                    const query = (searchInput?.value || '').trim().toLowerCase();
+                    const filter = (filterSelect?.value || '').trim().toLowerCase();
+
+                    getRows().forEach((row) => {
+                        const haystack = config.searchFields.map(field => row.dataset[field] || '').join(' ').toLowerCase();
+                        const filterValue = row.dataset[config.filterField] || '';
+                        const matchSearch = !query || haystack.includes(query);
+                        const matchFilter = !filter || filterValue.includes(filter);
+
+                        row.style.display = (matchSearch && matchFilter) ? '' : 'none';
+                    });
+
+                    updateCount();
+                }
+
+                searchInput?.addEventListener('input', applyFilters);
+                filterSelect?.addEventListener('change', applyFilters);
+
+                applyFilters();
+            }
+
+            setupTable({
+                tableId: 'sleepTable',
+                searchId: 'sleepSearch',
+                filterId: 'sleepStatusFilter',
+                countId: 'sleepCount',
+                filterField: 'status',
+                searchFields: ['id', 'date', 'duree', 'qualite', 'coucher', 'reveil', 'status'],
+                countLabel: (n) => `${n} entrée(s)`
+            });
+
+            setupTable({
+                tableId: 'dreamTable',
+                searchId: 'dreamSearch',
+                filterId: 'dreamTypeFilter',
+                countId: 'dreamCount',
+                filterField: 'type',
+                searchFields: ['id', 'date', 'title', 'type', 'humeur'],
+                countLabel: (n) => `${n} rêve(s)`
+            });
+
+            function openModal(id) {
+                document.getElementById(id).hidden = false;
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal(id) {
+                document.getElementById(id).hidden = true;
+                document.body.style.overflow = '';
+            }
+
+            window.openDeleteModal = function(action, token, label) {
+                document.getElementById('deleteForm').action = action;
+                document.getElementById('deleteToken').value = token;
+                document.getElementById('deleteModalTitle').textContent = 'Supprimer ' + label + ' ?';
+                document.getElementById('deleteModalBody').textContent = 'Supprimer ' + label + ' ? Cette action est irréversible.';
+                openModal('deleteModal');
+            };
+
+            window.closeDeleteModal = function() {
+                closeModal('deleteModal');
+            };
+
+            window.openViewSommeilModal = function(url) {
+                const body = document.getElementById('viewSommeilBody');
+                body.innerHTML = '<div style="text-align:center;padding:2rem;opacity:.5;">Chargement...</div>';
+                openModal('viewSommeilModal');
+
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(r => r.text())
+                    .then(html => {
+                        body.innerHTML = html;
+                    })
+                    .catch(() => {
+                        body.innerHTML = '<p style="color:var(--color-error)">Erreur de chargement.</p>';
+                    });
+            };
+
+            window.closeViewSommeilModal = function() {
+                closeModal('viewSommeilModal');
+            };
+
+            window.closeSommeilModal = function() {
+                closeModal('viewSommeilModal');
+            };
+
+            window.openViewReveModal = function(url) {
+                const body = document.getElementById('viewReveBody');
+                body.innerHTML = '<div style="text-align:center;padding:2rem;opacity:.5;">Chargement...</div>';
+                openModal('viewReveModal');
+
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(r => r.text())
+                    .then(html => {
+                        body.innerHTML = html;
+                    })
+                    .catch(() => {
+                        body.innerHTML = '<p style="color:var(--color-error)">Erreur de chargement.</p>';
+                    });
+            };
+
+            window.closeViewReveModal = function() {
+                closeModal('viewReveModal');
+            };
+
+            ['viewSommeilModal', 'viewReveModal', 'deleteModal'].forEach(id => {
+                document.getElementById(id)?.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeModal(id);
+                    }
+                });
+            });
+
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape') {
+                    ['viewSommeilModal', 'viewReveModal', 'deleteModal'].forEach(id => closeModal(id));
+                }
+            });
+        })();
+    </script>
+{% endblock %}

@@ -1,0 +1,142 @@
+{
+    "app": {
+        "path": "\/assets\/app-d4koKta.js",
+        "type": "js"
+    },
+    "\/assets\/stimulus_bootstrap.js": {
+        "path": "\/assets\/stimulus_bootstrap-qb7P5kN.js",
+        "type": "js"
+    },
+    "\/assets\/@symfony\/stimulus-bundle\/controllers.js": {
+        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers--myUX5V.js",
+        "type": "js"
+    },
+    "\/assets\/@symfony\/ux-turbo\/turbo_controller.js": {
+        "path": "\/assets\/@symfony\/ux-turbo\/turbo_controller-xqRD2D6.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/auth_form_controller.js": {
+        "path": "\/assets\/controllers\/auth_form_controller-5uTrkeB.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/auth_switcher_controller.js": {
+        "path": "\/assets\/controllers\/auth_switcher_controller-zLLo1yl.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/avatar_generator_controller.js": {
+        "path": "\/assets\/controllers\/avatar_generator_controller-qD2AoTp.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/edit_user_controller.js": {
+        "path": "\/assets\/controllers\/edit_user_controller-pQpXhXV.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/face_login_controller.js": {
+        "path": "\/assets\/controllers\/face_login_controller-O1Zk3tF.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/face_settings_controller.js": {
+        "path": "\/assets\/controllers\/face_settings_controller-5Zr7Eju.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/flash_toast_controller.js": {
+        "path": "\/assets\/controllers\/flash_toast_controller-3I5CZ36.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/form_feedback_controller.js": {
+        "path": "\/assets\/controllers\/form_feedback_controller-AAOj1lU.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/hello_controller.js": {
+        "path": "\/assets\/controllers\/hello_controller-h7Y4WCm.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/home_session_controller.js": {
+        "path": "\/assets\/controllers\/home_session_controller-WUeti6G.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/journal_editor_controller.js": {
+        "path": "\/assets\/controllers\/journal_editor_controller-SVF3CGI.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/modal_controller.js": {
+        "path": "\/assets\/controllers\/modal_controller-KgXDqGI.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/mood_analytics_controller.js": {
+        "path": "\/assets\/controllers\/mood_analytics_controller-I9LbP7t.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/mood_charts_controller.js": {
+        "path": "\/assets\/controllers\/mood_charts_controller-_YuxCtz.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/navbar_menu_controller.js": {
+        "path": "\/assets\/controllers\/navbar_menu_controller-9wF3m5v.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/password_reset_controller.js": {
+        "path": "\/assets\/controllers\/password_reset_controller-TGl81FW.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/password_toggle_controller.js": {
+        "path": "\/assets\/controllers\/password_toggle_controller-OLHr6zE.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/sidebar_toggle_controller.js": {
+        "path": "\/assets\/controllers\/sidebar_toggle_controller-M49cR4g.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/submit_state_controller.js": {
+        "path": "\/assets\/controllers\/submit_state_controller-wO-BQ12.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/table_filter_controller.js": {
+        "path": "\/assets\/controllers\/table_filter_controller-lzrmSGz.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/two_factor_settings_controller.js": {
+        "path": "\/assets\/controllers\/two_factor_settings_controller-3AhN5RH.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/ui_theme_controller.js": {
+        "path": "\/assets\/controllers\/ui_theme_controller-UpLYhuA.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/user_actions_controller.js": {
+        "path": "\/assets\/controllers\/user_actions_controller-zHci2QK.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/user_filters_controller.js": {
+        "path": "\/assets\/controllers\/user_filters_controller-gadp9h4.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/user_mood_controller.js": {
+        "path": "\/assets\/controllers\/user_mood_controller-WPI7quj.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/verify_email_controller.js": {
+        "path": "\/assets\/controllers\/verify_email_controller-NZL6Q-3.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/csrf_protection_controller.js": {
+        "path": "\/assets\/controllers\/csrf_protection_controller-xsifGyW.js",
+        "type": "js"
+    },
+    "\/assets\/styles\/app.css": {
+        "path": "\/assets\/styles\/app-s6PPT96.css",
+        "type": "css"
+    },
+    "@hotwired\/stimulus": {
+        "path": "\/assets\/vendor\/@hotwired\/stimulus\/stimulus.index-S4zNcea.js",
+        "type": "js"
+    },
+    "@symfony\/stimulus-bundle": {
+        "path": "\/assets\/@symfony\/stimulus-bundle\/loader-TdCRoU6.js",
+        "type": "js"
+    },
+    "@hotwired\/turbo": {
+        "path": "\/assets\/vendor\/@hotwired\/turbo\/turbo.index-pT15T6h.js",
+        "type": "js"
+    }
+}

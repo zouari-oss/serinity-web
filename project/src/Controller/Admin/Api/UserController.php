@@ -23,7 +23,8 @@ final class UserController extends AbstractController
 {
     public function __construct(
         private readonly UserManagementService $userManagementService,
-    ) {}
+    ) {
+    }
 
     /**
      * Get paginated list of users with optional filters.
@@ -42,7 +43,7 @@ final class UserController extends AbstractController
         $result = $this->userManagementService->getUsersPaginated($filterRequest);
 
         // Serialize users without sensitive data
-        $users = array_map(fn($user) => [
+        $users = array_map(fn ($user) => [
             'id' => $user->getId(),
             'email' => $user->getEmail(),
             'role' => $user->getRole(),
@@ -97,8 +98,7 @@ final class UserController extends AbstractController
     #[Route('/{id}', name: 'update', methods: ['PUT'])]
     public function update(
         string $id,
-        #[MapRequestPayload]
-        UpdateUserRequest $request
+        #[MapRequestPayload] UpdateUserRequest $request
     ): JsonResponse {
         $result = $this->userManagementService->updateUser($id, $request);
 
@@ -148,8 +148,7 @@ final class UserController extends AbstractController
     #[Route('/{id}/status', name: 'change_status', methods: ['PATCH'])]
     public function changeStatus(
         string $id,
-        #[MapRequestPayload]
-        ChangeAccountStatusRequest $request
+        #[MapRequestPayload] ChangeAccountStatusRequest $request
     ): JsonResponse {
         $result = $this->userManagementService->changeAccountStatus($id, $request);
 

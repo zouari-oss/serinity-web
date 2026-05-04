@@ -1,0 +1,145 @@
+<div class="ac-row-between" style="margin-bottom: 1.25rem;">
+    <div>
+        <h3 style="font-size: 1rem; font-weight: 700; margin: 0;">
+            💭 {{ reve.titre }}
+        </h3>
+        <p style="color: var(--color-text-muted); font-size: 0.85rem; margin-top: 0.2rem;">
+            {% if reve.sommeil %}
+                Nuit du {{ reve.sommeil.dateNuit ? reve.sommeil.dateNuit|date('d/m/Y') : '—' }}
+            {% else %}
+                Journal de rêve
+            {% endif %}
+        </p>
+    </div>
+    <div style="display: flex; gap: 0.5rem;">
+        {% if modal_mode|default(false) %}
+            <button type="button" class="ac-ghost-btn"
+                    onclick="openReveModal('{{ path('app_reve_edit', {id: reve.id}) }}')">
+                <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
+                Modifier
+            </button>
+        {% else %}
+            <a href="{{ path('app_reve_edit', {id: reve.id}) }}" class="ac-ghost-btn">
+                <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
+                Modifier
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{# ── Badges ── #}
+<div style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.25rem;">
+    {% if reve.typeReve %}
+        {% set typeColor = {'Normal':'secondary','Lucide':'primary','Cauchemar':'danger','Prémonitoire':'warning'} %}
+        <span class="ac-badge ac-badge-{{ typeColor[reve.typeReve] ?? 'secondary' }}">{{ reve.typeReve }}</span>
+    {% endif %}
+
+    {% if reve.humeur %}
+        <span class="ac-badge ac-badge-primary">{{ reve.humeur }}</span>
+    {% endif %}
+
+    {% if reve.couleur %}
+        <span class="ac-badge ac-badge-success">🎨 Couleur</span>
+    {% else %}
+        <span class="ac-badge ac-badge-secondary">Noir &amp; blanc</span>
+    {% endif %}
+
+    {% if reve.recurrent %}
+        <span class="ac-badge ac-badge-warning">↻ Récurrent</span>
+    {% else %}
+        <span class="ac-badge ac-badge-secondary">Non récurrent</span>
+    {% endif %}
+</div>
+
+{# ── Description ── #}
+<div class="ac-card" style="margin-bottom: 1rem;">
+    <p style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+              letter-spacing: 0.05em; color: var(--color-text-muted); margin-bottom: 0.75rem;">
+        📝 Description
+    </p>
+    <p style="white-space: pre-wrap; color: var(--color-text-muted); line-height: 1.8; margin: 0;">
+        {{ reve.description ?: '—' }}
+    </p>
+</div>
+
+{# ── Détails ── #}
+<div class="ac-card" style="margin-bottom: 1rem;">
+    <p style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+              letter-spacing: 0.05em; color: var(--color-text-muted); margin-bottom: 0.75rem;">
+        🔍 Détails
+    </p>
+
+    <div class="ac-kpi-grid">
+
+        {# Intensité #}
+        <div>
+            <span style="font-size: 0.8rem; color: var(--color-text-muted);">Intensité</span>
+            <div style="display: flex; align-items: center; gap: 0.4rem; margin-top: 0.35rem;">
+                <div style="display: flex; gap: 4px;">
+                    {% for i in 1..10 %}
+                        <div style="width: 10px; height: 10px; border-radius: 999px;
+                                background: {{ i <= (reve.intensite ?? 0) ? 'var(--color-primary)' : 'var(--color-border)' }};"></div>
+                    {% endfor %}
+                </div>
+                <strong style="font-size: 0.85rem;">{{ reve.intensite ?? 0 }}/10</strong>
+            </div>
+        </div>
+
+        {# Nuit associée #}
+        <div>
+            <span style="font-size: 0.8rem; color: var(--color-text-muted);">Nuit associée</span>
+            <strong style="display: block; margin-top: 0.35rem; font-size: 0.95rem;">
+                {% if reve.sommeil %}
+                    <a href="{{ path('app_sommeil_show', {id: reve.sommeil.id}) }}"
+                       style="color: var(--color-primary); text-decoration: none;">
+                        Nuit du {{ reve.sommeil.dateNuit ? reve.sommeil.dateNuit|date('d/m/Y') : '—' }}
+                    </a>
+                {% else %}—{% endif %}
+            </strong>
+        </div>
+
+        {# Créé le #}
+        <div>
+            <span style="font-size: 0.8rem; color: var(--color-text-muted);">Créé le</span>
+            <strong style="display: block; margin-top: 0.35rem; font-size: 0.95rem;">
+                {{ reve.createdAt ? reve.createdAt|date('d/m/Y à H:i') : '—' }}
+            </strong>
+        </div>
+
+        {# Modifié le #}
+        <div>
+            <span style="font-size: 0.8rem; color: var(--color-text-muted);">Modifié le</span>
+            <strong style="display: block; margin-top: 0.35rem; font-size: 0.95rem;">
+                {{ reve.updatedAt ? reve.updatedAt|date('d/m/Y à H:i') : '—' }}
+            </strong>
+        </div>
+
+    </div>
+
+    {# Émotions #}
+    {% if reve.emotions %}
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-border);">
+            <span style="font-size: 0.8rem; color: var(--color-text-muted); font-weight: 700;
+                         text-transform: uppercase; letter-spacing: 0.05em;">Émotions</span>
+            <p style="margin-top: 0.35rem; font-size: 0.95rem;">{{ reve.emotions }}</p>
+        </div>
+    {% endif %}
+
+    {# Symboles #}
+    {% if reve.symboles %}
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-border);">
+            <span style="font-size: 0.8rem; color: var(--color-text-muted); font-weight: 700;
+                         text-transform: uppercase; letter-spacing: 0.05em;">Symboles</span>
+            <p style="margin-top: 0.35rem; font-size: 0.95rem; white-space: pre-wrap;">{{ reve.symboles }}</p>
+        </div>
+    {% endif %}
+</div>
+
+{# ── Actions modal ── #}
+{% if modal_mode|default(false) %}
+    <div class="ac-row-end" style="margin-top: 0.5rem;">
+        <button type="button" class="ac-ghost-btn" onclick="closeReveModal()">
+            Fermer
+        </button>
+    </div>
+{% endif %}

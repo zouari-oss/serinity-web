@@ -1,0 +1,10 @@
+parameters:
+    level: 8
+
+    paths:
+        - src/Entity/Sleep
+        - src/Form/Sleep
+        - src/Controller/Sleep
+        - src/Repository/Sleep
+        - src/Service/Sleep
+        - tests/Service/Sleep

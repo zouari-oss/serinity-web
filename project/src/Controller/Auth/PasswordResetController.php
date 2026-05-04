@@ -18,7 +18,9 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('/api/auth')]
 final class PasswordResetController extends AbstractApiController
 {
-    public function __construct(private readonly PasswordResetService $passwordResetService) {}
+    public function __construct(private readonly PasswordResetService $passwordResetService)
+    {
+    }
 
     #[Route('/forgot-password', name: 'api_auth_forgot_password', methods: ['POST'])]
     #[Route('/reset/send', name: 'api_auth_reset_send', methods: ['POST'])]

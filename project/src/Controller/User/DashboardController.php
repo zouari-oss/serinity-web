@@ -6,10 +6,14 @@ namespace App\Controller\User;
 
 use App\Dto\Mood\MoodSummaryRequest;
 use App\Repository\MoodEntryRepository;
+use App\Repository\CategoryRepository;
 use App\Service\Api\ZenQuotesClient;
+use App\Service\ProfileLookupService;
+use App\Service\ThreadService;
 use App\Service\User\UserDashboardService;
 use App\Service\User\UserMoodService;
 use App\Service\User\RecoveryPlanService;
+use App\Model\CurrentUser;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,7 +30,11 @@ final class DashboardController extends AbstractUserUiController
         private readonly RecoveryPlanService $recoveryPlanService,
         private readonly MoodEntryRepository $moodEntryRepository,
         private readonly ZenQuotesClient $zenQuotesClient,
-    ) {}
+        private readonly ThreadService $threadService,
+        private readonly CategoryRepository $categoryRepository,
+        private readonly ProfileLookupService $profileLookupService,
+    ) {
+    }
 
     #[Route('/dashboard', name: 'user_ui_dashboard', methods: ['GET'])]
     public function dashboard(): Response
@@ -58,12 +66,46 @@ final class DashboardController extends AbstractUserUiController
     {
         $user = $this->currentUser();
 
-        return $this->render('access_control/pages/coming_soon.html.twig', [
+        if ($user->getRole() === 'THERAPIST') {
+            return $this->redirectToRoute('app_admin_forum');
+        }
+
+        $baseThreads = $this->threadService->feed(['excludeArchived' => true]);
+        $this->hydrateThreadAuthors($baseThreads);
+
+        $displayUser = new CurrentUser(
+            $user->getId(),
+            $user->getProfile()?->getUsername() ?? $user->getEmail(),
+            'User',
+            $user->getRoles(),
+        );
+
+        return $this->render('user/pages/forum.html.twig', [
             'nav' => $this->buildNav('user_ui_forum'),
             'userName' => $user->getEmail(),
-            'title' => 'Forum',
-            'subtitle' => 'User forum module will be available soon.',
+            'threads' => $baseThreads,
+            'categories' => $this->categoryRepository->findAll(),
+            'currentUser' => $displayUser,
+            'currentSort' => 'most_followers',
+            'activeStatuses' => [],
+            'activeTypes' => [],
+            'activeCategories' => [],
         ]);
+    }
+
+    private function hydrateThreadAuthors(array $threads): void
+    {
+        $ids = [];
+        foreach ($threads as $thread) {
+            $ids[] = $thread->getAuthorId() ?? '';
+        }
+
+        $usernames = $this->profileLookupService->usernamesByIds($ids);
+
+        foreach ($threads as $thread) {
+            $authorId = $thread->getAuthorId() ?? '';
+            $thread->setAuthorUsername($usernames[$authorId] ?? 'Unknown User');
+        }
     }
 
     #[Route('/mood', name: 'user_ui_mood', methods: ['GET'])]
@@ -172,7 +214,7 @@ final class DashboardController extends AbstractUserUiController
     {
         $this->currentUser();
 
-        return $this->redirectToRoute('user_ui_sommeil_list');
+        return $this->redirectToRoute('app_sommeil_list');
     }
 
     private function isWeeklyTrendReviewed(Request $request): bool

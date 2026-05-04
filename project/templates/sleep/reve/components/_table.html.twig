@@ -1,0 +1,197 @@
+{% import _self as helper %}
+
+{% macro sort_link(label, field, filters) %}
+    {% set currentSort      = filters.sort|default('s.dateNuit') %}
+    {% set currentDirection = filters.direction|default('DESC') %}
+    {% set direction = (currentSort == field and currentDirection == 'ASC') ? 'DESC' : 'ASC' %}
+    <a href="{{ path(app.request.attributes.get('_route'), filters|merge({ sort: field, direction: direction })) }}"
+       class="ac-table-sort-link {{ currentSort == field ? 'is-active' : '' }}"
+       style="display:inline-flex; align-items:center; gap:0.25rem; color:inherit; text-decoration:none; font-weight:600;">
+        <span>{{ label }}</span>
+        <span style="font-size:0.8rem; opacity:0.7;">
+            {% if currentSort == field %}
+                {{ currentDirection == 'ASC' ? '↑' : '↓' }}
+            {% else %}⇅{% endif %}
+        </span>
+    </a>
+{% endmacro %}
+
+{% if reves.getTotalItemCount == 0 %}
+    <div style="text-align:center; padding: 3rem 1rem; color: var(--color-text-muted);">
+        <span class="material-symbols-outlined" style="font-size:48px; display:block; margin-bottom:0.75rem; opacity:0.4;">bedtime</span>
+        <h3 style="margin-bottom:0.5rem;">Aucun rêve enregistré</h3>
+        <p style="margin-bottom:1.25rem;">Commencez à noter vos rêves pour repérer les récurrences, émotions et intensités.</p>
+        <button type="button" class="ac-btn ac-btn-primary"
+                onclick="openReveModal('{{ path('app_reve_new') }}')">
+            <span class="material-symbols-outlined" style="font-size:16px;">add</span>
+            Ajouter un rêve
+        </button>
+    </div>
+{% else %}
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+        <div>
+            <h3 style="font-size:1rem; font-weight:700;">Journal des rêves</h3>
+            <p style="color:var(--color-text-muted); font-size:0.875rem; margin-top:0.2rem;">
+                {{ reves.getTotalItemCount }} élément(s) enregistré(s)
+            </p>
+        </div>
+    </div>
+
+    <div class="ac-table-container">
+        <table class="ac-table">
+            <thead>
+            <tr>
+                <th>{{ helper.sort_link('Titre',     'r.titre',     filters) }}</th>
+                <th>{{ helper.sort_link('Date',      's.dateNuit',  filters) }}</th>
+                <th>{{ helper.sort_link('Type',      'r.typeReve',  filters) }}</th>
+                <th>{{ helper.sort_link('Humeur',    'r.humeur',    filters) }}</th>
+                <th>{{ helper.sort_link('Intensité', 'r.intensite', filters) }}</th>
+                <th>Couleur</th>
+                <th>Récurrent</th>
+                <th style="text-align:right;">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for reve in reves %}
+                {% set typeColor = {
+                    'Normal':       'secondary',
+                    'Lucide':       'primary',
+                    'Cauchemar':    'danger',
+                    'Prémonitoire': 'warning'
+                } %}
+                {% set moodLabel = {
+                    '😄 Joyeux': 'Joyeux',
+                    '😢 Triste': 'Triste',
+                    '😨 Effrayé': 'Effrayé',
+                    '😐 Neutre': 'Neutre',
+                    '😌 Serein': 'Serein'
+                } %}
+
+                <tr>
+                    {# TITRE #}
+                    <td>
+                        <button type="button"
+                                onclick="openReveModal('{{ path('app_reve_show', {id: reve.id}) }}')"
+                                style="background:none; border:none; cursor:pointer; color:var(--color-primary); font-weight:600; padding:0; text-align:left;">
+                            {{ reve.titre ?: 'Sans titre' }}
+                        </button>
+                        <div style="font-size:0.78rem; color:var(--color-text-muted); margin-top:0.15rem;">
+                            {% if reve.updatedAt is defined and reve.updatedAt and reve.createdAt is defined and reve.createdAt
+                                and reve.updatedAt|date('Y-m-d H:i:s') != reve.createdAt|date('Y-m-d H:i:s') %}
+                                Modifié le {{ reve.updatedAt|date('d/m/Y à H:i') }}
+                            {% elseif reve.createdAt is defined and reve.createdAt %}
+                                Enregistré le {{ reve.createdAt|date('d/m/Y à H:i') }}
+                            {% else %}—{% endif %}
+                        </div>
+                    </td>
+
+                    {# DATE #}
+                    <td>
+                        {% if reve.sommeil is not null %}
+                            <a href="{{ path('app_sommeil_show', {id: reve.sommeil.id}) }}"
+                               style="color:var(--color-primary); text-decoration:none;">
+                                {{ reve.sommeil.dateNuit ? reve.sommeil.dateNuit|date('d/m/Y') : '—' }}
+                            </a>
+                        {% else %}
+                            <span style="color:var(--color-text-muted);">—</span>
+                        {% endif %}
+                    </td>
+
+                    {# TYPE #}
+                    <td>
+                        <span class="ac-badge ac-badge-{{ typeColor[reve.typeReve] ?? 'secondary' }}">
+                            {{ reve.typeReve ?? '—' }}
+                        </span>
+                    </td>
+
+                    {# HUMEUR #}
+                    <td>{{ moodLabel[reve.humeur] ?? (reve.humeur ?? '—') }}</td>
+
+                    {# INTENSITÉ — barre de progression mini #}
+                    <td>
+                        <div style="display:flex; align-items:center; gap:0.4rem;">
+                            <div style="width:60px; height:6px; background:var(--color-border); border-radius:999px; overflow:hidden;">
+                                <div style="width:{{ ((reve.intensite ?? 0) / 10 * 100)|round }}%; height:100%; background:var(--color-primary); border-radius:999px;"></div>
+                            </div>
+                            <span style="font-size:0.8rem; color:var(--color-text-muted);">{{ reve.intensite ?? 0 }}/10</span>
+                        </div>
+                    </td>
+
+                    {# COULEUR #}
+                    <td>
+                        {% if reve.couleur %}
+                            <span class="ac-badge ac-badge-primary">Couleur</span>
+                        {% else %}
+                            <span class="ac-badge ac-badge-secondary">N&amp;B</span>
+                        {% endif %}
+                    </td>
+
+                    {# RÉCURRENT #}
+                    <td>
+                        {% if reve.recurrent %}
+                            <span class="ac-badge ac-badge-warning">Oui</span>
+                        {% else %}
+                            <span class="ac-badge ac-badge-secondary">Non</span>
+                        {% endif %}
+                    </td>
+
+                    {# ACTIONS #}
+                    <td>
+                        <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.3rem; flex-wrap:wrap;">
+                            {# Voir #}
+                            <button type="button"
+                                    class="ac-icon-btn"
+                                    onclick="openReveModal('{{ path('app_reve_show', {id: reve.id}) }}')"
+                                    title="Voir">
+                                <span class="material-symbols-outlined">visibility</span>
+                            </button>
+
+                            {# Modifier #}
+                            <button type="button"
+                                    class="ac-icon-btn"
+                                    onclick="openReveModal('{{ path('app_reve_edit', {id: reve.id}) }}')"
+                                    title="Modifier">
+                                <span class="material-symbols-outlined">edit</span>
+                            </button>
+
+                            {# Humeur #}
+                            <button type="button"
+                                    class="ac-icon-btn"
+                                    onclick="openMoodAnalysisWidget({{ reve.id }})"
+                                    title="Analyse humeur">
+                                <span class="material-symbols-outlined">mood</span>
+                            </button>
+
+                            {# IA #}
+                            <button type="button"
+                                    class="ac-icon-btn"
+                                    onclick="analyzeReve({{ reve.id }})"
+                                    title="Analyse IA">
+                                <span class="material-symbols-outlined">psychology</span>
+                            </button>
+
+                            {# Supprimer #}
+                            <button type="button"
+                                    class="ac-icon-btn ac-danger"
+                                    onclick="openDeleteModal(
+                                            '{{ path('app_reve_delete', {id: reve.id}) }}',
+                                            '{{ reve.titre|default('Sans titre')|escape('js') }}',
+                                            '{{ csrf_token('delete' ~ reve.id) }}'
+                                            )"
+                                    title="Supprimer">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if reves.getPageCount > 1 %}
+        <div class="ac-pagination" style="margin-top:1rem;">
+            {{ knp_pagination_render(reves) }}
+        </div>
+    {% endif %}
+{% endif %}

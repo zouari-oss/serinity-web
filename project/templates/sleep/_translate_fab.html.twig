@@ -1,0 +1,44 @@
+<div class="tr-fab-wrap" id="trFabWrap">
+    <button type="button"
+            class="tr-fab-btn"
+            id="trFabBtn"
+            aria-label="Ouvrir la traduction">
+        <span class="material-symbols-outlined" aria-hidden="true">translate</span>
+    </button>
+
+    <div class="tr-panel" id="trPanel" hidden>
+        <div class="tr-panel-head">
+            <div>
+                <h3>Traduction</h3>
+                <p>Traduire le contenu visible de cette page</p>
+            </div>
+
+            <button type="button" class="tr-panel-close" id="trPanelClose" aria-label="Fermer">
+                ×
+            </button>
+        </div>
+
+        <div class="tr-panel-body">
+            <label for="trTargetLang" class="tr-label">Langue cible</label>
+            <select id="trTargetLang" class="tr-select">
+                <option value="en">English</option>
+                <option value="ar">العربية</option>
+                <option value="es">Español</option>
+                <option value="de">Deutsch</option>
+                <option value="it">Italiano</option>
+            </select>
+
+            <div class="tr-actions">
+                <button type="button" class="rv-btn rv-btn-primary" id="trRunBtn">
+                    Traduire la page
+                </button>
+
+                <button type="button" class="rv-btn rv-btn-ghost" id="trResetBtn">
+                    Réinitialiser
+                </button>
+            </div>
+
+            <p class="tr-status" id="trStatus" hidden></p>
+        </div>
+    </div>
+</div>

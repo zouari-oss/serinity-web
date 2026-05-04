@@ -1,0 +1,414 @@
+{% extends 'sleep/_layout.html.twig' %}
+
+{% block title %}Serinity Sleep — Plateforme de bien-être{% endblock %}
+{% block meta_description %}Serinity Sleep : une plateforme complète de bien-être regroupant le suivi du sommeil, les exercices, le journal d'humeur, les consultations en ligne et un forum communautaire.{% endblock %}
+
+{% block sleep_content %}
+
+    {# ══════════════════════════════════════════════════════════════
+   HERO — Introduction générale à la plateforme
+══════════════════════════════════════════════════════════════ #}
+    <section class="sn-hero" aria-labelledby="hero-title">
+
+        <div class="sn-hero-bg" aria-hidden="true">
+            <div class="sn-stars"></div>
+            <div class="sn-hero-orb sn-hero-orb-1"></div>
+            <div class="sn-hero-orb sn-hero-orb-2"></div>
+            <div class="sn-hero-orb sn-hero-orb-3"></div>
+        </div>
+
+        <div class="sn-hero-content">
+
+            {# ── Texte principal ── #}
+            <div>
+
+                <div class="sn-hero-badge sn-animate">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                    Plateforme de bien-être intégrale
+                </div>
+
+                <h1 class="sn-hero-title sn-animate sn-animate-delay-1" id="hero-title">
+                    Votre bien-être,<br>
+                    <span class="highlight">tous les aspects.</span><br>
+                    <span class="gold">Un seul endroit.</span>
+                </h1>
+
+                <p class="sn-hero-desc sn-animate sn-animate-delay-2">
+                    Serinity Sleep est une plateforme complète qui réunit cinq modules
+                    essentiels : suivi du <strong>sommeil</strong>, <strong>exercices</strong>
+                    de relaxation, journal d'<strong>humeur</strong>,
+                    <strong>consultations</strong> spécialisées et
+                    <strong>forum</strong> communautaire — tout ce dont vous avez besoin
+                    pour prendre soin de vous au quotidien.
+                </p>
+
+                {# Modules en pills #}
+                <div class="sn-hero-modules sn-animate sn-animate-delay-2" aria-label="Modules disponibles">
+                <span class="sn-module-pill pill-sommeil">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13" aria-hidden="true">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                    Sommeil
+                </span>
+                    <span class="sn-module-pill pill-exercice">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13" aria-hidden="true">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                    </svg>
+                    Exercice
+                </span>
+                    <span class="sn-module-pill pill-humeur">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                        <line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.5"/>
+                        <line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.5"/>
+                    </svg>
+                    Humeur
+                </span>
+                    <span class="sn-module-pill pill-consult">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13" aria-hidden="true">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6.08 6.08l1.15-1.15a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                    </svg>
+                    Consultation
+                </span>
+                    <span class="sn-module-pill pill-forum">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13" aria-hidden="true">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Forum
+                </span>
+                </div>
+
+                <div class="sn-hero-cta sn-animate sn-animate-delay-3">
+                    <a href="#features" class="sn-btn sn-btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 8 12 12 14 14"/>
+                        </svg>
+                        Découvrir la plateforme
+                    </a>
+                    <a href="{{ path('app_sommeil_index') }}" class="sn-btn sn-btn-outline">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <polyline points="5 12 12 5 19 12"/>
+                            <line x1="12" y1="19" x2="12" y2="5"/>
+                        </svg>
+                        Commencer maintenant
+                    </a>
+                </div>
+
+            </div>
+
+            {# ── Carte visuelle — résumé des modules ── #}
+            <div class="sn-hero-visual sn-animate sn-animate-delay-4" aria-hidden="true">
+                <div class="sn-platform-card">
+
+                    <div class="sn-platform-card-header">
+                        <span class="sn-platform-card-title">Ma journée bien-être</span>
+                        <span class="sn-platform-card-date">Aujourd'hui</span>
+                    </div>
+
+                    <div class="sn-platform-modules-list">
+
+                        <div class="sn-pm-item pm-sommeil">
+                            <div class="sn-pm-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                                </svg>
+                            </div>
+                            <div class="sn-pm-info">
+                                <p class="sn-pm-name">Sommeil</p>
+                                <p class="sn-pm-value">7h 42m · Score 82</p>
+                            </div>
+                            <div class="sn-pm-badge good">✓</div>
+                        </div>
+
+                        <div class="sn-pm-item pm-exercice">
+                            <div class="sn-pm-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                                </svg>
+                            </div>
+                            <div class="sn-pm-info">
+                                <p class="sn-pm-name">Exercice</p>
+                                <p class="sn-pm-value">Yoga · 20 min</p>
+                            </div>
+                            <div class="sn-pm-badge good">✓</div>
+                        </div>
+
+                        <div class="sn-pm-item pm-humeur">
+                            <div class="sn-pm-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                                    <line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.5"/>
+                                    <line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.5"/>
+                                </svg>
+                            </div>
+                            <div class="sn-pm-info">
+                                <p class="sn-pm-name">Humeur</p>
+                                <p class="sn-pm-value">😌 Serein · +2</p>
+                            </div>
+                            <div class="sn-pm-badge good">✓</div>
+                        </div>
+
+                        <div class="sn-pm-item pm-consult">
+                            <div class="sn-pm-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                    <line x1="16" y1="2" x2="16" y2="6"/>
+                                    <line x1="8" y1="2" x2="8" y2="6"/>
+                                    <line x1="3" y1="10" x2="21" y2="10"/>
+                                </svg>
+                            </div>
+                            <div class="sn-pm-info">
+                                <p class="sn-pm-name">Consultation</p>
+                                <p class="sn-pm-value">RDV demain 14h</p>
+                            </div>
+                            <div class="sn-pm-badge pending">→</div>
+                        </div>
+
+                        <div class="sn-pm-item pm-forum">
+                            <div class="sn-pm-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                            </div>
+                            <div class="sn-pm-info">
+                                <p class="sn-pm-name">Forum</p>
+                                <p class="sn-pm-value">3 nouvelles réponses</p>
+                            </div>
+                            <div class="sn-pm-badge new">3</div>
+                        </div>
+
+                    </div>
+
+                    <div class="sn-platform-card-footer">
+                        <div class="sn-progress-row">
+                            <span>Progression du jour</span>
+                            <span>3 / 5 modules</span>
+                        </div>
+                        <div class="sn-progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100">
+                            <div class="sn-progress-fill" style="width:60%"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    {# ══════════════════════════════════════════════════════════════
+   STATISTIQUES GLOBALES
+══════════════════════════════════════════════════════════════ #}
+    <div class="sn-container" aria-label="Chiffres clés de la plateforme">
+        <div class="sn-stats-row">
+            <div class="sn-stat-block">
+                <p class="sn-stat-number">5 modules</p>
+                <p class="sn-stat-text">De bien-être intégrés</p>
+            </div>
+            <div class="sn-stat-block">
+                <p class="sn-stat-number">+12 000</p>
+                <p class="sn-stat-text">Utilisateurs actifs</p>
+            </div>
+            <div class="sn-stat-block">
+                <p class="sn-stat-number">94%</p>
+                <p class="sn-stat-text">Taux de satisfaction</p>
+            </div>
+            <div class="sn-stat-block">
+                <p class="sn-stat-number">24/7</p>
+                <p class="sn-stat-text">Accès à la communauté</p>
+            </div>
+        </div>
+    </div>
+
+    {# ══════════════════════════════════════════════════════════════
+   MODULES / FONCTIONNALITÉS
+══════════════════════════════════════════════════════════════ #}
+    <section class="sn-section" id="features" aria-labelledby="features-title">
+
+        <div class="sn-section-label">
+            <span aria-hidden="true"></span>
+            Nos 5 modules
+        </div>
+
+        <h2 class="sn-section-title" id="features-title">
+            Tout ce dont vous avez besoin<br>
+            pour un bien-être <span class="highlight">complet</span>
+        </h2>
+
+        <p class="sn-section-desc">
+            Chaque module est conçu pour répondre à un aspect précis de votre santé.
+            Ensemble, ils forment un accompagnement holistique au quotidien.
+        </p>
+
+        <div class="sn-features-grid" role="list">
+
+            {# ── 1. Sommeil ─────────────────────────────────── #}
+            <a href="{{ path('app_sommeil_index') }}" class="sn-feature-card" role="listitem" aria-label="Module Sommeil">
+                <div class="sn-feature-icon icon-sommeil" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                </div>
+                <h3 class="sn-feature-title">Suivi du Sommeil</h3>
+                <p class="sn-feature-desc">
+                    Enregistrez vos nuits, analysez votre qualité de sommeil, suivez
+                    vos cycles et identifiez les facteurs qui influencent votre repos.
+                </p>
+                <span class="sn-feature-link" aria-hidden="true">
+                Accéder au suivi
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </span>
+            </a>
+
+            {# ── 2. Exercice ────────────────────────────────── #}
+            <a href="#" class="sn-feature-card" role="listitem" aria-label="Module Exercice">
+                <div class="sn-feature-icon icon-exercice" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                    </svg>
+                </div>
+                <h3 class="sn-feature-title">Exercices &amp; Relaxation</h3>
+                <p class="sn-feature-desc">
+                    Découvrez des routines de relaxation, de respiration et d'étirements
+                    conçues pour préparer votre corps et votre esprit au sommeil.
+                </p>
+                <span class="sn-feature-link" aria-hidden="true">
+                Explorer les exercices
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </span>
+            </a>
+
+            {# ── 3. Humeur ──────────────────────────────────── #}
+            <a href="#" class="sn-feature-card" role="listitem" aria-label="Module Humeur">
+                <div class="sn-feature-icon icon-humeur" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                        <line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.5"/>
+                        <line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.5"/>
+                    </svg>
+                </div>
+                <h3 class="sn-feature-title">Journal d'Humeur</h3>
+                <p class="sn-feature-desc">
+                    Tracez vos émotions au fil du temps et comprenez les liens entre
+                    votre état émotionnel et la qualité de vos nuits.
+                </p>
+                <span class="sn-feature-link" aria-hidden="true">
+                Suivre mon humeur
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </span>
+            </a>
+
+            {# ── 4. Consultation ────────────────────────────── #}
+            <a href="#" class="sn-feature-card" role="listitem" aria-label="Module Consultation">
+                <div class="sn-feature-icon icon-consult" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6.08 6.08l1.15-1.15a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                    </svg>
+                </div>
+                <h3 class="sn-feature-title">Consultation en ligne</h3>
+                <p class="sn-feature-desc">
+                    Prenez rendez-vous avec des spécialistes du sommeil et du bien-être
+                    mental directement depuis l'application.
+                </p>
+                <span class="sn-feature-link" aria-hidden="true">
+                Prendre rendez-vous
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </span>
+            </a>
+
+            {# ── 5. Forum ───────────────────────────────────── #}
+            <a href="#" class="sn-feature-card" role="listitem" aria-label="Module Forum">
+                <div class="sn-feature-icon icon-forum" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+                <h3 class="sn-feature-title">Forum Communautaire</h3>
+                <p class="sn-feature-desc">
+                    Échangez avec d'autres membres, partagez vos expériences et
+                    trouvez du soutien dans une communauté bienveillante.
+                </p>
+                <span class="sn-feature-link" aria-hidden="true">
+                Rejoindre la communauté
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </span>
+            </a>
+
+            {# ── 6. Journal des Rêves ────────────────────────── #}
+            <a href="{{ path('app_reve_index') }}" class="sn-feature-card" role="listitem" aria-label="Journal des rêves">
+                <div class="sn-feature-icon" style="background:rgba(168,156,206,0.12);color:var(--sn-lavender);" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                    </svg>
+                </div>
+                <h3 class="sn-feature-title">Journal des Rêves</h3>
+                <p class="sn-feature-desc">
+                    Notez, catégorisez et analysez vos rêves. Suivez les récurrences,
+                    les émotions et les symboles pour mieux vous comprendre.
+                </p>
+                <span class="sn-feature-link" aria-hidden="true">
+                Ouvrir le journal
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </span>
+            </a>
+
+        </div>
+    </section>
+
+    {# ══════════════════════════════════════════════════════════════
+   CTA BANNER
+══════════════════════════════════════════════════════════════ #}
+    <div class="sn-container" style="padding-bottom:var(--sn-sp-20);">
+        <div class="sn-cta-banner" aria-labelledby="cta-title">
+            <h2 class="sn-cta-title" id="cta-title">
+                Prêt(e) à prendre soin de vous ?
+            </h2>
+            <p class="sn-cta-desc">
+                Rejoignez des milliers d'utilisateurs qui améliorent leur quotidien
+                grâce aux 5 modules de Serinity Sleep.
+            </p>
+            <div style="display:flex;gap:var(--sn-sp-4);justify-content:center;flex-wrap:wrap;">
+                <a href="{{ path('app_sommeil_index') }}" class="sn-btn sn-btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true" width="16" height="16">
+                        <polyline points="5 12 12 5 19 12"/>
+                        <line x1="12" y1="19" x2="12" y2="5"/>
+                    </svg>
+                    Commencer maintenant
+                </a>
+                <a href="#features" class="sn-btn sn-btn-outline">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" width="16" height="16">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    En savoir plus
+                </a>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

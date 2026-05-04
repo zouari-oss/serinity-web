@@ -1,0 +1,45 @@
+<div id="iaAnalysisWidget"
+     hidden
+     style="
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        width: min(480px, calc(100vw - 2rem));
+        max-height: 80vh;
+        overflow-y: auto;
+        z-index: 500;
+        border-radius: var(--radius-lg, 0.75rem);
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        box-shadow: var(--shadow-lg);
+     ">
+
+    {# ── En-tête ── #}
+    <div class="ac-row-between" style="
+        padding: 0.9rem 1rem;
+        border-bottom: 1px solid var(--color-border);
+        position: sticky;
+        top: 0;
+        background: var(--color-surface);
+        z-index: 1;
+    ">
+        <h4 id="iaAnalysisTitle" style="font-size: 0.95rem; font-weight: 700; margin: 0;">
+            Analyse psychologique du rêve
+        </h4>
+        <button type="button"
+                class="ac-icon-btn"
+                onclick="closeIaAnalysisWidget()"
+                aria-label="Fermer l'analyse IA">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+    </div>
+
+    {# ── Corps ── #}
+    <div id="iaAnalysisContent" style="padding: 1rem;">
+        <div style="text-align: center; padding: 1.5rem; color: var(--color-text-muted);">
+            <span class="material-symbols-outlined ac-spin" style="font-size: 32px; display: block; margin-bottom: 0.5rem;">progress_activity</span>
+            Analyse IA en cours…
+        </div>
+    </div>
+
+</div>

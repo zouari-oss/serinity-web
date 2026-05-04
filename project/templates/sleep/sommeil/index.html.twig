@@ -1,0 +1,327 @@
+{% extends 'sleep/_layout.html.twig' %}
+
+{% block title %}Mes nuits — Serinity Sleep{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('assets/css/sleep-weather-widget.css') }}">
+    <style>
+        .powerbi-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1140 / 541.25;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+            background: var(--color-surface, #f9f8f5);
+        }
+
+        .powerbi-wrapper iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        #deleteModal {
+            position: fixed !important;
+            inset: 0 !important;
+            z-index: 99999 !important;
+            display: none !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 24px !important;
+            background: rgba(10, 40, 45, 0.35) !important;
+            backdrop-filter: blur(4px);
+        }
+
+        #deleteModal.open {
+            display: flex !important;
+        }
+
+        #deleteModal .sl-delete-dialog {
+            width: min(460px, 100%) !important;
+            background: #e9fbfc !important;
+            border: 1px solid #b3ecf1 !important;
+            border-radius: 22px !important;
+            padding: 28px !important;
+            box-shadow: 0 24px 60px rgba(19, 97, 99, 0.25) !important;
+        }
+
+        #deleteModal h2 {
+            margin: 0 0 12px !important;
+            color: #06283a !important;
+            font-size: 1.6rem !important;
+            font-weight: 800 !important;
+        }
+
+        #deleteModal p {
+            margin: 0 0 20px !important;
+            color: #06283a !important;
+            font-size: 1rem !important;
+        }
+
+        #deleteModal .sl-delete-actions {
+            display: flex !important;
+            gap: 10px !important;
+            justify-content: flex-start !important;
+        }
+    </style>
+{% endblock %}
+
+{% block sleep_content %}
+    <section class="sl-page sl-page--pro">
+        <div class="rv-shell">
+
+            <header class="sl-hero sl-hero--pro">
+                <div class="sl-hero__content">
+                    <div>
+                        <span class="sl-hero__eyebrow">Suivi du sommeil</span>
+                        <h1 class="sl-title">
+                            <span class="title-icon">🌙</span>
+                            Mes nuits de sommeil
+                        </h1>
+                        <p class="sl-hero__subtitle">
+                            Consultez vos nuits, comparez vos durées et gardez une vue claire sur votre récupération.
+                        </p>
+                    </div>
+
+                    <div class="sl-hero__actions">
+                        <a href="{{ path('app_sommeil_index') }}" class="rv-btn rv-btn-outline">← Retour</a>
+
+                        <button type="button"
+                                class="rv-btn rv-btn-outline"
+                                id="openSleepWeatherBtn">
+                            ☁️ Météo sommeil
+                        </button>
+
+                        <button type="button"
+                                class="rv-btn rv-btn-primary"
+                                onclick="openSommeilModal('{{ path('app_sommeil_new') }}')">
+                            + Ajouter une nuit
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <section class="sl-insights-panel">
+                <div class="sl-insights-header">
+                    <div>
+                        <span class="sl-insights-eyebrow">Vue d'ensemble</span>
+                        <h2 class="sl-insights-title">Résumé de vos nuits</h2>
+                        <p class="sl-insights-subtitle">
+                            Une lecture rapide de votre rythme, de la qualité moyenne et de votre état au réveil.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="powerbi-wrapper">
+                    <iframe
+                            title="sommeil"
+                            src="https://app.powerbi.com/reportEmbed?reportId=0e045a52-f58f-44af-ae60-1134d355b44f&autoAuth=true&ctid=604f1a96-cbe8-43f8-abbf-f8eaf5d85730"
+                            frameborder="0"
+                            allowFullScreen="true"
+                            loading="lazy">
+                    </iframe>
+                </div>
+            </section>
+
+            <div class="rv-toolbar-card sl-toolbar-card">
+                <form method="get" class="rv-toolbar-form sl-toolbar-form">
+                    <div class="rv-field">
+                        <input
+                                type="text"
+                                name="q"
+                                value="{{ filters.q|default('') }}"
+                                placeholder="Recherche dynamique..."
+                                class="rv-input"
+                        >
+                    </div>
+
+                    <div class="rv-field">
+                        <select name="qualite" class="rv-select">
+                            <option value="">Toutes les qualités</option>
+                            <option value="Excellente" {{ filters.qualite|default('') == 'Excellente' ? 'selected' : '' }}>Excellente</option>
+                            <option value="Bonne" {{ filters.qualite|default('') == 'Bonne' ? 'selected' : '' }}>Bonne</option>
+                            <option value="Moyenne" {{ filters.qualite|default('') == 'Moyenne' ? 'selected' : '' }}>Moyenne</option>
+                            <option value="Mauvaise" {{ filters.qualite|default('') == 'Mauvaise' ? 'selected' : '' }}>Mauvaise</option>
+                        </select>
+                    </div>
+
+                    <div class="rv-field">
+                        <input
+                                type="text"
+                                name="humeur"
+                                value="{{ filters.humeur|default('') }}"
+                                placeholder="Humeur réveil"
+                                class="rv-input"
+                        >
+                    </div>
+
+                    <div class="rv-field">
+                        <select name="insuffisant" class="rv-select">
+                            <option value="">Tous</option>
+                            <option value="1" {{ filters.insuffisant|default('') == '1' ? 'selected' : '' }}>
+                                Sommeil insuffisant
+                            </option>
+                        </select>
+                    </div>
+
+                    <input type="hidden" name="sort" value="{{ filters.sort|default('s.dateNuit') }}">
+                    <input type="hidden" name="direction" value="{{ filters.direction|default('DESC') }}">
+
+                    <div class="rv-toolbar-actions">
+                        <button type="submit" class="rv-btn rv-btn-primary">Filtrer</button>
+                        <a href="{{ path('app_sommeil_list') }}" class="rv-btn rv-btn-ghost">Réinitialiser</a>
+                        <a href="{{ path('app_sommeil_export_csv', app.request.query.all) }}" class="rv-btn rv-btn-outline">Exporter Excel</a>
+                        <a href="{{ path('app_sommeil_export_pdf', app.request.query.all) }}" target="_blank" class="rv-btn rv-btn-outline">Exporter PDF</a>
+                    </div>
+                </form>
+            </div>
+
+            {% include 'sleep/sommeil/components/_table.html.twig' with {
+                sommeils: sommeils,
+                filters: filters
+            } %}
+        </div>
+    </section>
+
+    {% include 'sleep/sommeil/components/_delete_modal.html.twig' %}
+    {% include 'sleep/sommeil/components/_weather_widget.html.twig' %}
+
+    <div class="rv-modal-overlay" id="sommeilModal" hidden>
+        <div class="rv-modal-dialog" role="dialog" aria-modal="true" aria-label="Fenêtre de détail de la nuit">
+            <button type="button" class="rv-modal-close" onclick="closeSommeilModal()" aria-label="Fermer la fenêtre">
+                ×
+            </button>
+
+            <div class="rv-modal-content" id="sommeilModalContent">
+                <div class="rv-modal-loading">Chargement...</div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block sleep_javascripts %}
+    {{ parent() }}
+
+    <script>
+        window.sleepWeatherApiUrl = "{{ path('app_sleep_weather_widget') }}";
+
+        function openDeleteModal(url, label, token) {
+            document.getElementById('deleteForm').action = url;
+            document.getElementById('deleteForm').querySelector('[name="_token"]').value = token;
+            document.getElementById('deleteModalBody').textContent = 'Supprimer la nuit du "' + label + '" ? Action irréversible.';
+            document.getElementById('deleteModal').classList.add('open');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('open');
+        }
+
+        function openSommeilModal(url) {
+            const modal = document.getElementById('sommeilModal');
+            const content = document.getElementById('sommeilModalContent');
+
+            if (!modal || !content) return false;
+
+            modal.hidden = false;
+            modal.classList.add('open');
+            content.innerHTML = '<div class="rv-modal-loading">Chargement...</div>';
+
+            fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(response => response.text())
+                .then(html => {
+                    content.innerHTML = html;
+                    bindSommeilModalForms();
+                })
+                .catch(() => {
+                    content.innerHTML = '<div class="rv-modal-error">Impossible de charger le contenu.</div>';
+                });
+
+            return false;
+        }
+
+        function closeSommeilModal() {
+            const modal = document.getElementById('sommeilModal');
+            const content = document.getElementById('sommeilModalContent');
+
+            if (!modal || !content) return;
+
+            modal.classList.remove('open');
+            modal.hidden = true;
+            content.innerHTML = '<div class="rv-modal-loading">Chargement...</div>';
+        }
+
+        function bindSommeilModalForms() {
+            const modal = document.getElementById('sommeilModal');
+            const content = document.getElementById('sommeilModalContent');
+
+            if (!modal || !content) return;
+
+            const forms = content.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    const formData = new FormData(form);
+
+                    fetch(form.action, {
+                        method: form.method || 'POST',
+                        body: formData,
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                        .then(async response => {
+                            const contentType = response.headers.get('content-type') || '';
+
+                            if (contentType.includes('application/json')) {
+                                const data = await response.json();
+                                if (data.success) {
+                                    closeSommeilModal();
+                                    window.location.reload();
+                                    return;
+                                }
+                            }
+
+                            const html = await response.text();
+                            content.innerHTML = html;
+                            bindSommeilModalForms();
+                        })
+                        .catch(() => {
+                            content.innerHTML = '<div class="rv-modal-error">Erreur lors de la soumission du formulaire.</div>';
+                        });
+                });
+            });
+        }
+
+        (function () {
+            const deleteModal = document.getElementById('deleteModal');
+            const sommeilModal = document.getElementById('sommeilModal');
+
+            if (deleteModal) {
+                deleteModal.addEventListener('click', function (e) {
+                    if (e.target === e.currentTarget) closeDeleteModal();
+                });
+            }
+
+            if (sommeilModal) {
+                sommeilModal.addEventListener('click', function (e) {
+                    if (e.target === e.currentTarget) closeSommeilModal();
+                });
+            }
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    closeDeleteModal();
+                    closeSommeilModal();
+                }
+            });
+        })();
+    </script>
+
+    <script src="{{ asset('assets/js/sleep-weather-widget.js') }}"></script>
+{% endblock %}

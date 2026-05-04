@@ -3,126 +3,110 @@
 
 {% block content %}
 <div class="ac-app-layout">
-  {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
-  <div class="ac-main">
-    {% include 'access_control/components/_topbar.html.twig' with { title: 'Emotion management', subtitle: 'Manage
-    available emotions', username: userName } %}
-    {% for message in app.flashes('success') %}
-    <section class="ac-card">
-      <p style="color: var(--success);">{{ message }}</p>
-    </section>
-    {% endfor %}
-    {% for message in app.flashes('error') %}
-    <section class="ac-card">
-      <p style="color: var(--danger);">{{ message }}</p>
-    </section>
-    {% endfor %}
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Emotion management', subtitle: 'Manage available emotions', username: userName } %}
+        {% for message in app.flashes('success') %}
+            <section class="ac-card"><p style="color: var(--success);">{{ message }}</p></section>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <section class="ac-card"><p style="color: var(--danger);">{{ message }}</p></section>
+        {% endfor %}
 
-    <section class="ac-card">
-      <div class="ac-row-between ac-mood-history-head">
-        <h3>Add emotion</h3>
-        <a class="ac-ghost-btn" href="{{ path('ac_ui_mood') }}">Back to mood analytics</a>
-      </div>
-      <form method="post"
-        action="{{ path('ac_ui_emotion', { page: emotions.currentPageNumber|default(1), perPage: perPage|default('10'), direction: direction|default('asc') }) }}"
-        class="ac-form ac-inline-form">
-        <input type="hidden" name="_token" value="{{ csrf_token('emotion_create') }}">
-        <label>
-          <span class="ac-label">Name</span>
-          <input class="ac-input" type="text" name="name" maxlength="40" required placeholder="e.g. Happy">
-        </label>
-        <button class="ac-btn ac-btn-primary" type="submit">Add emotion</button>
-      </form>
-    </section>
+        <section class="ac-card">
+            <div class="ac-row-between ac-mood-history-head">
+                <h3>Add emotion</h3>
+                <a class="ac-ghost-btn" href="{{ path('ac_ui_mood') }}">Back to mood analytics</a>
+            </div>
+            <form method="post" action="{{ path('ac_ui_emotion', { page: emotions.currentPageNumber|default(1), perPage: perPage|default('10'), direction: direction|default('asc') }) }}" class="ac-form ac-inline-form">
+                <input type="hidden" name="_token" value="{{ csrf_token('emotion_create') }}">
+                <label>
+                    <span class="ac-label">Name</span>
+                    <input class="ac-input" type="text" name="name" maxlength="40" required placeholder="e.g. Happy">
+                </label>
+                <button class="ac-btn ac-btn-primary" type="submit">Add emotion</button>
+            </form>
+        </section>
 
-    <section class="ac-card">
-      <div class="ac-row-between ac-mood-history-head">
-        <h3>Emotions</h3>
-        <form method="get" action="{{ path('ac_ui_emotion') }}" class="ac-inline-form ac-list-controls">
-          <input type="hidden" name="page" value="1">
-          <label>
-            <span class="ac-label">Sort</span>
-            <select class="ac-input" name="direction">
-              <option value="asc" {{ direction=='asc' ? 'selected' : '' }}>ID ↑</option>
-              <option value="desc" {{ direction=='desc' ? 'selected' : '' }}>ID ↓</option>
-            </select>
-          </label>
-          <label>
-            <span class="ac-label">Per page</span>
-            <select class="ac-input" name="perPage">
-              <option value="5" {{ perPage=='5' ? 'selected' : '' }}>5</option>
-              <option value="10" {{ perPage=='10' ? 'selected' : '' }}>10</option>
-              <option value="20" {{ perPage=='20' ? 'selected' : '' }}>20</option>
-              <option value="all" {{ perPage=='all' ? 'selected' : '' }}>All</option>
-            </select>
-          </label>
-          <button class="ac-ghost-btn" type="submit">Apply</button>
-        </form>
-      </div>
-      <div class="ac-table-container">
-        <table class="ac-table">
-          <thead>
-            <tr>
-              <th>
-                <a class="ac-table-sort-link"
-                  href="{{ path('ac_ui_emotion', { page: 1, perPage: perPage, direction: direction == 'asc' ? 'desc' : 'asc' }) }}">
-                  ID {{ direction == 'desc' ? '↓' : '↑' }}
-                </a>
-              </th>
-              <th>Name</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for emotion in emotions %}
-            <tr>
-              <td>{{ emotion.id }}</td>
-              <td>
-                <form method="post"
-                  action="{{ path('ac_ui_emotion_edit', { id: emotion.id, page: emotions.currentPageNumber, perPage: perPage, direction: direction }) }}"
-                  class="ac-inline-form">
-                  <input type="hidden" name="_token" value="{{ csrf_token('emotion_edit_' ~ emotion.id) }}">
-                  <input class="ac-input" type="text" name="name" maxlength="40" value="{{ emotion.name }}" required>
-                  <button class="ac-ghost-btn" type="submit">Save</button>
+        <section class="ac-card">
+            <div class="ac-row-between ac-mood-history-head">
+                <h3>Emotions</h3>
+                <form method="get" action="{{ path('ac_ui_emotion') }}" class="ac-inline-form ac-list-controls">
+                    <input type="hidden" name="page" value="1">
+                    <label>
+                        <span class="ac-label">Sort</span>
+                        <select class="ac-input" name="direction">
+                            <option value="asc" {{ direction == 'asc' ? 'selected' : '' }}>ID ↑</option>
+                            <option value="desc" {{ direction == 'desc' ? 'selected' : '' }}>ID ↓</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span class="ac-label">Per page</span>
+                        <select class="ac-input" name="perPage">
+                            <option value="5" {{ perPage == '5' ? 'selected' : '' }}>5</option>
+                            <option value="10" {{ perPage == '10' ? 'selected' : '' }}>10</option>
+                            <option value="20" {{ perPage == '20' ? 'selected' : '' }}>20</option>
+                            <option value="all" {{ perPage == 'all' ? 'selected' : '' }}>All</option>
+                        </select>
+                    </label>
+                    <button class="ac-ghost-btn" type="submit">Apply</button>
                 </form>
-              </td>
-              <td>
-                <form method="post"
-                  action="{{ path('ac_ui_emotion_delete', { id: emotion.id, page: emotions.currentPageNumber, perPage: perPage, direction: direction }) }}">
-                  <input type="hidden" name="_token" value="{{ csrf_token('emotion_delete_' ~ emotion.id) }}">
-                  <button class="ac-danger-btn" type="submit">Delete</button>
-                </form>
-              </td>
-            </tr>
-            {% else %}
-            <tr>
-              <td colspan="3">No emotions found.</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      {% if emotions.pageCount > 1 %}
-      <nav class="ac-pagination" aria-label="Emotion pages">
-        {% if emotions.currentPageNumber > 1 %}
-        <a class="ac-ghost-btn"
-          href="{{ path('ac_ui_emotion', { page: emotions.currentPageNumber - 1, perPage: perPage, direction: direction }) }}">Previous</a>
-        {% else %}
-        <span class="ac-ghost-btn is-disabled" aria-disabled="true">Previous</span>
-        {% endif %}
+            </div>
+            <div class="ac-table-container">
+                <table class="ac-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <a class="ac-table-sort-link" href="{{ path('ac_ui_emotion', { page: 1, perPage: perPage, direction: direction == 'asc' ? 'desc' : 'asc' }) }}">
+                                    ID {{ direction == 'desc' ? '↓' : '↑' }}
+                                </a>
+                            </th>
+                            <th>Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for emotion in emotions %}
+                            <tr>
+                                <td>{{ emotion.id }}</td>
+                                <td>
+                                    <form method="post" action="{{ path('ac_ui_emotion_edit', { id: emotion.id, page: emotions.currentPageNumber, perPage: perPage, direction: direction }) }}" class="ac-inline-form">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('emotion_edit_' ~ emotion.id) }}">
+                                        <input class="ac-input" type="text" name="name" maxlength="40" value="{{ emotion.name }}" required>
+                                        <button class="ac-ghost-btn" type="submit">Save</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form method="post" action="{{ path('ac_ui_emotion_delete', { id: emotion.id, page: emotions.currentPageNumber, perPage: perPage, direction: direction }) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('emotion_delete_' ~ emotion.id) }}">
+                                        <button class="ac-danger-btn" type="submit">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="3">No emotions found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if emotions.pageCount > 1 %}
+                <nav class="ac-pagination" aria-label="Emotion pages">
+                    {% if emotions.currentPageNumber > 1 %}
+                        <a class="ac-ghost-btn" href="{{ path('ac_ui_emotion', { page: emotions.currentPageNumber - 1, perPage: perPage, direction: direction }) }}">Previous</a>
+                    {% else %}
+                        <span class="ac-ghost-btn is-disabled" aria-disabled="true">Previous</span>
+                    {% endif %}
 
-        <span class="ac-badge ac-badge-secondary">Page {{ emotions.currentPageNumber }} / {{ emotions.pageCount
-          }}</span>
+                    <span class="ac-badge ac-badge-secondary">Page {{ emotions.currentPageNumber }} / {{ emotions.pageCount }}</span>
 
-        {% if emotions.currentPageNumber < emotions.pageCount %} <a class="ac-ghost-btn"
-          href="{{ path('ac_ui_emotion', { page: emotions.currentPageNumber + 1, perPage: perPage, direction: direction }) }}">
-          Next</a>
-          {% else %}
-          <span class="ac-ghost-btn is-disabled" aria-disabled="true">Next</span>
-          {% endif %}
-      </nav>
-      {% endif %}
-    </section>
-  </div>
+                    {% if emotions.currentPageNumber < emotions.pageCount %}
+                        <a class="ac-ghost-btn" href="{{ path('ac_ui_emotion', { page: emotions.currentPageNumber + 1, perPage: perPage, direction: direction }) }}">Next</a>
+                    {% else %}
+                        <span class="ac-ghost-btn is-disabled" aria-disabled="true">Next</span>
+                    {% endif %}
+                </nav>
+            {% endif %}
+        </section>
+    </div>
 </div>
 {% endblock %}

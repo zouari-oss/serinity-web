@@ -1,0 +1,428 @@
+{% extends 'forum/embedded_layout.html.twig' %}
+
+{% block title %}Forum Statistics{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .stats-shell {
+            max-width: 1180px;
+        }
+
+        .stats-fxml-theme .stats-panel {
+            border-radius: 0.75rem;
+        }
+
+        .stats-head {
+            background: linear-gradient(87deg, rgba(94, 114, 228, 0.08), rgba(17, 205, 239, 0.11));
+        }
+
+        .stats-title {
+            font-size: 1.45rem;
+        }
+
+        .stat-card {
+            border-left: 4px solid transparent;
+        }
+
+        .stat-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(94, 114, 228, 0.15);
+            color: #5e72e4;
+        }
+
+        .stat-card-blue { border-left-color: var(--argon-primary); }
+        .stat-card-green { border-left-color: var(--argon-success); }
+        .stat-card-orange { border-left-color: var(--argon-warning); }
+        .stat-card-violet { border-left-color: #8965e0; }
+
+        .stat-label {
+            font-size: 0.79rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--argon-muted);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            line-height: 1.1;
+            color: var(--argon-dark);
+            font-weight: 700;
+        }
+
+        .btn-stats-back,
+        .btn-stats-refresh {
+            border-radius: 0.5rem;
+            font-weight: 600;
+        }
+
+        .btn-stats-back {
+            border: 1px solid var(--argon-primary);
+            color: var(--argon-primary);
+        }
+
+        .btn-stats-back:hover {
+            background: var(--argon-primary);
+            color: #fff;
+        }
+
+        .btn-stats-refresh {
+            background: linear-gradient(87deg, var(--argon-success), #22c55e);
+            color: #fff;
+        }
+
+        .chart-wrap {
+            position: relative;
+            width: 100%;
+        }
+
+        .chart-wrap canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .chart-wrap-pie { min-height: 315px; }
+        .chart-wrap-line { min-height: 300px; }
+        .chart-wrap-bar { min-height: 330px; }
+
+        .chart-error {
+            border: 1px dashed var(--argon-danger);
+            background: #fff5f7;
+            border-radius: 0.5rem;
+            color: #911a3a;
+            padding: 0.9rem;
+        }
+
+        .metric-tile {
+            border: 1px solid #edf2f7;
+            border-radius: 0.7rem;
+            padding: 0.9rem;
+            background: #fff;
+        }
+
+        .metric-tile-blue { background: rgba(17, 205, 239, 0.12); }
+        .metric-tile-green { background: rgba(45, 206, 137, 0.12); }
+        .metric-tile-red { background: rgba(245, 54, 92, 0.1); }
+        .metric-tile-orange { background: rgba(251, 99, 64, 0.12); }
+
+        .metric-label {
+            color: var(--argon-muted);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .metric-value {
+            color: var(--argon-dark);
+            font-size: 1.24rem;
+            font-weight: 700;
+        }
+    </style>
+{% endblock %}
+
+{% block forum_content %}
+<main class="page-shell">
+    <div class="container stats-shell stats-fxml-theme">
+        <section class="card-soft p-3 p-md-4 mb-3 stats-head stats-panel">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2 gap-md-3">
+                    <a class="btn btn-stats-back" href="{{ path('app_admin_forum') }}">Back</a>
+                    <div>
+                        <p class="mb-1 section-kicker text-uppercase">Analytics Dashboard</p>
+                        <h1 class="h3 m-0 stats-title">Forum Statistics</h1>
+                        <p class="text-muted small mb-0">Live overview of forum health, activity, and engagement</p>
+                    </div>
+                </div>
+                <a class="btn btn-stats-refresh" href="{{ path('app_admin_statistics') }}">Refresh</a>
+            </div>
+        </section>
+
+        <div class="row g-3 mb-3">
+            <div class="col-6 col-lg-3">
+                <article class="card-soft p-3 h-100 stat-card stat-card-blue stats-panel">
+                    <div class="stat-icon mb-2"><i class="ni ni-collection"></i></div>
+                    <div class="stat-label">Total Threads</div>
+                    <div class="stat-value">{{ stats.totalThreads }}</div>
+                </article>
+            </div>
+            <div class="col-6 col-lg-3">
+                <article class="card-soft p-3 h-100 stat-card stat-card-green stats-panel">
+                    <div class="stat-icon mb-2"><i class="ni ni-chat-round"></i></div>
+                    <div class="stat-label">Total Replies</div>
+                    <div class="stat-value">{{ stats.totalReplies }}</div>
+                </article>
+            </div>
+            <div class="col-6 col-lg-3">
+                <article class="card-soft p-3 h-100 stat-card stat-card-orange stats-panel">
+                    <div class="stat-icon mb-2"><i class="ni ni-single-02"></i></div>
+                    <div class="stat-label">Total Users</div>
+                    <div class="stat-value">{{ stats.totalUsers }}</div>
+                </article>
+            </div>
+            <div class="col-6 col-lg-3">
+                <article class="card-soft p-3 h-100 stat-card stat-card-violet stats-panel">
+                    <div class="stat-icon mb-2"><i class="ni ni-bullet-list-67"></i></div>
+                    <div class="stat-label">Total Categories</div>
+                    <div class="stat-value">{{ stats.totalCategories }}</div>
+                </article>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-lg-6">
+                <article class="card-soft p-3 p-md-4 h-100 chart-panel stats-panel">
+                    <h2 class="h6 mb-3">Thread Status Distribution</h2>
+                    <div class="chart-wrap chart-wrap-pie">
+                        <canvas id="statusPieChart"></canvas>
+                    </div>
+                </article>
+            </div>
+            <div class="col-lg-6">
+                <article class="card-soft p-3 p-md-4 h-100 chart-panel stats-panel">
+                    <h2 class="h6 mb-3">Thread Type Distribution</h2>
+                    <div class="chart-wrap chart-wrap-pie">
+                        <canvas id="typePieChart"></canvas>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-12">
+                <article class="card-soft p-3 p-md-4 chart-panel stats-panel">
+                    <h2 class="h6 mb-3">Threads Created (Last 30 Days)</h2>
+                    <div class="chart-wrap chart-wrap-line">
+                        <canvas id="threadsLineChart"></canvas>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-12">
+                <article class="card-soft p-3 p-md-4 chart-panel stats-panel">
+                    <h2 class="h6 mb-3">Top 10 Most Active Users</h2>
+                    <div class="chart-wrap chart-wrap-bar">
+                        <canvas id="topUsersBarChart"></canvas>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <article class="card-soft p-3 p-md-4 h-100 stats-panel">
+                    <h2 class="h6 mb-3">User Activity</h2>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="metric-tile metric-tile-green">
+                                <div class="metric-label">Active Today</div>
+                                <div class="metric-value">{{ stats.activeUsersToday }} users</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="metric-tile metric-tile-blue">
+                                <div class="metric-label">Active This Week</div>
+                                <div class="metric-value">{{ stats.activeUsersThisWeek }} users</div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <div class="col-lg-6">
+                <article class="card-soft p-3 p-md-4 h-100 stats-panel">
+                    <h2 class="h6 mb-3">Interactions</h2>
+                    <div class="row g-3">
+                        <div class="col-sm-4">
+                            <div class="metric-tile metric-tile-green">
+                                <div class="metric-label">Total Likes</div>
+                                <div class="metric-value">{{ stats.totalLikes }}</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="metric-tile metric-tile-red">
+                                <div class="metric-label">Total Dislikes</div>
+                                <div class="metric-value">{{ stats.totalDislikes }}</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="metric-tile metric-tile-orange">
+                                <div class="metric-label">Total Follows</div>
+                                <div class="metric-value">{{ stats.totalFollows }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('vendor/chartjs/chart.umd.min.js') }}"></script>
+    <script>
+        let statsChartsBooted = false;
+
+        const initStatisticsCharts = () => {
+            if (statsChartsBooted) {
+                return;
+            }
+
+            statsChartsBooted = true;
+
+            if (typeof Chart === 'undefined') {
+                document.querySelectorAll('.chart-wrap').forEach((wrap) => {
+                    wrap.innerHTML = '<div class="chart-error">Charts could not load (Chart.js unavailable). Check internet/CDN access.</div>';
+                });
+                return;
+            }
+
+            const statusLabels = ['Open', 'Locked', 'Archived'];
+            const statusValues = [{{ stats.openThreads }}, {{ stats.lockedThreads }}, {{ stats.archivedThreads }}];
+
+            const typeLabels = ['Discussion', 'Question', 'Announcement'];
+            const typeValues = [{{ stats.discussionThreads }}, {{ stats.questionThreads }}, {{ stats.announcementThreads }}];
+
+            const threadDayLabels = {{ stats.threadsPerDayLabels|json_encode|raw }};
+            const threadDayValues = {{ stats.threadsPerDayValues|json_encode|raw }};
+
+            const topUserLabels = {{ stats.topUsersLabels|json_encode|raw }};
+            const topUserValues = {{ stats.topUsersValues|json_encode|raw }};
+
+            const rankingColors = topUserValues.map((_, index) => {
+                if (index === 0) return '#FFD700';
+                if (index === 1) return '#C0C0C0';
+                if (index === 2) return '#CD7F32';
+                return '#2196F3';
+            });
+
+            const statusEl = document.getElementById('statusPieChart');
+            const typeEl = document.getElementById('typePieChart');
+            const lineEl = document.getElementById('threadsLineChart');
+            const barEl = document.getElementById('topUsersBarChart');
+
+            if (!statusEl || !typeEl || !lineEl || !barEl) {
+                return;
+            }
+
+            if (typeof Chart.getChart === 'function') {
+                [statusEl, typeEl, lineEl, barEl].forEach((el) => {
+                    const chart = Chart.getChart(el);
+                    if (chart) {
+                        chart.destroy();
+                    }
+                });
+            }
+
+            new Chart(statusEl, {
+                type: 'pie',
+                data: {
+                    labels: statusLabels,
+                    datasets: [{
+                        data: statusValues,
+                        backgroundColor: ['#4CAF50', '#FF9800', '#9E9E9E'],
+                        borderColor: '#ffffff',
+                        borderWidth: 3,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                    },
+                },
+            });
+
+            new Chart(typeEl, {
+                type: 'pie',
+                data: {
+                    labels: typeLabels,
+                    datasets: [{
+                        data: typeValues,
+                        backgroundColor: ['#2196F3', '#FF5722', '#9C27B0'],
+                        borderColor: '#ffffff',
+                        borderWidth: 3,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                    },
+                },
+            });
+
+            new Chart(lineEl, {
+                type: 'line',
+                data: {
+                    labels: threadDayLabels,
+                    datasets: [{
+                        label: 'Threads',
+                        data: threadDayValues,
+                        borderColor: '#2196F3',
+                        backgroundColor: 'rgba(33, 150, 243, 0.15)',
+                        tension: 0.35,
+                        fill: true,
+                        pointRadius: 3,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { ticks: { precision: 0 } },
+                    },
+                },
+            });
+
+            new Chart(barEl, {
+                type: 'bar',
+                data: {
+                    labels: topUserLabels,
+                    datasets: [{
+                        label: 'Activity',
+                        data: topUserValues,
+                        backgroundColor: rankingColors,
+                        borderRadius: 8,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { ticks: { precision: 0 } },
+                    },
+                },
+            });
+        };
+
+        const bootCharts = () => initStatisticsCharts();
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bootCharts);
+        } else {
+            bootCharts();
+        }
+
+        document.addEventListener('turbo:load', bootCharts);
+        window.addEventListener('load', bootCharts);
+    </script>
+{% endblock %}

@@ -5,178 +5,179 @@
 
 {% block content %}
 <div class="auth-page-shell">
-  <nav class="home-navbar auth-navbar" data-controller="navbar-menu">
-    <div class="container">
-      <div class="navbar-content">
-        <a class="navbar-brand" href="{{ path('home') }}">
-          <img src="{{ asset('assets/logo/serinity-logo-without-bg-and-app-name.png') }}" alt="Serinity"
-            class="navbar-logo">
-          <span class="navbar-title">Serinity</span>
-        </a>
-        <button type="button" class="navbar-menu-btn" aria-label="Open navigation menu"
-          data-action="click->navbar-menu#toggle">
-          <span class="material-symbols-outlined">menu</span>
-        </button>
-        <div class="navbar-links" data-navbar-menu-target="links">
-          <a href="{{ path('home') }}#features" class="nav-link">Features</a>
-          <a href="{{ path('home') }}#about" class="nav-link">About</a>
-          <a href="{{ path('home') }}#download" class="nav-link">Download</a>
-          <a href="{{ path('home') }}" class="nav-link-btn">Home</a>
-        </div>
-      </div>
-    </div>
-  </nav>
-
-  <main class="ac-auth auth-page-main" data-controller="auth-switcher auth-form password-toggle face-login">
-    <section class="ac-auth-side-brand">
-      <div class="ac-brand-gradient"></div>
-      <div class="ac-brand-content">
-        <img src="{{ asset('assets/logo/serinity-logo-without-bg-and-app-name.png') }}" alt="Serinity logo"
-          class="ac-auth-logo">
-        <h1>Your Journey to Mental Wellness</h1>
-        <p>A comprehensive platform dedicated to psychotherapy and personal development, designed for individuals and
-          mental health professionals.</p>
-        <ul>
-          <li><span class="material-symbols-outlined">neurology</span> AI-powered emotional analysis & insights</li>
-          <li><span class="material-symbols-outlined">bedtime</span> Sleep tracking & dream journaling</li>
-          <li><span class="material-symbols-outlined">mood</span> Mood tracking & guided exercises</li>
-          <li><span class="material-symbols-outlined">calendar_month</span> Professional therapy appointments</li>
-        </ul>
-      </div>
-    </section>
-
-    <section class="ac-auth-panel-wrap">
-      <div class="ac-auth-tabs" role="tablist" aria-label="Authentication mode">
-        <button class="ac-tab-btn {{ authMode == 'signin' ? 'is-active' : '' }}" role="tab"
-          aria-selected="{{ authMode == 'signin' ? 'true' : 'false' }}" aria-controls="signin-panel"
-          data-auth-switcher-target="signinTab" data-action="click->auth-switcher#showSignin" type="button">
-          Sign in
-        </button>
-        <button class="ac-tab-btn {{ authMode == 'signup' ? 'is-active' : '' }}" role="tab"
-          aria-selected="{{ authMode == 'signup' ? 'true' : 'false' }}" aria-controls="signup-panel"
-          data-auth-switcher-target="signupTab" data-action="click->auth-switcher#showSignup" type="button">
-          Sign up
-        </button>
-      </div>
-
-      <p class="ac-inline-error" data-auth-form-target="error" hidden></p>
-
-      <section id="signin-panel" class="ac-auth-panel {{ authMode == 'signin' ? 'is-active' : '' }}" role="tabpanel"
-        aria-labelledby="signin-tab" data-auth-switcher-target="signin"
-        style="{{ authMode == 'signup' ? 'display: none;' : '' }}">
-        <h2>Welcome back</h2>
-        <form class="ac-form" data-action="submit->auth-form#submit" method="post"
-          action="{{ path('api_auth_login') }}">
-          <label>
-            <span class="ac-label">Email or username</span>
-            <input class="ac-input" type="text" name="usernameOrEmail" required autocomplete="username">
-          </label>
-          <label>
-            <span class="ac-label">Password</span>
-            <div class="ac-password-wrap">
-              <input class="ac-input" type="password" name="password" required autocomplete="current-password"
-                data-password-toggle-target="input">
-              <button class="ac-password-toggle" type="button" data-action="password-toggle#toggle"
-                aria-label="Toggle password visibility">
-                <span class="material-symbols-outlined" data-password-toggle-target="icon">visibility</span>
-              </button>
+    <nav class="home-navbar auth-navbar" data-controller="navbar-menu">
+        <div class="container">
+            <div class="navbar-content">
+                <a class="navbar-brand" href="{{ path('home') }}">
+                    <img src="{{ asset('assets/logo/serinity-logo-without-bg-and-app-name.png') }}" alt="Serinity" class="navbar-logo">
+                    <span class="navbar-title">Serinity</span>
+                </a>
+                <button type="button" class="navbar-menu-btn" aria-label="Open navigation menu" data-action="click->navbar-menu#toggle">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <div class="navbar-links" data-navbar-menu-target="links">
+                    <a href="{{ path('home') }}#features" class="nav-link">Features</a>
+                    <a href="{{ path('home') }}#about" class="nav-link">About</a>
+                    <a href="{{ path('home') }}#download" class="nav-link">Download</a>
+                    <a href="{{ path('home') }}" class="nav-link-btn">Home</a>
+                </div>
             </div>
-          </label>
-          <label class="ac-check"><input type="checkbox" name="rememberMe" value="1"> Remember me</label>
-          <div data-auth-form-target="otpStep" hidden>
-            <label>
-              <span class="ac-label">Authentication code</span>
-              <input class="ac-input" type="text" name="otpCode" inputmode="numeric" autocomplete="one-time-code"
-                data-auth-form-target="otpCode">
-            </label>
-          </div>
-          <button class="ac-btn ac-btn-primary" type="submit">
-            <span class="ac-btn-content">
-              <span class="ac-btn-text">Sign in</span>
-              <span class="ac-btn-spinner" hidden>
-                <span class="material-symbols-outlined ac-spin">progress_activity</span>
-              </span>
-            </span>
-          </button>
-        </form>
-        <a class="ac-social-btn ac-social-btn-google" href="/api/auth/google/connect" aria-label="Continue with Google">
-          <span class="ac-social-btn-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" role="img" focusable="false">
-              <path fill="#EA4335"
-                d="M12 10.2v3.9h5.5c-.2 1.3-1.5 3.9-5.5 3.9-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.2.8 3.9 1.5l2.7-2.6C16.8 3.2 14.6 2.3 12 2.3 6.7 2.3 2.4 6.6 2.4 12S6.7 21.7 12 21.7c6.9 0 9.2-4.9 9.2-7.5 0-.5 0-.8-.1-1.2H12z" />
-              <path fill="#4285F4"
-                d="M2.4 7.6l3.2 2.4C6.4 7.7 9 6 12 6c1.9 0 3.2.8 3.9 1.5l2.7-2.6C16.8 3.2 14.6 2.3 12 2.3c-3.7 0-6.9 2.1-8.5 5.3z" />
-              <path fill="#34A853"
-                d="M12 21.7c2.5 0 4.7-.8 6.3-2.3l-2.9-2.4c-.8.6-1.9 1-3.4 1-4 0-5.3-2.6-5.5-3.9l-3.2 2.5c1.5 3.3 4.8 5.1 8.7 5.1z" />
-              <path fill="#FBBC05"
-                d="M2.4 16.4l3.2-2.5c-.2-.6-.3-1.2-.3-1.9s.1-1.3.3-1.9L2.4 7.6A9.7 9.7 0 0 0 1.3 12c0 1.6.4 3.1 1.1 4.4z" />
-            </svg>
-          </span>
-          <span class="ac-social-btn-text">Continue with Google</span>
-        </a>
-        <div class="ac-face-auth-block">
-          <button class="ac-icon-btn ac-face-auth-icon-btn" type="button" aria-label="Use face authentication"
-            data-face-login-target="trigger" data-action="face-login#startAutoFaceAuth">
-            <span class="material-symbols-outlined">face</span>
-          </button>
-          <video class="ac-face-video" data-face-login-target="video" autoplay playsinline hidden></video>
-          <p data-face-login-target="status" hidden></p>
         </div>
-        <a class="ac-link-btn" href="{{ path('ac_ui_reset_password') }}">Forgot password?</a>
-      </section>
+    </nav>
 
-      <section id="signup-panel" class="ac-auth-panel {{ authMode == 'signup' ? 'is-active' : '' }}" role="tabpanel"
-        aria-labelledby="signup-tab" data-auth-switcher-target="signup"
-        style="{{ authMode == 'signin' ? 'display: none;' : '' }}">
-        <h2>Create account</h2>
-        <form class="ac-form" data-action="submit->auth-form#submit" method="post"
-          action="{{ path('api_auth_register') }}">
-          <label>
-            <span class="ac-label">Email</span>
-            <input class="ac-input" type="email" name="email" required autocomplete="email">
-          </label>
-          <label>
-            <span class="ac-label">Password</span>
-            <div class="ac-password-wrap">
-              <input class="ac-input" type="password" name="password" required minlength="8" autocomplete="new-password"
-                data-password-toggle-target="input">
-              <button class="ac-password-toggle" type="button" data-action="password-toggle#toggle"
-                aria-label="Toggle password visibility">
-                <span class="material-symbols-outlined" data-password-toggle-target="icon">visibility</span>
-              </button>
+    <main class="ac-auth auth-page-main" data-controller="auth-switcher auth-form password-toggle face-login">
+        <section class="ac-auth-side-brand">
+            <div class="ac-brand-gradient"></div>
+            <div class="ac-brand-content">
+                <img src="{{ asset('assets/logo/serinity-logo-without-bg-and-app-name.png') }}" alt="Serinity logo" class="ac-auth-logo">
+                <h1>Your Journey to Mental Wellness</h1>
+                <p>A comprehensive platform dedicated to psychotherapy and personal development, designed for individuals and mental health professionals.</p>
+                <ul>
+                    <li><span class="material-symbols-outlined">neurology</span> AI-powered emotional analysis & insights</li>
+                    <li><span class="material-symbols-outlined">bedtime</span> Sleep tracking & dream journaling</li>
+                    <li><span class="material-symbols-outlined">mood</span> Mood tracking & guided exercises</li>
+                    <li><span class="material-symbols-outlined">calendar_month</span> Professional therapy appointments</li>
+                </ul>
             </div>
-          </label>
-          <label>
-            <span class="ac-label">Confirm password</span>
-            <input class="ac-input" type="password" name="confirmPassword" required minlength="8"
-              autocomplete="new-password">
-          </label>
-          <label>
-            <span class="ac-label">Role</span>
-            <select class="ac-input" name="role">
-              <option value="PATIENT">Patient</option>
-              <option value="THERAPIST">Therapist</option>
-            </select>
-          </label>
-          <button class="ac-btn ac-btn-primary" type="submit">
-            <span class="ac-btn-content">
-              <span class="ac-btn-text">Sign up</span>
-              <span class="ac-btn-spinner" hidden>
-                <span class="material-symbols-outlined ac-spin">progress_activity</span>
-              </span>
-            </span>
-          </button>
-        </form>
-      </section>
-    </section>
-  </main>
+        </section>
 
-  <footer class="home-footer auth-footer">
-    <div class="container">
-      <div class="footer-bottom">
-        <p>&copy; 2026 Serinity. Secure, privacy-first mental wellness platform.</p>
-      </div>
-    </div>
-  </footer>
+        <section class="ac-auth-panel-wrap">
+            <div class="ac-auth-tabs" role="tablist" aria-label="Authentication mode">
+                <button 
+                    class="ac-tab-btn {{ authMode == 'signin' ? 'is-active' : '' }}" 
+                    role="tab"
+                    aria-selected="{{ authMode == 'signin' ? 'true' : 'false' }}"
+                    aria-controls="signin-panel"
+                    data-auth-switcher-target="signinTab"
+                    data-action="click->auth-switcher#showSignin"
+                    type="button">
+                    Sign in
+                </button>
+                <button 
+                    class="ac-tab-btn {{ authMode == 'signup' ? 'is-active' : '' }}"
+                    role="tab"
+                    aria-selected="{{ authMode == 'signup' ? 'true' : 'false' }}"
+                    aria-controls="signup-panel"
+                    data-auth-switcher-target="signupTab"
+                    data-action="click->auth-switcher#showSignup"
+                    type="button">
+                    Sign up
+                </button>
+            </div>
+
+            <p class="ac-inline-error" data-auth-form-target="error" hidden></p>
+
+            <section 
+                id="signin-panel"
+                class="ac-auth-panel {{ authMode == 'signin' ? 'is-active' : '' }}" 
+                role="tabpanel"
+                aria-labelledby="signin-tab"
+                data-auth-switcher-target="signin"
+                style="{{ authMode == 'signup' ? 'display: none;' : '' }}">
+                <h2>Welcome back</h2>
+                <form class="ac-form" data-action="submit->auth-form#submit" method="post" action="{{ path('api_auth_login') }}">
+                    <label>
+                        <span class="ac-label">Email or username</span>
+                        <input class="ac-input" type="text" name="usernameOrEmail" required autocomplete="username">
+                    </label>
+                    <label>
+                        <span class="ac-label">Password</span>
+                        <div class="ac-password-wrap">
+                            <input class="ac-input" type="password" name="password" required autocomplete="current-password" data-password-toggle-target="input">
+                            <button class="ac-password-toggle" type="button" data-action="password-toggle#toggle" aria-label="Toggle password visibility">
+                                <span class="material-symbols-outlined" data-password-toggle-target="icon">visibility</span>
+                            </button>
+                        </div>
+                    </label>
+                    <label class="ac-check"><input type="checkbox" name="rememberMe" value="1"> Remember me</label>
+                    <div data-auth-form-target="otpStep" hidden>
+                        <label>
+                            <span class="ac-label">Authentication code</span>
+                            <input class="ac-input" type="text" name="otpCode" inputmode="numeric" autocomplete="one-time-code" data-auth-form-target="otpCode">
+                        </label>
+                    </div>
+                    <button class="ac-btn ac-btn-primary" type="submit">
+                        <span class="ac-btn-content">
+                            <span class="ac-btn-text">Sign in</span>
+                            <span class="ac-btn-spinner" hidden>
+                                <span class="material-symbols-outlined ac-spin">progress_activity</span>
+                            </span>
+                        </span>
+                    </button>
+                </form>
+                <a class="ac-social-btn ac-social-btn-google" href="/api/auth/google/connect" aria-label="Continue with Google">
+                    <span class="ac-social-btn-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" role="img" focusable="false">
+                            <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.5 3.9-5.5 3.9-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.2.8 3.9 1.5l2.7-2.6C16.8 3.2 14.6 2.3 12 2.3 6.7 2.3 2.4 6.6 2.4 12S6.7 21.7 12 21.7c6.9 0 9.2-4.9 9.2-7.5 0-.5 0-.8-.1-1.2H12z"/>
+                            <path fill="#4285F4" d="M2.4 7.6l3.2 2.4C6.4 7.7 9 6 12 6c1.9 0 3.2.8 3.9 1.5l2.7-2.6C16.8 3.2 14.6 2.3 12 2.3c-3.7 0-6.9 2.1-8.5 5.3z"/>
+                            <path fill="#34A853" d="M12 21.7c2.5 0 4.7-.8 6.3-2.3l-2.9-2.4c-.8.6-1.9 1-3.4 1-4 0-5.3-2.6-5.5-3.9l-3.2 2.5c1.5 3.3 4.8 5.1 8.7 5.1z"/>
+                            <path fill="#FBBC05" d="M2.4 16.4l3.2-2.5c-.2-.6-.3-1.2-.3-1.9s.1-1.3.3-1.9L2.4 7.6A9.7 9.7 0 0 0 1.3 12c0 1.6.4 3.1 1.1 4.4z"/>
+                        </svg>
+                    </span>
+                    <span class="ac-social-btn-text">Continue with Google</span>
+                </a>
+                <div class="ac-face-auth-block">
+                    <button class="ac-icon-btn ac-face-auth-icon-btn" type="button" aria-label="Use face authentication" data-face-login-target="trigger" data-action="face-login#startAutoFaceAuth">
+                        <span class="material-symbols-outlined">face</span>
+                    </button>
+                    <video class="ac-face-video" data-face-login-target="video" autoplay playsinline hidden></video>
+                    <p data-face-login-target="status" hidden></p>
+                </div>
+                <a class="ac-link-btn" href="{{ path('ac_ui_reset_password') }}">Forgot password?</a>
+            </section>
+
+            <section 
+                id="signup-panel"
+                class="ac-auth-panel {{ authMode == 'signup' ? 'is-active' : '' }}"
+                role="tabpanel"
+                aria-labelledby="signup-tab"
+                data-auth-switcher-target="signup"
+                style="{{ authMode == 'signin' ? 'display: none;' : '' }}">
+                <h2>Create account</h2>
+                <form class="ac-form" data-action="submit->auth-form#submit" method="post" action="{{ path('api_auth_register') }}">
+                    <label>
+                        <span class="ac-label">Email</span>
+                        <input class="ac-input" type="email" name="email" required autocomplete="email">
+                    </label>
+                    <label>
+                        <span class="ac-label">Password</span>
+                        <div class="ac-password-wrap">
+                            <input class="ac-input" type="password" name="password" required minlength="8" autocomplete="new-password" data-password-toggle-target="input">
+                            <button class="ac-password-toggle" type="button" data-action="password-toggle#toggle" aria-label="Toggle password visibility">
+                                <span class="material-symbols-outlined" data-password-toggle-target="icon">visibility</span>
+                            </button>
+                        </div>
+                    </label>
+                    <label>
+                        <span class="ac-label">Confirm password</span>
+                        <input class="ac-input" type="password" name="confirmPassword" required minlength="8" autocomplete="new-password">
+                    </label>
+                    <label>
+                        <span class="ac-label">Role</span>
+                        <select class="ac-input" name="role">
+                            <option value="PATIENT">Patient</option>
+                            <option value="THERAPIST">Therapist</option>
+                        </select>
+                    </label>
+                    <button class="ac-btn ac-btn-primary" type="submit">
+                        <span class="ac-btn-content">
+                            <span class="ac-btn-text">Sign up</span>
+                            <span class="ac-btn-spinner" hidden>
+                                <span class="material-symbols-outlined ac-spin">progress_activity</span>
+                            </span>
+                        </span>
+                    </button>
+                </form>
+            </section>
+        </section>
+    </main>
+
+    <footer class="home-footer auth-footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 Serinity. Secure, privacy-first mental wellness platform.</p>
+            </div>
+        </div>
+    </footer>
 </div>
 {% endblock %}

@@ -48,7 +48,7 @@ class AuditLogRepository extends ServiceEntityRepository
     public function countRecentEvents(int $days = 7): int
     {
         $since = new \DateTimeImmutable("-{$days} days");
-
+        
         return (int) $this->createQueryBuilder('a')
             ->select('COUNT(a.id)')
             ->where('a.createdAt >= :since')
@@ -57,3 +57,4 @@ class AuditLogRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 }
+

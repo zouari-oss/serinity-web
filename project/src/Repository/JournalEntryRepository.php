@@ -91,7 +91,7 @@ class JournalEntryRepository extends ServiceEntityRepository
             }
 
             if (is_string($createdAt) && $createdAt !== '') {
-                $days[new \DateTimeImmutable($createdAt)->format('Y-m-d')] = true;
+                $days[(new \DateTimeImmutable($createdAt))->format('Y-m-d')] = true;
             }
         }
 

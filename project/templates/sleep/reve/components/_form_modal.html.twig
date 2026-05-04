@@ -1,0 +1,243 @@
+{% set isEdit = reve is defined and reve is not null %}
+{% set formAction = isEdit ? path('app_reve_edit', {id: reve.id}) : path('app_reve_new') %}
+
+{{ form_start(form, {
+    'action': formAction,
+    'attr': { 'novalidate': 'novalidate' }
+}) }}
+
+{# ── En-tête de la modale ── #}
+<div class="ac-row-between" style="margin-bottom: 1.25rem;">
+    <div>
+        <h3 style="font-size: 1rem; font-weight: 700; margin: 0;">
+            {{ isEdit ? 'Modifier le rêve' : 'Nouveau rêve' }}
+        </h3>
+        <p style="color: var(--color-text-muted); font-size: 0.85rem; margin-top: 0.2rem;">
+            {{ isEdit ? (reve.titre ?? 'Édition') : 'Décrivez votre rêve avec le plus de détails possible' }}
+        </p>
+    </div>
+</div>
+
+{# ── Erreurs globales ── #}
+{% if form.vars.submitted and not form.vars.valid %}
+    <div class="ac-inline-error" style="margin-bottom: 1rem;">
+        <strong>⚠ Veuillez corriger les erreurs suivantes :</strong>
+        <ul style="margin: 0.5rem 0 0 1.25rem; padding: 0;">
+            {% for error in form.vars.errors %}
+                <li>{{ error.message }}</li>
+            {% endfor %}
+            {% for child in form %}
+                {% for error in child.vars.errors %}
+                    <li>{{ error.message }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+{{ form_errors(form) }}
+
+{# ══════════════════════════════════════
+   SECTION 1 — Général
+══════════════════════════════════════ #}
+<div class="ac-card" style="margin-bottom: 1rem;">
+    <h4 style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase;
+               letter-spacing: 0.05em; color: var(--color-text-muted);
+               margin-bottom: 1rem;">
+        🌙 Général
+    </h4>
+
+    <div class="ac-form" style="display: grid; gap: 0.85rem;">
+
+        <label>
+            <span class="ac-label">{{ form_label(form.sommeil) }}</span>
+            {{ form_widget(form.sommeil, {'attr': {'class': 'ac-input'}}) }}
+            {{ form_errors(form.sommeil) }}
+        </label>
+
+        <label>
+            <span class="ac-label">{{ form_label(form.titre) }}</span>
+            {{ form_widget(form.titre, {'attr': {'class': 'ac-input', 'id': 'reve_titre'}}) }}
+            {{ form_errors(form.titre) }}
+        </label>
+
+        <label>
+            <span class="ac-label">{{ form_label(form.description) }}</span>
+            {{ form_widget(form.description, {'attr': {'class': 'ac-input', 'id': 'reve_description', 'rows': '4'}}) }}
+            {{ form_errors(form.description) }}
+            <button type="button" id="generateDreamDescriptionBtn" class="ac-ghost-btn" style="margin-top: 0.5rem;">
+                ✨ Générer automatiquement
+            </button>
+        </label>
+
+    </div>
+</div>
+
+{# ══════════════════════════════════════
+   SECTION 2 — Classification
+══════════════════════════════════════ #}
+<div class="ac-card" style="margin-bottom: 1rem;">
+    <h4 style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase;
+               letter-spacing: 0.05em; color: var(--color-text-muted);
+               margin-bottom: 1rem;">
+        🏷️ Classification
+    </h4>
+
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem;">
+
+        <label>
+            <span class="ac-label">{{ form_label(form.typeReve) }}</span>
+            {{ form_widget(form.typeReve, {'attr': {'class': 'ac-input'}}) }}
+            {{ form_errors(form.typeReve) }}
+        </label>
+
+        <label>
+            <span class="ac-label">{{ form_label(form.humeur) }}</span>
+            {{ form_widget(form.humeur, {'attr': {'class': 'ac-input'}}) }}
+            {{ form_errors(form.humeur) }}
+        </label>
+
+        <label>
+            <span class="ac-label">{{ form_label(form.intensite) }}</span>
+            {{ form_widget(form.intensite, {'attr': {'class': 'ac-input', 'id': 'intensite_input', 'min': '0', 'max': '10'}}) }}
+            {{ form_errors(form.intensite) }}
+            {# Barre d'intensité visuelle #}
+            <div id="intensite_preview"
+                 style="display:flex; gap:5px; margin-top:0.5rem; align-items:center;">
+                {% set currentIntensity = isEdit and reve.intensite is not null ? reve.intensite : 0 %}
+                {% for i in 1..10 %}
+                    <div data-val="{{ i }}"
+                         style="width:12px; height:12px; border-radius:999px;
+                                 background: {{ i <= currentIntensity ? 'var(--color-primary)' : 'var(--color-border)' }};
+                                 transition: background 0.15s ease;">
+                    </div>
+                {% endfor %}
+            </div>
+        </label>
+
+        <label>
+            <span class="ac-label">{{ form_label(form.emotions) }}</span>
+            {{ form_widget(form.emotions, {'attr': {'class': 'ac-input'}}) }}
+            {{ form_errors(form.emotions) }}
+        </label>
+
+    </div>
+</div>
+
+{# ══════════════════════════════════════
+   SECTION 3 — Détails
+══════════════════════════════════════ #}
+<div class="ac-card" style="margin-bottom: 1.25rem;">
+    <h4 style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase;
+               letter-spacing: 0.05em; color: var(--color-text-muted);
+               margin-bottom: 1rem;">
+        🔍 Détails
+    </h4>
+
+    <div class="ac-form" style="display: grid; gap: 0.85rem;">
+
+        <label>
+            <span class="ac-label">{{ form_label(form.symboles) }}</span>
+            {{ form_widget(form.symboles, {'attr': {'class': 'ac-input'}}) }}
+            {{ form_errors(form.symboles) }}
+        </label>
+
+        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; padding-top: 0.25rem;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 600;">
+                {{ form_widget(form.couleur) }}
+                {{ form_label(form.couleur) }}
+                {{ form_errors(form.couleur) }}
+            </label>
+
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 600;">
+                {{ form_widget(form.recurrent) }}
+                {{ form_label(form.recurrent) }}
+                {{ form_errors(form.recurrent) }}
+            </label>
+        </div>
+
+    </div>
+</div>
+
+{# ── Actions ── #}
+<div class="ac-row-end">
+    {% if modal_mode|default(false) %}
+        <button type="button" class="ac-ghost-btn" onclick="closeReveModal()">Annuler</button>
+    {% else %}
+        {% if isEdit %}
+            <a href="{{ path('app_reve_show', {id: reve.id}) }}" class="ac-ghost-btn">Annuler</a>
+        {% else %}
+            <a href="{{ path('app_reve_index') }}" class="ac-ghost-btn">Annuler</a>
+        {% endif %}
+    {% endif %}
+
+    <button type="submit" class="ac-btn ac-btn-primary">
+        <span class="material-symbols-outlined" style="font-size:16px;">check</span>
+        {{ isEdit ? 'Sauvegarder' : 'Enregistrer' }}
+    </button>
+</div>
+
+{{ form_end(form) }}
+
+<script>
+    /* ── Génération automatique description ── */
+    document.addEventListener('click', async function(e) {
+        if (e.target.id !== 'generateDreamDescriptionBtn') return;
+        const titleInput = document.getElementById('reve_titre');
+        const descInput  = document.getElementById('reve_description');
+        if (!titleInput || !descInput) return;
+        const title = titleInput.value.trim();
+        if (title.length < 5) { alert('Veuillez saisir un titre plus détaillé'); return; }
+        try {
+            const r = await fetch('/reve/generate-description', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title })
+            });
+            const d = await r.json();
+            if (d.success && d.description) descInput.value = d.description;
+        } catch(err) { console.error(err); }
+    });
+
+    document.addEventListener('blur', async function(e) {
+        if (!e.target.matches('#reve_titre')) return;
+        const descInput = document.getElementById('reve_description');
+        if (!descInput) return;
+        const title = e.target.value.trim();
+        if (title.length < 5 || descInput.value.trim() !== '') return;
+        try {
+            const r = await fetch('/reve/generate-description', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title })
+            });
+            const d = await r.json();
+            if (d.success && d.description) descInput.value = d.description;
+        } catch(err) { console.error(err); }
+    }, true);
+
+    /* ── Barre d'intensité interactive ── */
+    (function() {
+        const input   = document.getElementById('intensite_input');
+        const preview = document.getElementById('intensite_preview');
+        if (!input || !preview) return;
+
+        function updateDots(val) {
+            preview.querySelectorAll('[data-val]').forEach(dot => {
+                dot.style.background = parseInt(dot.dataset.val) <= val
+                    ? 'var(--color-primary)'
+                    : 'var(--color-border)';
+            });
+        }
+
+        input.addEventListener('input', () => updateDots(parseInt(input.value) || 0));
+
+        preview.querySelectorAll('[data-val]').forEach(dot => {
+            dot.style.cursor = 'pointer';
+            dot.addEventListener('click', () => {
+                input.value = dot.dataset.val;
+                updateDots(parseInt(dot.dataset.val));
+            });
+        });
+    })();
+</script>

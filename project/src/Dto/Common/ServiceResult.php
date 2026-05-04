@@ -10,7 +10,8 @@ final readonly class ServiceResult
         public bool $success,
         public string $message,
         public mixed $data = null,
-    ) {}
+    ) {
+    }
 
     public static function success(string $message, mixed $data = null): self
     {

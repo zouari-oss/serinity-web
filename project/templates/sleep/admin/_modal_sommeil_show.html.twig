@@ -1,0 +1,10 @@
+<div style="display:grid; gap:12px;">
+    <div><strong>ID :</strong> {{ sommeil.id }}</div>
+    <div><strong>Date :</strong> {{ sommeil.dateNuit ? sommeil.dateNuit|date('d/m/Y') : '-' }}</div>
+    <div><strong>Durée :</strong> {{ sommeil.dureeSommeil ?? '-' }} h</div>
+    <div><strong>Qualité :</strong> {{ sommeil.qualite ?? '-' }}</div>
+    <div><strong>Heure coucher :</strong> {{ sommeil.heureCoucher ?? '-' }}</div>
+    <div><strong>Heure réveil :</strong> {{ sommeil.heureReveil ?? '-' }}</div>
+    <div><strong>Humeur réveil :</strong> {{ sommeil.humeurReveil ?? '-' }}</div>
+    <div><strong>User ID :</strong> {{ sommeil.userId ?? '-' }}</div>
+</div>

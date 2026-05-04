@@ -1,50 +1,50 @@
 <aside class="ac-sidebar" data-controller="home-session">
-  <div class="ac-brand">
-    <div class="ac-brand-badge">S</div>
-    <div>
-      <p class="ac-brand-name">Serinity</p>
-      <p class="ac-brand-sub">Access Control</p>
+    <div class="ac-brand">
+        <div class="ac-brand-badge">S</div>
+        <div>
+            <p class="ac-brand-name">Serinity</p>
+            <p class="ac-brand-sub">Access Control</p>
+        </div>
     </div>
-  </div>
 
-  <nav class="ac-nav" aria-label="Primary">
-    {% set currentSection = null %}
-    {% for item in items %}
-    {% if currentSection != item.section %}
-    {% if currentSection is not null %}
-    <div class="ac-nav-divider" aria-hidden="true"></div>
-    {% endif %}
-    {% set currentSection = item.section %}
-    {% endif %}
-    {% if item.children is defined and item.children is not empty %}
-    <details class="ac-nav-group" {{ item.active ? 'open' : '' }}>
-      <summary class="ac-nav-link {{ item.active ? 'is-active' : '' }}">
-        <span class="material-symbols-outlined">{{ item.icon|default('chevron_right') }}</span>
-        <span>{{ item.label }}</span>
-        <span class="material-symbols-outlined ac-nav-group-caret">expand_more</span>
-      </summary>
-      <div class="ac-nav-submenu">
-        {% for child in item.children %}
-        <a class="ac-nav-sublink {{ child.active ? 'is-active' : '' }}" href="{{ path(child.route) }}">
-          <span class="material-symbols-outlined">{{ child.icon|default('chevron_right') }}</span>
-          <span>{{ child.label }}</span>
-        </a>
+    <nav class="ac-nav" aria-label="Primary">
+        {% set currentSection = null %}
+        {% for item in items %}
+            {% if currentSection != item.section %}
+                {% if currentSection is not null %}
+                    <div class="ac-nav-divider" aria-hidden="true"></div>
+                {% endif %}
+                {% set currentSection = item.section %}
+            {% endif %}
+            {% if item.children is defined and item.children is not empty %}
+                <details class="ac-nav-group" {{ item.active ? 'open' : '' }}>
+                    <summary class="ac-nav-link {{ item.active ? 'is-active' : '' }}">
+                        <span class="material-symbols-outlined">{{ item.icon|default('chevron_right') }}</span>
+                        <span>{{ item.label }}</span>
+                        <span class="material-symbols-outlined ac-nav-group-caret">expand_more</span>
+                    </summary>
+                    <div class="ac-nav-submenu">
+                        {% for child in item.children %}
+                            <a class="ac-nav-sublink {{ child.active ? 'is-active' : '' }}" href="{{ path(child.route) }}">
+                                <span class="material-symbols-outlined">{{ child.icon|default('chevron_right') }}</span>
+                                <span>{{ child.label }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </details>
+            {% else %}
+                <a class="ac-nav-link {{ item.active ? 'is-active' : '' }}" href="{{ path(item.route) }}">
+                    <span class="material-symbols-outlined">{{ item.icon|default('chevron_right') }}</span>
+                    <span>{{ item.label }}</span>
+                </a>
+            {% endif %}
         {% endfor %}
-      </div>
-    </details>
-    {% else %}
-    <a class="ac-nav-link {{ item.active ? 'is-active' : '' }}" href="{{ path(item.route) }}">
-      <span class="material-symbols-outlined">{{ item.icon|default('chevron_right') }}</span>
-      <span>{{ item.label }}</span>
-    </a>
-    {% endif %}
-    {% endfor %}
-  </nav>
+    </nav>
 
-  <div class="ac-sidebar-footer">
-    <button type="button" class="ac-nav-link ac-nav-link-danger" data-action="click->home-session#logout">
-      <span class="material-symbols-outlined">logout</span>
-      <span>Logout</span>
-    </button>
-  </div>
+    <div class="ac-sidebar-footer">
+        <button type="button" class="ac-nav-link ac-nav-link-danger" data-action="click->home-session#logout">
+            <span class="material-symbols-outlined">logout</span>
+            <span>Logout</span>
+        </button>
+    </div>
 </aside>

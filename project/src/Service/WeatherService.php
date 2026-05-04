@@ -15,7 +15,8 @@ final readonly class WeatherService
     public function __construct(
         private HttpClientInterface $httpClient,
         private LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     /**
      * @return array{temperature:float|int,weatherCode:int,isDay:int,localTime:string,timezone:string,weatherLabel:string}
@@ -75,12 +76,12 @@ final readonly class WeatherService
     {
         try {
             if (is_string($currentTime) && trim($currentTime) !== '') {
-                return new \DateTimeImmutable($currentTime)->format('H:i');
+                return (new \DateTimeImmutable($currentTime))->format('H:i');
             }
 
-            return new \DateTimeImmutable('now', new \DateTimeZone($timezone))->format('H:i');
+            return (new \DateTimeImmutable('now', new \DateTimeZone($timezone)))->format('H:i');
         } catch (\Throwable) {
-            return new \DateTimeImmutable('now', new \DateTimeZone('UTC'))->format('H:i');
+            return (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format('H:i');
         }
     }
 
@@ -95,7 +96,7 @@ final readonly class WeatherService
             'temperature' => 22,
             'weatherCode' => 0,
             'isDay' => 1,
-            'localTime' => new \DateTimeImmutable('now', new \DateTimeZone($timezone))->format('H:i'),
+            'localTime' => (new \DateTimeImmutable('now', new \DateTimeZone($timezone)))->format('H:i'),
             'timezone' => $timezone,
             'weatherLabel' => 'Clear sky',
         ];

@@ -25,7 +25,8 @@ final class ProfileController extends AbstractUserUiController
         private readonly ImageUploadService $imageUploadService,
         private readonly MessageBusInterface $messageBus,
         private readonly AvatarGenerationPendingStore $pendingStore,
-    ) {}
+    ) {
+    }
 
     #[Route('/profile', name: 'user_ui_profile', methods: ['GET', 'POST'])]
     public function profile(Request $request, ValidatorInterface $validator): Response

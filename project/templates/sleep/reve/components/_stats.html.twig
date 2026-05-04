@@ -1,0 +1,31 @@
+<div class="rv-stats-grid">
+    <article class="rv-stat-card">
+        <span class="rv-stat-label">Total rêves</span>
+        <strong class="rv-stat-value">{{ stats.total|default(0) }}</strong>
+        <small class="rv-stat-foot">Journal enregistré</small>
+    </article>
+
+    <article class="rv-stat-card rv-stat-card-danger">
+        <span class="rv-stat-label">Cauchemars</span>
+        <strong class="rv-stat-value">{{ stats.nightmares|default(0) }}</strong>
+        <small class="rv-stat-foot">Nuits sensibles</small>
+    </article>
+
+    <article class="rv-stat-card rv-stat-card-info">
+        <span class="rv-stat-label">Intensité moyenne</span>
+        <strong class="rv-stat-value">{{ stats.avg_intensity|default(0)|number_format(1, '.', ' ') }}</strong>
+        <small class="rv-stat-foot">Sur 10</small>
+    </article>
+
+    <article class="rv-stat-card rv-stat-card-warning">
+        <span class="rv-stat-label">Attention</span>
+        <strong class="rv-stat-value">
+            {% if stats.attention|default(false) %}
+                Oui
+            {% else %}
+                Non
+            {% endif %}
+        </strong>
+        <small class="rv-stat-foot">Signal émotionnel</small>
+    </article>
+</div>

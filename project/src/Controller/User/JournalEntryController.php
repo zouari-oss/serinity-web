@@ -27,7 +27,8 @@ final class JournalEntryController extends AbstractUserUiController
         private readonly JournalContentSanitizer $journalContentSanitizer,
         private readonly CallMeBotClient $callMeBotClient,
         private readonly JournalEmotionTagger $journalEmotionTagger,
-    ) {}
+    ) {
+    }
 
     #[Route('', name: 'user_ui_journal_entry', methods: ['GET'])]
     public function index(Request $request): Response
@@ -69,7 +70,7 @@ final class JournalEntryController extends AbstractUserUiController
         $content = $this->journalContentSanitizer->sanitize((string) $request->request->get('content', ''));
 
         $now = new \DateTimeImmutable();
-        $entry = new JournalEntry()
+        $entry = (new JournalEntry())
             ->setUser($user)
             ->setTitle($title)
             ->setContent($content)
@@ -202,7 +203,7 @@ final class JournalEntryController extends AbstractUserUiController
     ): array {
         $calendarStart = $monthStart->modify('monday this week')->setTime(0, 0, 0);
         $calendarEnd = $monthEnd->modify('sunday this week')->setTime(0, 0, 0);
-        $today = new \DateTimeImmutable('today')->format('Y-m-d');
+        $today = (new \DateTimeImmutable('today'))->format('Y-m-d');
         $cells = [];
 
         for ($cursor = $calendarStart; $cursor <= $calendarEnd; $cursor = $cursor->modify('+1 day')) {
@@ -230,7 +231,7 @@ final class JournalEntryController extends AbstractUserUiController
         }
 
         try {
-            return new \DateTimeImmutable($month . '-01')->setTime(0, 0, 0);
+            return (new \DateTimeImmutable($month . '-01'))->setTime(0, 0, 0);
         } catch (\Exception) {
             return new \DateTimeImmutable('first day of this month');
         }

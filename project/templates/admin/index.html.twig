@@ -1,0 +1,176 @@
+{# templates/admin/index.html.twig #}
+{% extends 'forum/embedded_layout.html.twig' %}
+
+{% block title %}Forum Backoffice{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+  .page-shell { padding: 2rem; max-width: 1100px; margin: 0 auto; }
+
+  .top-bar {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    padding: 1.1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    gap: .75rem;
+  }
+  .top-bar-label { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #999; margin-bottom: .15rem; }
+  .top-bar-title { font-size: 1.05rem; font-weight: 700; color: #222; }
+  .top-bar-actions { display: flex; gap: .5rem; }
+
+  .cat-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    overflow: hidden;
+  }
+  .cat-card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #eee;
+    font-size: .95rem;
+    font-weight: 600;
+    color: #222;
+  }
+
+  .cat-table { width: 100%; border-collapse: collapse; }
+  .cat-table thead th {
+    background: #fafafa;
+    padding: .6rem 1rem;
+    text-align: left;
+    font-size: .72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #888;
+    border-bottom: 1px solid #eee;
+  }
+  .cat-table tbody tr { border-bottom: 1px solid #f0f0f0; transition: background .15s; }
+  .cat-table tbody tr:last-child { border-bottom: none; }
+  .cat-table tbody tr:hover { background: #fafbff; }
+  .cat-table tbody td { padding: .75rem 1rem; vertical-align: middle; color: #444; font-size: .875rem; }
+
+  .cat-name { font-weight: 600; color: #222; }
+  .cat-slug { font-size: .75rem; color: #999; margin-top: .15rem; }
+
+  .cat-desc { color: #666; max-width: 380px; }
+
+  .cat-parent {
+    display: inline-block;
+    background: #f0f4ff;
+    color: #2c5faa;
+    font-size: .72rem;
+    font-weight: 600;
+    padding: .2rem .55rem;
+    border-radius: 5px;
+  }
+  .cat-no-parent { color: #bbb; font-size: .8rem; }
+
+  .u-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: .32rem .8rem;
+    border-radius: 6px;
+    font-size: .78rem; font-weight: 600;
+    cursor: pointer; border: none;
+    text-decoration: none;
+    transition: opacity .15s, transform .1s;
+    white-space: nowrap;
+  }
+  .u-btn:hover { opacity: .88; transform: translateY(-1px); }
+  .u-btn-edit   { background: #2980b9; color: #fff; }
+  .u-btn-delete { background: #e74c3c; color: #fff; }
+  .u-actions    { display: flex; align-items: center; gap: .5rem; }
+
+  .nav-btn {
+    display: inline-flex; align-items: center;
+    padding: .45rem 1rem;
+    border-radius: 7px;
+    font-size: .82rem; font-weight: 600;
+    text-decoration: none; cursor: pointer;
+    border: none; transition: opacity .15s;
+  }
+  .nav-btn:hover { opacity: .88; }
+  .nav-btn-primary { background: #2980b9; color: #fff; }
+  .nav-btn-outline {
+    background: transparent;
+    color: #2980b9;
+    border: 1.5px solid #2980b9;
+  }
+
+  .cat-empty { text-align: center; padding: 3rem; color: #aaa; font-size: .9rem; }
+</style>
+{% endblock %}
+
+{% block forum_content %}
+<main>
+  <div class="page-shell">
+    <div class="top-bar">
+      <div>
+        <div class="top-bar-label">Administration</div>
+        <div class="top-bar-title">Forum Backoffice</div>
+      </div>
+      <div class="top-bar-actions">
+        <a class="nav-btn nav-btn-primary" href="{{ path('app_admin_category_new') }}">Add Category</a>
+        <a class="nav-btn nav-btn-outline" href="{{ path('app_admin_statistics') }}">Statistics</a>
+      </div>
+    </div>
+
+    <div class="cat-card">
+      <div class="cat-card-header">All Categories</div>
+
+      <table class="cat-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name / Slug</th>
+            <th>Description</th>
+            <th>Parent</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for category in categories %}
+          <tr>
+            <td style="color:#bbb; font-size:.82rem;">{{ category.id }}</td>
+            <td>
+              <div class="cat-name">{{ category.name }}</div>
+              <div class="cat-slug">/{{ category.slug }}</div>
+            </td>
+            <td class="cat-desc">{{ category.description|slice(0, 100) }}{% if category.description|length > 100 %}...{% endif %}</td>
+            <td>
+              {% if category.parent %}
+                <span class="cat-parent">{{ category.parent.name }}</span>
+              {% else %}
+                <span class="cat-no-parent">-</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="u-actions">
+                <a class="u-btn u-btn-edit"
+                   href="{{ path('app_admin_category_edit', {id: category.id}) }}">Edit</a>
+                <form method="post"
+                      action="{{ path('app_admin_category_delete', {id: category.id}) }}"
+                      onsubmit="return confirm('Delete &quot;{{ category.name }}&quot;?')">
+                  <input type="hidden" name="_token"
+                         value="{{ csrf_token('delete' ~ category.id) }}">
+                  <button type="submit" class="u-btn u-btn-delete">Delete</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" class="cat-empty">No categories yet. <a href="{{ path('app_admin_category_new') }}">Add one -&gt;</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+{% endblock %}

@@ -14,16 +14,21 @@ final readonly class UserFilterRequest
     public function __construct(
         #[Assert\Positive]
         public int $page = 1,
+
         #[Assert\Positive]
         #[Assert\LessThanOrEqual(100)]
         public int $limit = 20,
+
         #[Assert\Email(message: 'Invalid email format')]
         public ?string $email = null,
+
         #[Assert\Choice(choices: ['ADMIN', 'THERAPIST', 'PATIENT'], message: 'Invalid role')]
         public ?string $role = null,
+
         #[Assert\Choice(choices: ['ACTIVE', 'DISABLED'], message: 'Invalid account status')]
         public ?string $accountStatus = null,
-    ) {}
+    ) {
+    }
 
     /**
      * Convert to repository filter array.

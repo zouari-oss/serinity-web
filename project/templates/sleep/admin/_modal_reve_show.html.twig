@@ -1,0 +1,12 @@
+<div style="display:grid; gap:12px;">
+    <div><strong>ID :</strong> {{ reve.id }}</div>
+    <div><strong>Date :</strong> {{ sommeil and sommeil.dateNuit ? sommeil.dateNuit|date('d/m/Y') : '-' }}</div>
+    <div><strong>Titre :</strong> {{ reve.titre ?? '-' }}</div>
+    <div><strong>Type :</strong> {{ reve.typeReve ?? '-' }}</div>
+    <div><strong>Humeur :</strong> {{ reve.humeur ?? '-' }}</div>
+    <div>
+        <strong>Description :</strong><br>
+        {{ reve.description ?? '-' }}
+    </div>
+    <div><strong>User ID :</strong> {{ sommeil ? sommeil.userId : '-' }}</div>
+</div>

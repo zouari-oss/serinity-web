@@ -1,0 +1,38 @@
+<article class="card-soft reply-box p-3 mb-2 ms-{{ level > 0 ? 4 : 0 }}">
+    <p class="small text-muted mb-1">{{ reply.authorUsername ?: 'Unknown User' }} • {{ reply.createdAt|date('Y-m-d H:i') }}</p>
+    <p class="mb-2">{{ reply.content|nl2br }}</p>
+
+    <div class="d-flex flex-wrap gap-2 mb-2">
+        {% if thread.status.value != 'locked' %}
+            <button type="button" class="btn btn-sm btn-outline-primary js-open-reply-layer" data-reply-id="{{ reply.id }}">Reply</button>
+        {% endif %}
+
+        {% if currentUser.id == reply.authorId %}
+            <button class="btn btn-sm btn-outline-dark" type="button" data-bs-toggle="collapse" data-bs-target="#reply-edit-{{ reply.id }}" aria-expanded="false" aria-controls="reply-edit-{{ reply.id }}">
+                Edit
+            </button>
+            <form method="post" action="{{ path('app_reply_delete', {id: reply.id}) }}" class="d-inline">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete_reply_' ~ reply.id) }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this reply?')">Delete</button>
+            </form>
+        {% endif %}
+    </div>
+
+    {% if currentUser.id == reply.authorId %}
+        <div class="collapse mb-2" id="reply-edit-{{ reply.id }}">
+            <form method="post" action="{{ path('app_reply_edit', {id: reply.id}) }}" class="d-flex flex-wrap gap-2 align-items-start">
+                <input type="hidden" name="_token" value="{{ csrf_token('edit_reply_' ~ reply.id) }}">
+                <textarea name="content" class="form-control form-control-sm" rows="2" style="max-width: 520px;">{{ reply.content }}</textarea>
+                <button type="submit" class="btn btn-sm btn-dark">Save</button>
+            </form>
+        </div>
+    {% endif %}
+
+    {% if reply.children|length > 0 %}
+        <div class="mt-2">
+            {% for child in reply.children %}
+                {{ include('forum/_reply_item.html.twig', { reply: child, thread: thread, currentUser: currentUser, level: level + 1 }) }}
+            {% endfor %}
+        </div>
+    {% endif %}
+</article>

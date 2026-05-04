@@ -1,0 +1,18 @@
+framework:
+    rate_limiter:
+        follow_toggle:
+            policy: 'fixed_window'
+            limit: 9
+            interval: '1 minute'
+        spam_thread_creation:
+            policy: 'fixed_window'
+            limit: 3
+            interval: '10 minutes'
+        spam_reply_creation:
+            policy: 'fixed_window'
+            limit: 5
+            interval: '5 minutes'
+        spam_interactions:
+            policy: 'fixed_window'
+            limit: 5
+            interval: '3 minutes'

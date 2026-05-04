@@ -1,0 +1,70 @@
+{% extends 'sleep/_layout.html.twig' %}
+{% block title %}Nuit du {{ sommeil.dateNuit ? sommeil.dateNuit|date('d/m/Y') : '' }} — Serinity Sleep{% endblock %}
+
+{% block sleep_content %}
+
+    <section class="ac-card" style="margin-bottom: 1.5rem;">
+        <div class="ac-row-between">
+            <div>
+                <h2>🌙 Nuit du {{ sommeil.dateNuit ? sommeil.dateNuit|date('d/m/Y') : '' }}</h2>
+                {% if sommeil.qualite %}
+                    <p style="color: var(--color-text-muted); margin-top: 0.25rem;">Qualité : {{ sommeil.qualite }}</p>
+                {% endif %}
+            </div>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+                <a href="{{ path('app_sommeil_list') }}" class="ac-ghost-btn">
+                    <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
+                    Retour
+                </a>
+                <a href="{{ path('app_sommeil_edit', {id: sommeil.id}) }}" class="ac-ghost-btn">
+                    <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
+                    Modifier
+                </a>
+                <button type="button" class="ac-danger-btn"
+                        onclick="document.getElementById('deleteModal').hidden = false">
+                    <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+                    Supprimer
+                </button>
+            </div>
+        </div>
+    </section>
+
+    {% include 'sleep/sommeil/components/_show_modal.html.twig' with {
+        sommeil: sommeil,
+        modal_mode: false
+    } %}
+
+    <div class="ac-modal" id="deleteModal" hidden>
+        <div class="ac-modal-content">
+
+            <div class="ac-row-between" style="margin-bottom: 1rem;">
+                <h3 style="font-size: 1rem; font-weight: 700;">Supprimer cette nuit ?</h3>
+                <button type="button" class="ac-icon-btn"
+                        onclick="document.getElementById('deleteModal').hidden = true"
+                        aria-label="Fermer">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <p style="color: var(--color-text-muted); margin-bottom: 1.25rem;">
+                Les rêves associés seront également supprimés. Action irréversible.
+            </p>
+
+            <form method="post" action="{{ path('app_sommeil_delete', {id: sommeil.id}) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ sommeil.id) }}">
+                <div class="ac-row-end">
+                    <button type="button" class="ac-ghost-btn"
+                            onclick="document.getElementById('deleteModal').hidden = true">
+                        Annuler
+                    </button>
+                    <button type="submit" class="ac-danger-btn">
+                        <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
+                        Supprimer
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+{% endblock %}

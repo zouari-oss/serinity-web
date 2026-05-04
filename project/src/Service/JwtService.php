@@ -8,7 +8,9 @@ use App\Entity\User;
 
 final readonly class JwtService
 {
-    public function __construct(private string $appSecret) {}
+    public function __construct(private string $appSecret)
+    {
+    }
 
     public function createAccessToken(User $user, int $ttlSeconds = 900): string
     {

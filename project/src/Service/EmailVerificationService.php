@@ -24,7 +24,8 @@ final readonly class EmailVerificationService
         private int $verifyRateLimitAttempts,
         private int $verifyRateLimitWindowSeconds,
         private int $maxResendAttempts,
-    ) {}
+    ) {
+    }
 
     public function sendCodeForUser(User $user, bool $resend = false): ServiceResult
     {
@@ -41,7 +42,7 @@ final readonly class EmailVerificationService
         }
 
         $code = $this->tokenGenerator->generateNumericCode(6);
-        $expiresAt = new \DateTimeImmutable()->modify(sprintf('+%d minutes', $this->codeTtlMinutes));
+        $expiresAt = (new \DateTimeImmutable())->modify(sprintf('+%d minutes', $this->codeTtlMinutes));
         $this->storeCodeState($email, $code, $expiresAt);
 
         $recipientName = $user->getProfile()?->getUsername() ?: 'there';
@@ -168,7 +169,7 @@ final readonly class EmailVerificationService
 
     private function isCodeValid(string $email, string $code, \DateTimeImmutable $now): bool
     {
-        $state = $this->cache->get($this->codeStateKey($email), static fn(ItemInterface $item): array => []);
+        $state = $this->cache->get($this->codeStateKey($email), static fn (ItemInterface $item): array => []);
         if (!is_array($state)) {
             return false;
         }
@@ -203,7 +204,7 @@ final readonly class EmailVerificationService
             return true;
         }
 
-        $attempts = $this->cache->get($key, static fn(ItemInterface $item): int => 0);
+        $attempts = $this->cache->get($key, static fn (ItemInterface $item): int => 0);
         if (!is_int($attempts)) {
             $attempts = 0;
         }
@@ -225,7 +226,7 @@ final readonly class EmailVerificationService
 
     private function isVerificationLimited(string $email): bool
     {
-        $attempts = $this->cache->get($this->verifyAttemptsKey($email), static fn(ItemInterface $item): int => 0);
+        $attempts = $this->cache->get($this->verifyAttemptsKey($email), static fn (ItemInterface $item): int => 0);
 
         return is_int($attempts) && $attempts >= $this->verifyRateLimitAttempts;
     }
@@ -233,7 +234,7 @@ final readonly class EmailVerificationService
     private function recordVerificationFailure(string $email): void
     {
         $key = $this->verifyAttemptsKey($email);
-        $attempts = $this->cache->get($key, static fn(ItemInterface $item): int => 0);
+        $attempts = $this->cache->get($key, static fn (ItemInterface $item): int => 0);
         if (!is_int($attempts)) {
             $attempts = 0;
         }

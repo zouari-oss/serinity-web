@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Export PDF - Sommeils</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            color: #136163;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #136163;
+        }
+
+        .meta {
+            text-align: right;
+            margin-bottom: 15px;
+            font-size: 11px;
+            color: #18848e;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #b3ecf1;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+            word-break: break-word;
+        }
+
+        th {
+            background: #b3ecf1;
+            color: #136163;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background: #f6fcfd;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        tfoot {
+            display: table-footer-group;
+        }
+
+        tr {
+            page-break-inside: avoid;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 10px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+<h1>Liste des sommeils</h1>
+
+<div class="meta">
+    Généré le : {{ generatedAt ? generatedAt|date("d/m/Y H:i") : "now"|date("d/m/Y H:i") }}
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>Date</th>
+        <th>Heure coucher</th>
+        <th>Heure réveil</th>
+        <th>Durée</th>
+        <th>Qualité</th>
+        <th>Humeur réveil</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for sommeil in sommeils %}
+        <tr>
+            <td>{{ sommeil.dateNuit ? sommeil.dateNuit|date('d/m/Y') : '—' }}</td>
+            <td>{{ sommeil.heureCoucher ?? '—' }}</td>
+            <td>{{ sommeil.heureReveil ?? '—' }}</td>
+            <td>{{ sommeil.dureeSommeil ?? '—' }}</td>
+            <td>{{ sommeil.qualite ?? '—' }}</td>
+            <td>{{ sommeil.humeurReveil ?? '—' }}</td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="6" style="text-align: center;">Aucun sommeil trouvé.</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<div class="footer">
+    Serinity • Analyse du sommeil
+</div>
+</body>
+</html>

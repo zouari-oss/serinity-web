@@ -1,0 +1,534 @@
+{% extends 'forum/embedded_layout.html.twig' %}
+{% set topbarTitle = thread.title %}
+{% set topbarSubtitle = thread.category ? thread.category.name : 'Thread details' %}
+{% set showForumNav = false %}
+
+{% block title %}{{ thread.title }}{% endblock %}
+
+{% block forum_content %}
+<main class="page-shell">
+    <div class="container stats-shell">
+        <section class="hero-shell p-4 p-md-5 mb-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                <div class="flex-grow-1">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                        <a href="{{ path('app_forum_feed') }}" class="btn btn-sm btn-outline-primary">Back to feed</a>
+                        <span class="meta-pill {{ thread.status.value == 'open' ? 'meta-open' : (thread.status.value == 'locked' ? 'meta-locked' : 'meta-archived') }}">{{ thread.status.value|upper }}</span>
+                        {% if thread.isPinned %}<span class="badge badge-info">Pinned</span>{% endif %}
+                    </div>
+                    <h1 class="h3 mb-2">{{ thread.title }}</h1>
+                    <p class="text-muted mb-3">By {{ thread.authorUsername ?: 'Unknown User' }} • {{ thread.category.name }} • {{ thread.createdAt|date('Y-m-d H:i') }}</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="stats-chip">Type: {{ thread.type.value }}</span>
+                        <span class="stats-chip">Likes: {{ thread.likeCount }}</span>
+                        <span class="stats-chip">Dislikes: {{ thread.dislikeCount }}</span>
+                        <span class="stats-chip">Replies: {{ thread.replyCount }}</span>
+                        <span class="stats-chip">Followers: {{ thread.followCount }}</span>
+                    </div>
+                </div>
+                <div class="d-flex flex-column gap-2 align-items-end">
+                    <a class="btn btn-sm btn-outline-primary" href="{{ path('app_forum_thread_export', {id: thread.id}) }}">Download PDF</a>
+                    <div class="d-flex flex-wrap gap-2 justify-content-end">
+                        <a class="btn btn-sm {{ currentVote == 1 ? 'btn-success' : 'btn-outline-success' }}" href="{{ path('app_thread_upvote', {id: thread.id}) }}">Upvote</a>
+                        <a class="btn btn-sm {{ currentVote == -1 ? 'btn-danger' : 'btn-outline-danger' }}" href="{{ path('app_thread_downvote', {id: thread.id}) }}">Downvote</a>
+                        <a
+                            id="followToggleBtn"
+                            class="btn btn-sm {{ isFollowing ? 'btn-dark' : 'btn-outline-primary' }}"
+                            href="{{ path('app_thread_follow', {id: thread.id}) }}"
+                            data-follow-toggle="1"
+                            data-following="{{ isFollowing ? '1' : '0' }}"
+                        >{{ isFollowing ? 'Unfollow' : 'Follow' }}</a>
+                    </div>
+                </div>
+                <div id="followFlashWarnings" class="d-none">
+                    {% for message in app.flashes('warning') %}
+                        <span data-follow-warning="{{ message|e('html_attr') }}"></span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="card-soft p-3 p-md-4 mt-4 thread-content-block">
+                <p class="mb-0">{{ thread.content|nl2br }}</p>
+            </div>
+
+            {% if thread.imageUrl %}
+                <img src="{{ thread.imageUrl }}" alt="Thread image" class="img-fluid rounded border mt-3">
+            {% endif %}
+        </section>
+
+        <section class="card-soft action-strip p-3 mb-3">
+            <div class="d-flex flex-wrap gap-2 justify-content-between">
+                <div class="d-flex flex-wrap gap-2">
+                {% if thread.status.value != 'locked' %}
+                    <button type="button" class="btn btn-sm btn-primary js-open-reply-layer" id="threadAddReplyBtn">Add Reply</button>
+                {% endif %}
+                <a class="btn btn-sm btn-outline-primary" href="{{ path('app_forum_thread_detail', {id: thread.id, summarize: 1}) }}">Summarize</a>
+                <a class="btn btn-sm btn-outline-primary" href="{{ path('app_forum_thread_detail', {id: thread.id, lang: 'French'}) }}">Translate FR</a>
+                <a class="btn btn-sm btn-outline-primary" href="{{ path('app_forum_thread_detail', {id: thread.id, lang: 'Arabic'}) }}">Translate AR</a>
+                </div>
+                {% if canManageThread %}
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="btn btn-sm btn-outline-primary" href="{{ path('app_thread_edit', {id: thread.id}) }}">Edit</a>
+                        {% if thread.status.value != 'archived' %}
+                            <a class="btn btn-sm btn-outline-warning" href="{{ path('app_thread_status', {id: thread.id, status: 'archived'}) }}">Archive</a>
+                        {% endif %}
+                        {% if thread.status.value == 'locked' %}
+                            <a class="btn btn-sm btn-outline-success" href="{{ path('app_thread_status', {id: thread.id, status: 'open'}) }}">Open</a>
+                        {% else %}
+                            <a class="btn btn-sm btn-outline-secondary" href="{{ path('app_thread_status', {id: thread.id, status: 'locked'}) }}">Lock</a>
+                        {% endif %}
+                        <form method="post" action="{{ path('app_thread_delete', {id: thread.id}) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_thread_' ~ thread.id) }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this thread permanently?')">Delete</button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        {% if summary %}
+            <section class="card-soft p-3 p-md-4 mb-3">
+                <h2 class="h6 text-uppercase section-kicker mb-2">Summary</h2>
+                <p class="mb-0">{{ summary }}</p>
+            </section>
+        {% endif %}
+
+        {% if translated %}
+            <section class="card-soft p-3 p-md-4 mb-3">
+                <h2 class="h6 text-uppercase section-kicker mb-2">Translated Content</h2>
+                <p class="mb-0">{{ translated }}</p>
+            </section>
+        {% endif %}
+
+        {% if thread.status.value == 'locked' %}
+            <section class="card-soft p-3 p-md-4 mb-3">
+                <div class="alert alert-warning mb-0">This thread is locked. Replies are disabled.</div>
+            </section>
+        {% else %}
+            <div class="reply-layer-backdrop" id="replyLayerBackdrop"></div>
+            <section class="reply-layer" id="replyLayer" aria-hidden="true" role="dialog" aria-label="Add reply panel">
+                <div class="reply-layer-head p-3 p-md-4 d-flex justify-content-between align-items-start gap-2">
+                    <div>
+                        <h2 class="h5 m-0">Add Reply</h2>
+                        <p class="reply-layer-context m-0" id="replyLayerContext">Posting a reply to the thread.</p>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="replyLayerCloseBtn">Close</button>
+                </div>
+                <div class="p-3 p-md-4">
+                    {{ form_start(replyForm, {'attr': {'novalidate': 'novalidate'}}) }}
+                    {{ form_widget(replyForm.parentId, { value: app.request.query.get('reply_to') }) }}
+                    {{ form_row(replyForm.content, { attr: { class: 'form-control forum-textarea' } }) }}
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary">Post Reply</button>
+                        <button type="button" class="btn btn-outline-primary" id="replyLayerCancelBtn">Cancel</button>
+                    </div>
+                    {{ form_end(replyForm) }}
+                </div>
+            </section>
+        {% endif %}
+
+        <section class="card-soft p-3 p-md-4">
+            <h2 class="h5 mb-3">Replies</h2>
+            {% for reply in replies %}
+                {{ include('forum/_reply_item.html.twig', { reply: reply, thread: thread, currentUser: currentUser, level: 0 }) }}
+            {% else %}
+                <p class="text-muted">No replies yet.</p>
+            {% endfor %}
+        </section>
+
+        <div class="modal fade" id="followWarningModal" tabindex="-1" aria-labelledby="followWarningModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title h5 mb-0" id="followWarningModalTitle">Action Interrupted</h2>
+                    </div>
+                    <div class="modal-body">
+                        <p id="followWarningModalMessage" class="mb-0"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="spamBanModal" tabindex="-1" aria-labelledby="spamBanModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-danger-subtle border-danger">
+                    <div class="modal-header border-danger">
+                        <h2 class="modal-title h5 mb-0" id="spamBanModalTitle">Account Temporarily Banned</h2>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-2"><strong>You have been temporarily banned due to spam activity.</strong></p>
+                        <p class="mb-0">You can try again in: <span id="spamBanModalTimer" class="badge bg-danger fw-bold">00:00</span></p>
+                    </div>
+                    <div class="modal-footer border-danger">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        (function () {
+            const initFollowToggle = () => {
+                const button = document.querySelector('[data-follow-toggle="1"]');
+                const warningModalEl = document.getElementById('followWarningModal');
+                const warningMessageEl = document.getElementById('followWarningModalMessage');
+                const warningSeed = document.getElementById('followFlashWarnings');
+
+                if (!button || button._followToggleBound === true) {
+                    return;
+                }
+
+                button._followToggleBound = true;
+
+                const FOLLOW_WINDOW_MS = 60_000;
+                const FOLLOW_MAX_ACTIONS = 9;
+
+                let committedState = button.dataset.following === '1';
+                let displayState = committedState;
+                let pendingToggles = 0;
+                let syncRunning = false;
+                let localBlockedUntil = 0;
+                const localActionTimestamps = [];
+
+                const warningModal = warningModalEl && window.bootstrap && window.bootstrap.Modal
+                    ? window.bootstrap.Modal.getOrCreateInstance(warningModalEl)
+                    : null;
+
+                const applyFollowingState = (isFollowing) => {
+                    button.dataset.following = isFollowing ? '1' : '0';
+                    button.textContent = isFollowing ? 'Unfollow' : 'Follow';
+                    button.classList.toggle('btn-dark', isFollowing);
+                    button.classList.toggle('btn-outline-primary', !isFollowing);
+                };
+
+                const showWarning = (message) => {
+                    if (!message || message.trim() === '') {
+                        return;
+                    }
+
+                    if (warningModal && warningMessageEl) {
+                        warningMessageEl.textContent = message;
+                        warningModal.show();
+                        return;
+                    }
+
+                    window.alert(message);
+                };
+
+                const secondsFromPayload = (payload) => {
+                    const raw = payload && payload.retryAfterSeconds;
+                    const parsed = Number(raw);
+
+                    if (!Number.isFinite(parsed) || parsed <= 0) {
+                        return null;
+                    }
+
+                    return Math.ceil(parsed);
+                };
+
+                const buildWarningMessage = (baseMessage, waitSeconds) => {
+                    const message = typeof baseMessage === 'string' && baseMessage.trim() !== ''
+                        ? baseMessage.trim()
+                        : 'Too many follow/unfollow actions.';
+
+                    if (waitSeconds === null || waitSeconds <= 0) {
+                        return message;
+                    }
+
+                    return `${message} Please wait ${waitSeconds} second${waitSeconds === 1 ? '' : 's'}.`;
+                };
+
+                const pruneLocalActions = (nowMs) => {
+                    const cutoff = nowMs - FOLLOW_WINDOW_MS;
+
+                    while (localActionTimestamps.length > 0 && localActionTimestamps[0] <= cutoff) {
+                        localActionTimestamps.shift();
+                    }
+                };
+
+                const flushFlashWarnings = () => {
+                    if (!warningSeed) {
+                        return;
+                    }
+
+                    const warningNodes = warningSeed.querySelectorAll('[data-follow-warning]');
+                    warningNodes.forEach((node) => {
+                        const message = node.getAttribute('data-follow-warning');
+                        if (typeof message === 'string' && message.trim() !== '') {
+                            showWarning(message);
+                        }
+                    });
+                };
+
+                const syncWithServer = async () => {
+                    if (syncRunning) {
+                        return;
+                    }
+
+                    syncRunning = true;
+
+                    try {
+                        while (pendingToggles > 0) {
+                            const stateBeforeRequest = committedState;
+                            const response = await fetch(button.getAttribute('href') || window.location.href, {
+                                method: 'GET',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json',
+                                },
+                                cache: 'no-store',
+                            });
+
+                            let payload = null;
+                            try {
+                                payload = await response.json();
+                            } catch (error) {
+                                payload = null;
+                            }
+
+                            const hasServerState = payload && typeof payload.isFollowing === 'boolean';
+
+                            if (!response.ok || !payload || payload.ok !== true) {
+                                committedState = hasServerState ? payload.isFollowing : stateBeforeRequest;
+                                displayState = committedState;
+                                pendingToggles = 0;
+                                applyFollowingState(committedState);
+
+                                const retryAfterSeconds = secondsFromPayload(payload);
+                                if (retryAfterSeconds !== null) {
+                                    localBlockedUntil = Date.now() + (retryAfterSeconds * 1000);
+                                }
+
+                                const baseMessage = payload && typeof payload.message === 'string'
+                                    ? payload.message
+                                    : 'Too many follow/unfollow actions.';
+                                showWarning(buildWarningMessage(baseMessage, retryAfterSeconds));
+                                break;
+                            }
+
+                            committedState = hasServerState ? payload.isFollowing : !stateBeforeRequest;
+                            pendingToggles -= 1;
+
+                            if (pendingToggles === 0) {
+                                displayState = committedState;
+                                applyFollowingState(displayState);
+                            }
+                        }
+                    } catch (error) {
+                        displayState = committedState;
+                        pendingToggles = 0;
+                        applyFollowingState(committedState);
+                        showWarning('Could not update follow state. Please try again.');
+                    } finally {
+                        syncRunning = false;
+                        if (pendingToggles > 0) {
+                            void syncWithServer();
+                        }
+                    }
+                };
+
+                applyFollowingState(displayState);
+                flushFlashWarnings();
+
+                button.addEventListener('click', (event) => {
+                    event.preventDefault();
+
+                    const now = Date.now();
+                    pruneLocalActions(now);
+
+                    if (localBlockedUntil > now) {
+                        const waitSeconds = Math.max(1, Math.ceil((localBlockedUntil - now) / 1000));
+                        showWarning(buildWarningMessage('Too many follow/unfollow actions.', waitSeconds));
+
+                        return;
+                    }
+
+                    if (localActionTimestamps.length >= FOLLOW_MAX_ACTIONS) {
+                        localBlockedUntil = localActionTimestamps[0] + FOLLOW_WINDOW_MS;
+                        const waitSeconds = Math.max(1, Math.ceil((localBlockedUntil - now) / 1000));
+                        showWarning(buildWarningMessage('Too many follow/unfollow actions.', waitSeconds));
+
+                        return;
+                    }
+
+                    localActionTimestamps.push(now);
+
+                    pendingToggles += 1;
+                    displayState = !displayState;
+                    applyFollowingState(displayState);
+                    void syncWithServer();
+                });
+            };
+
+            const initReplyLayer = () => {
+                const layer = document.getElementById('replyLayer');
+                const backdrop = document.getElementById('replyLayerBackdrop');
+
+                if (!layer || !backdrop || layer.dataset.bound === '1') {
+                    return;
+                }
+
+                layer.dataset.bound = '1';
+
+                const closeBtn = document.getElementById('replyLayerCloseBtn');
+                const cancelBtn = document.getElementById('replyLayerCancelBtn');
+                const contextEl = document.getElementById('replyLayerContext');
+                const parentInput = layer.querySelector('input[name$="[parentId]"]');
+
+                const setReplyContext = (replyId) => {
+                    if (!parentInput || !contextEl) {
+                        return;
+                    }
+
+                    if (replyId) {
+                        parentInput.value = replyId;
+                        contextEl.textContent = `Replying to comment #${replyId}.`;
+                        return;
+                    }
+
+                    parentInput.value = '';
+                    contextEl.textContent = 'Posting a reply to the thread.';
+                };
+
+                const openLayer = (replyId = null) => {
+                    setReplyContext(replyId);
+                    layer.classList.add('is-open');
+                    backdrop.classList.add('is-open');
+                    layer.setAttribute('aria-hidden', 'false');
+                };
+
+                const closeLayer = () => {
+                    layer.classList.remove('is-open');
+                    backdrop.classList.remove('is-open');
+                    layer.setAttribute('aria-hidden', 'true');
+                };
+
+                document.querySelectorAll('.js-open-reply-layer').forEach((trigger) => {
+                    trigger.addEventListener('click', () => {
+                        const replyId = trigger.dataset.replyId || null;
+                        openLayer(replyId);
+                    });
+                });
+
+                [closeBtn, cancelBtn, backdrop].forEach((el) => {
+                    if (el) {
+                        el.addEventListener('click', closeLayer);
+                    }
+                });
+
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape' && layer.classList.contains('is-open')) {
+                        closeLayer();
+                    }
+                });
+
+                const urlReplyTo = new URLSearchParams(window.location.search).get('reply_to');
+                const composeRequested = new URLSearchParams(window.location.search).get('compose') === '1';
+
+                if (urlReplyTo) {
+                    openLayer(urlReplyTo);
+                    return;
+                }
+
+                if (composeRequested) {
+                    openLayer();
+                }
+            };
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    initFollowToggle();
+                    initReplyLayer();
+                    initSpamBanModal();
+                }, { once: true });
+            } else {
+                initFollowToggle();
+                initReplyLayer();
+                initSpamBanModal();
+            }
+
+            const initSpamBanModal = () => {
+                const spamBanModalEl = document.getElementById('spamBanModal');
+                const timerEl = document.getElementById('spamBanModalTimer');
+
+                if (!spamBanModalEl || !timerEl) {
+                    return;
+                }
+
+                const spamBanModal = window.bootstrap && window.bootstrap.Modal
+                    ? window.bootstrap.Modal.getOrCreateInstance(spamBanModalEl)
+                    : null;
+
+                if (!spamBanModal) {
+                    return;
+                }
+
+                let countdownInterval = null;
+
+                const updateTimer = (remainingSeconds) => {
+                    if (remainingSeconds <= 0) {
+                        timerEl.textContent = '00:00';
+                        if (countdownInterval) {
+                            clearInterval(countdownInterval);
+                            countdownInterval = null;
+                        }
+
+                        return;
+                    }
+
+                    const hours = Math.floor(remainingSeconds / 3600);
+                    const minutes = Math.floor((remainingSeconds % 3600) / 60);
+
+                    if (hours > 0) {
+                        timerEl.textContent = `${hours}h ${minutes}m`;
+                    } else {
+                        timerEl.textContent = `${minutes}m`;
+                    }
+                };
+
+                const showBanModal = (remainingSeconds) => {
+                    updateTimer(remainingSeconds);
+                    spamBanModal.show();
+
+                    if (countdownInterval) {
+                        clearInterval(countdownInterval);
+                    }
+
+                    let remaining = remainingSeconds;
+                    countdownInterval = setInterval(() => {
+                        remaining -= 1;
+                        updateTimer(remaining);
+
+                        if (remaining <= 0) {
+                            clearInterval(countdownInterval);
+                            countdownInterval = null;
+                        }
+                    }, 1000);
+                };
+
+                // Check if user is banned via data attribute (populated by server on page load)
+                const pageContent = document.querySelector('main');
+                if (pageContent && pageContent.dataset.userBannedSeconds) {
+                    const bannedSeconds = parseInt(pageContent.dataset.userBannedSeconds, 10);
+                    if (bannedSeconds > 0) {
+                        showBanModal(bannedSeconds);
+                    }
+                }
+
+                // Store the function globally so AJAX responses can show the modal
+                window._showSpamBanModal = showBanModal;
+            };
+
+            document.addEventListener('turbo:load', initFollowToggle);
+            document.addEventListener('turbo:load', initReplyLayer);
+            document.addEventListener('turbo:load', initSpamBanModal);
+        })();
+    </script>
+{% endblock %}

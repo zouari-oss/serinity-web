@@ -8,7 +8,9 @@ final readonly class TwoFactorCryptoService
 {
     private const OPENSSL_CIPHER = 'aes-256-gcm';
 
-    public function __construct(private string $appSecret) {}
+    public function __construct(private string $appSecret)
+    {
+    }
 
     public function encryptSecret(string $secret): string
     {

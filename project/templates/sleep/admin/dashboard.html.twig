@@ -1,0 +1,187 @@
+{% extends 'sleep/admin/base.html.twig' %}
+
+{% block title %}Dashboard Admin — Serinity{% endblock %}
+{% block breadcrumb %}Vue d'ensemble{% endblock %}
+
+{% block body %}
+
+    <div class="adm-page-header">
+        <div>
+            <h1 class="adm-page-title">Vue d'ensemble</h1>
+            <p class="adm-page-subtitle">Bienvenue dans le panneau d'administration Serinity.</p>
+        </div>
+        <span class="adm-date-badge">{{ "now"|date("d M Y") }}</span>
+    </div>
+
+    {# ── KPI Stats ── #}
+    <div class="adm-kpi-grid">
+
+        <div class="adm-kpi-card kpi-users">
+            <div class="adm-kpi-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+            </div>
+            <div class="adm-kpi-info">
+                <span class="adm-kpi-value">{{ total_users ?? 0 }}</span>
+                <span class="adm-kpi-label">Utilisateurs</span>
+            </div>
+            <span class="adm-kpi-trend up">+8%</span>
+        </div>
+
+        <div class="adm-kpi-card kpi-sommeil">
+            <div class="adm-kpi-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </div>
+            <div class="adm-kpi-info">
+                <span class="adm-kpi-value">{{ total_sommeils ?? 0 }}</span>
+                <span class="adm-kpi-label">Entrées Sommeil</span>
+            </div>
+            <span class="adm-kpi-trend up">+12%</span>
+        </div>
+
+        <div class="adm-kpi-card kpi-reves">
+            <div class="adm-kpi-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                </svg>
+            </div>
+            <div class="adm-kpi-info">
+                <span class="adm-kpi-value">{{ total_reves ?? 0 }}</span>
+                <span class="adm-kpi-label">Rêves enregistrés</span>
+            </div>
+            <span class="adm-kpi-trend up">+5%</span>
+        </div>
+
+        <div class="adm-kpi-card kpi-exercice">
+            <div class="adm-kpi-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+            </div>
+            <div class="adm-kpi-info">
+                <span class="adm-kpi-value">{{ total_exercices ?? 0 }}</span>
+                <span class="adm-kpi-label">Sessions Exercice</span>
+            </div>
+            <span class="adm-kpi-trend down">-2%</span>
+        </div>
+
+        <div class="adm-kpi-card kpi-humeur">
+            <div class="adm-kpi-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                    <line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
+                </svg>
+            </div>
+            <div class="adm-kpi-info">
+                <span class="adm-kpi-value">{{ total_humeurs ?? 0 }}</span>
+                <span class="adm-kpi-label">Humeurs</span>
+            </div>
+            <span class="adm-kpi-trend up">+3%</span>
+        </div>
+
+        <div class="adm-kpi-card kpi-consult">
+            <div class="adm-kpi-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.82 12 19.79 19.79 0 0 1 1.72 3.36 2 2 0 0 1 3.69 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.69a16 16 0 0 0 6.29 6.29l1.01-1.01a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+            </div>
+            <div class="adm-kpi-info">
+                <span class="adm-kpi-value">{{ total_consultations ?? 0 }}</span>
+                <span class="adm-kpi-label">Consultations</span>
+            </div>
+            <span class="adm-kpi-trend up">+1%</span>
+        </div>
+
+    </div>
+
+    {# ── Module Cards raccourcis ── #}
+    <h2 class="adm-section-title">Accès rapides</h2>
+
+    <div class="adm-modules-grid">
+
+        {# Sommeil : actif car c'est ton module #}
+        <a href="{{ path('app_admin_sommeil_index') }}" class="adm-module-card mod-sommeil-card">
+            <div class="adm-mc-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </div>
+            <h3 class="adm-mc-title">Sommeil & Rêves</h3>
+            <p class="adm-mc-desc">Gérer les entrées de sommeil et le journal des rêves</p>
+            <span class="adm-mc-arrow" aria-hidden="true">→</span>
+        </a>
+
+        {# Exercice : désactivé #}
+        <a href="#" class="adm-module-card mod-exercice-card disabled-link" title="Bientôt disponible">
+            <div class="adm-mc-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+            </div>
+            <h3 class="adm-mc-title">Exercice</h3>
+            <p class="adm-mc-desc">Suivre et gérer les sessions d'exercice physique</p>
+            <span class="adm-mc-arrow" aria-hidden="true">→</span>
+        </a>
+
+        {# Humeur : désactivé #}
+        <a href="#" class="adm-module-card mod-humeur-card disabled-link" title="Bientôt disponible">
+            <div class="adm-mc-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                    <line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
+                </svg>
+            </div>
+            <h3 class="adm-mc-title">Humeur</h3>
+            <p class="adm-mc-desc">Analyser les données de bien-être émotionnel</p>
+            <span class="adm-mc-arrow" aria-hidden="true">→</span>
+        </a>
+
+        {# Consultation : désactivé #}
+        <a href="#" class="adm-module-card mod-consult-card disabled-link" title="Bientôt disponible">
+            <div class="adm-mc-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.82 12 19.79 19.79 0 0 1 1.72 3.36 2 2 0 0 1 3.69 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.69a16 16 0 0 0 6.29 6.29l1.01-1.01a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+            </div>
+            <h3 class="adm-mc-title">Consultation</h3>
+            <p class="adm-mc-desc">Gérer les rendez-vous et consultations médicales</p>
+            <span class="adm-mc-arrow" aria-hidden="true">→</span>
+        </a>
+
+        {# Forum : désactivé #}
+        <a href="#" class="adm-module-card mod-forum-card disabled-link" title="Bientôt disponible">
+            <div class="adm-mc-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+            </div>
+            <h3 class="adm-mc-title">Forum</h3>
+            <p class="adm-mc-desc">Modérer les discussions et messages du forum</p>
+            <span class="adm-mc-arrow" aria-hidden="true">→</span>
+        </a>
+
+        {# Utilisateurs : désactivé #}
+        <a href="#" class="adm-module-card mod-users-card disabled-link" title="Bientôt disponible">
+            <div class="adm-mc-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+            </div>
+            <h3 class="adm-mc-title">Utilisateurs</h3>
+            <p class="adm-mc-desc">Gérer les comptes, rôles et permissions</p>
+            <span class="adm-mc-arrow" aria-hidden="true">→</span>
+        </a>
+
+    </div>
+
+{% endblock %}

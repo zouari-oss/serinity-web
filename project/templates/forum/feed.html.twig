@@ -1,0 +1,10 @@
+{% extends 'forum/embedded_layout.html.twig' %}
+{% set topbarTitle = 'Forum' %}
+{% set topbarSubtitle = 'Community discussions' %}
+{% set showForumNav = true %}
+
+{% block title %}Forum Feed{% endblock %}
+
+{% block forum_content %}
+    {{ include('forum/_feed_content.html.twig') }}
+{% endblock %}

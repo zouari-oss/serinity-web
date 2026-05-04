@@ -25,7 +25,8 @@ final class EmailVerificationController extends AbstractApiController
         private readonly EmailVerificationService $emailVerificationService,
         private readonly UserRepository $userRepository,
         private readonly AuthenticationService $authenticationService,
-    ) {}
+    ) {
+    }
 
     #[Route('/verify-email', name: 'api_auth_verify_email', methods: ['POST'])]
     public function verifyEmail(Request $request, ValidatorInterface $validator): JsonResponse

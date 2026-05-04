@@ -21,7 +21,8 @@ final class ExerciceController extends AbstractApiController
 {
     public function __construct(
         private readonly AdminExerciceService $adminExerciceService,
-    ) {}
+    ) {
+    }
 
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(Request $request): JsonResponse

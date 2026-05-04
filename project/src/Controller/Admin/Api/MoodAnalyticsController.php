@@ -20,7 +20,8 @@ final class MoodAnalyticsController extends AbstractApiController
 {
     public function __construct(
         private readonly AdminMoodAnalyticsService $adminMoodAnalyticsService,
-    ) {}
+    ) {
+    }
 
     #[Route('/summary', name: 'summary', methods: ['GET'])]
     public function summary(Request $request, ValidatorInterface $validator): JsonResponse

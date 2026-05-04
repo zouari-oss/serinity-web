@@ -63,7 +63,7 @@ final class CriticalPeriodDetectionServiceTest extends TestCase
 
     private function buildUser(): User
     {
-        return new User()
+        return (new User())
             ->setId('test-user')
             ->setEmail('test@example.com')
             ->setPassword('secret')
@@ -80,7 +80,7 @@ final class CriticalPeriodDetectionServiceTest extends TestCase
      */
     private function buildEntry(User $user, int $moodLevel, string $date, array $emotionNames): MoodEntry
     {
-        $entry = new MoodEntry()
+        $entry = (new MoodEntry())
             ->setUser($user)
             ->setEntryDate(new \DateTimeImmutable($date))
             ->setMomentType('MOMENT')
@@ -88,7 +88,7 @@ final class CriticalPeriodDetectionServiceTest extends TestCase
             ->setUpdatedAt(new \DateTimeImmutable($date . ' 10:00:00'));
 
         foreach ($emotionNames as $emotionName) {
-            $entry->addEmotion(new MoodEmotion()->setName($emotionName));
+            $entry->addEmotion((new MoodEmotion())->setName($emotionName));
         }
 
         return $entry;

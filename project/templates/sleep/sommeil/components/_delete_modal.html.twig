@@ -1,0 +1,28 @@
+<div class="ac-modal" id="deleteModal" hidden>
+    <div class="ac-modal-content">
+
+        <div class="ac-row-between" style="margin-bottom: 1rem;">
+            <h3 style="font-size: 1rem; font-weight: 700;">Supprimer cette nuit ?</h3>
+            <button type="button" class="ac-icon-btn"
+                    onclick="closeDeleteModal()" aria-label="Fermer">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <p id="deleteModalBody" style="color: var(--color-text-muted); margin-bottom: 1.25rem;">
+            Supprimer cette nuit ? Action irréversible.
+        </p>
+
+        <form id="deleteForm" method="post">
+            <input type="hidden" name="_token" value="">
+            <div class="ac-row-end">
+                <button type="button" class="ac-ghost-btn" onclick="closeDeleteModal()">Annuler</button>
+                <button type="submit" class="ac-danger-btn">
+                    <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
+                    Supprimer
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>

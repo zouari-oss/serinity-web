@@ -1,0 +1,153 @@
+{% extends 'access_control/layout.html.twig' %}
+
+{% block title %}Serinity — Sleep{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+    <link rel="stylesheet" href="{{ asset('assets/css/tokens.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/serinity.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/front.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/serinity-custom.css') }}">
+{% endblock %}
+
+{% block content %}
+    {% set current_route = app.request.attributes.get('_route') %}
+
+    {% set items = [
+        {
+            label: 'Dashboard',
+            route: 'user_ui_dashboard',
+            icon: 'dashboard',
+            section: 'home',
+            active: current_route == 'user_ui_dashboard'
+        },
+        {
+            label: 'Profile',
+            route: 'user_ui_profile',
+            icon: 'person',
+            section: 'home',
+            active: current_route == 'user_ui_profile'
+        },
+        {
+            label: 'Settings',
+            route: 'user_ui_settings',
+            icon: 'settings',
+            section: 'home',
+            active: current_route == 'user_ui_settings'
+        },
+        {
+            label: 'Consultations',
+            route: 'user_ui_consultations',
+            icon: 'medical_services',
+            section: 'modules',
+            active: current_route == 'user_ui_consultations'
+        },
+        {
+            label: 'Exercises',
+            route: 'user_ui_exercises',
+            icon: 'fitness_center',
+            section: 'modules',
+            active: current_route == 'user_ui_exercises'
+        },
+        {
+            label: 'Forum',
+            route: 'user_ui_forum',
+            icon: 'forum',
+            section: 'modules',
+            active: current_route == 'user_ui_forum'
+        },
+        {
+            label: 'Mood',
+            route: 'user_ui_mood',
+            icon: 'mood',
+            section: 'modules',
+            active: current_route starts with 'user_ui_mood' or current_route == 'user_ui_journal_entry',
+            children: [
+            {
+                label: 'Mood entries',
+                route: 'user_ui_mood',
+                icon: 'list',
+                active: current_route == 'user_ui_mood'
+            },
+            {
+                label: 'Journal',
+                route: 'user_ui_journal_entry',
+                icon: 'edit_note',
+                active: current_route == 'user_ui_journal_entry'
+            },
+            {
+                label: 'Insights',
+                route: 'user_ui_mood_insights',
+                icon: 'insights',
+                active: current_route == 'user_ui_mood_insights'
+            },
+            {
+                label: 'Recovery plan',
+                route: 'user_ui_mood_recovery_plan',
+                icon: 'healing',
+                active: current_route == 'user_ui_mood_recovery_plan'
+            }
+        ]
+        },
+        {
+            label: 'Sleep',
+            route: 'app_sommeil_list',
+            icon: 'bedtime',
+            section: 'modules',
+            active: current_route starts with 'app_sommeil' or current_route starts with 'app_reve',
+            children: [
+            {
+                label: 'Gestion sommeil',
+                route: 'app_sommeil_list',
+                icon: 'bed',
+                active: current_route starts with 'app_sommeil'
+            },
+            {
+                label: 'Gestion Rêves',
+                route: 'app_reve_index',
+                icon: 'nights_stay',
+                active: current_route starts with 'app_reve'
+            }
+        ]
+        }
+    ] %}
+
+    <div class="ac-app-layout">
+
+        {% include 'access_control/components/_sidebar.html.twig' with {
+            items: items
+        } %}
+
+        <div class="ac-main" data-controller="flash-toast">
+
+            {% include 'access_control/components/_topbar.html.twig' with {
+                title: current_route starts with 'app_reve' ? 'Rêves' : 'Sommeil',
+                subtitle: current_route starts with 'app_reve'
+                ? 'Gestion et analyse des rêves'
+                : 'Suivi des nuits et de la récupération',
+                username: app.user ? app.user.email : 'Guest'
+            } %}
+
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <span data-flash-toast-target="message" data-type="{{ label }}" hidden>{{ message }}</span>
+                {% endfor %}
+            {% endfor %}
+
+            <main id="main-content" role="main" tabindex="-1">
+                {% block sleep_content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    {% if current_route starts with 'app_sommeil' or current_route starts with 'app_reve' %}
+        {% include 'sleep/_translate_fab.html.twig' %}
+    {% endif %}
+{% endblock %}
+
+{% block body_javascripts %}
+    {{ parent() }}
+
+    {% block sleep_javascripts %}{% endblock %}
+{% endblock %}

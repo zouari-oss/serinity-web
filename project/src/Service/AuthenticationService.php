@@ -38,7 +38,8 @@ final readonly class AuthenticationService
         private TwoFactorCheckRateLimiter $twoFactorCheckRateLimiter,
         private EmailVerificationService $emailVerificationService,
         private AccountAccessService $accountAccessService,
-    ) {}
+    ) {
+    }
 
     public function register(RegisterRequest $request): ServiceResult
     {
@@ -59,7 +60,7 @@ final readonly class AuthenticationService
         }
 
         $now = new \DateTimeImmutable();
-        $user = new User()
+        $user = (new User())
             ->setId($this->tokenGenerator->generateUuidV4())
             ->setEmail(mb_strtolower(trim($request->email)))
             ->setRole($role->value)
@@ -71,7 +72,7 @@ final readonly class AuthenticationService
             ->setUpdatedAt($now);
         $user->setPassword($this->passwordHasher->hashPassword($user, $request->password));
 
-        $profile = new Profile()
+        $profile = (new Profile())
             ->setId($this->tokenGenerator->generateUuidV4())
             ->setUsername($this->generateUsername($user->getEmail()))
             ->setUser($user)

@@ -7,219 +7,275 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-  app.jwt_secret: '%env(APP_SECRET)%'
-  app.image_request_url: '%env(IMAGE_REQUEST_URL)%'
-  app.image_api_key: '%env(IMAGE_API_KEY)%'
-  app.phpmailer_host: '%env(string:PHPMAILER_HOST)%'
-  app.phpmailer_port: '%env(int:PHPMAILER_PORT)%'
-  app.phpmailer_username: '%env(string:PHPMAILER_USERNAME)%'
-  app.phpmailer_password: '%env(string:PHPMAILER_PASSWORD)%'
-  app.phpmailer_encryption: '%env(string:PHPMAILER_ENCRYPTION)%'
-  app.phpmailer_from_email: '%env(string:PHPMAILER_FROM_EMAIL)%'
-  app.phpmailer_from_name: '%env(string:PHPMAILER_FROM_NAME)%'
-  app.password_reset_code_ttl_minutes: '%env(int:PASSWORD_RESET_CODE_TTL_MINUTES)%'
-  app.password_reset_rate_limit_attempts: '%env(int:PASSWORD_RESET_RATE_LIMIT_ATTEMPTS)%'
-  app.password_reset_rate_limit_window_seconds: '%env(int:PASSWORD_RESET_RATE_LIMIT_WINDOW_SECONDS)%'
-  app.password_reset_max_resends: '%env(int:PASSWORD_RESET_MAX_RESENDS)%'
-  app.email_verification_code_ttl_minutes: '%env(int:EMAIL_VERIFICATION_CODE_TTL_MINUTES)%'
-  app.email_verification_rate_limit_attempts: '%env(int:EMAIL_VERIFICATION_RATE_LIMIT_ATTEMPTS)%'
-  app.email_verification_rate_limit_window_seconds: '%env(int:EMAIL_VERIFICATION_RATE_LIMIT_WINDOW_SECONDS)%'
-  app.email_verification_max_resends: '%env(int:EMAIL_VERIFICATION_MAX_RESENDS)%'
-  app.whatsapp_phone: '%env(string:WHATSAPP_PHONE)%'
-  app.whatsapp_api_key: '%env(string:WHATSAPP_API_KEY)%'
-  app.face_auth_similarity_threshold: '%env(float:FACE_AUTH_SIMILARITY_THRESHOLD)%'
-  app.face_auth_rate_limit_attempts: '%env(int:FACE_AUTH_RATE_LIMIT_ATTEMPTS)%'
-  app.face_auth_rate_limit_window_seconds: '%env(int:FACE_AUTH_RATE_LIMIT_WINDOW_SECONDS)%'
-  app.face_auth_recognition_model_path: '%env(string:FACE_AUTH_RECOGNITION_MODEL_PATH)%'
-  app.face_auth_onnx_runtime_library_path: '%env(string:FACE_AUTH_ONNX_RUNTIME_LIBRARY_PATH)%'
-  app.face_auth_python_command: '%env(string:FACE_AUTH_PYTHON_COMMAND)%'
-  app.face_auth_python_script_path: '%env(string:FACE_AUTH_PYTHON_SCRIPT_PATH)%'
-  app.face_auth_input_width: '%env(int:FACE_AUTH_INPUT_WIDTH)%'
-  app.face_auth_input_height: '%env(int:FACE_AUTH_INPUT_HEIGHT)%'
-  app.google_redirect_uri: '%env(string:GOOGLE_REDIRECT_URI)%'
-  app.two_factor_challenge_ttl_seconds: '%env(int:TWO_FACTOR_CHALLENGE_TTL_SECONDS)%'
-  app.two_factor_rate_limit_attempts: '%env(int:TWO_FACTOR_RATE_LIMIT_ATTEMPTS)%'
-  app.two_factor_rate_limit_window_seconds: '%env(int:TWO_FACTOR_RATE_LIMIT_WINDOW_SECONDS)%'
-  app.avatar_img2img_api_url: '%env(string:AVATAR_IMG2IMG_API_URL)%'
-  app.avatar_img2img_timeout: '%env(int:AVATAR_IMG2IMG_TIMEOUT)%'
-  app.avatar_default_prompt: '%env(string:AVATAR_DEFAULT_PROMPT)%'
-  app.avatar_default_negative_prompt: '%env(string:AVATAR_DEFAULT_NEGATIVE_PROMPT)%'
-  app.avatar_default_strength: '%env(float:AVATAR_DEFAULT_STRENGTH)%'
-  app.avatar_rate_limit_attempts: '%env(int:AVATAR_RATE_LIMIT_ATTEMPTS)%'
-  app.avatar_rate_limit_window_seconds: '%env(int:AVATAR_RATE_LIMIT_WINDOW_SECONDS)%'
-  app.avatar_generation_pending_ttl_seconds: '%env(int:AVATAR_GENERATION_PENDING_TTL_SECONDS)%'
-  app.ai_emotion_api_enabled: '%env(bool:AI_EMOTION_API_ENABLED)%'
-  app.ai_emotion_api_base_url: '%env(string:AI_EMOTION_API_BASE_URL)%'
-  app.ai_emotion_api_route: '%env(string:AI_EMOTION_API_ROUTE)%'
-  app.ai_emotion_api_timeout: '%env(float:AI_EMOTION_API_TIMEOUT)%'
-  app.ai_emotion_api_threshold: '%env(float:AI_EMOTION_API_THRESHOLD)%'
-  app.ai_emotion_api_top_k: '%env(int:AI_EMOTION_API_TOP_K)%'
-  app.account_ban_duration_minutes: '%env(int:ACCOUNT_BAN_DURATION_MINUTES)%'
-  app.ntfy_base_url: '%env(string:NTFY_BASE_URL)%'
-  app.ntfy_doctor_topic: '%env(string:NTFY_DOCTOR_TOPIC)%'
-  app.ntfy_enabled: '%env(bool:NTFY_ENABLED)%'
-  app.ntfy_cooldown_seconds: '%env(int:NTFY_COOLDOWN_SECONDS)%'
-  app.youtube_api_key: '%env(string:YOUTUBE_API_KEY)%'
-  app.user_lat: '%env(float:USER_LAT)%'
-  app.user_lon: '%env(float:USER_LON)%'
-  app.gemini_api_key: '%env(string:GEMINI_API_KEY)%'
-  app.gemini_model: '%env(string:GEMINI_MODEL)%'
+    app.jwt_secret: '%env(APP_SECRET)%'
+    app.image_request_url: '%env(IMAGE_REQUEST_URL)%'
+    app.image_api_key: '%env(IMAGE_API_KEY)%'
+    app.phpmailer_host: '%env(string:PHPMAILER_HOST)%'
+    app.phpmailer_port: '%env(int:PHPMAILER_PORT)%'
+    app.phpmailer_username: '%env(string:PHPMAILER_USERNAME)%'
+    app.phpmailer_password: '%env(string:PHPMAILER_PASSWORD)%'
+    app.phpmailer_encryption: '%env(string:PHPMAILER_ENCRYPTION)%'
+    app.phpmailer_from_email: '%env(string:PHPMAILER_FROM_EMAIL)%'
+    app.phpmailer_from_name: '%env(string:PHPMAILER_FROM_NAME)%'
+    app.password_reset_code_ttl_minutes: '%env(int:PASSWORD_RESET_CODE_TTL_MINUTES)%'
+    app.password_reset_rate_limit_attempts: '%env(int:PASSWORD_RESET_RATE_LIMIT_ATTEMPTS)%'
+    app.password_reset_rate_limit_window_seconds: '%env(int:PASSWORD_RESET_RATE_LIMIT_WINDOW_SECONDS)%'
+    app.password_reset_max_resends: '%env(int:PASSWORD_RESET_MAX_RESENDS)%'
+    app.email_verification_code_ttl_minutes: '%env(int:EMAIL_VERIFICATION_CODE_TTL_MINUTES)%'
+    app.email_verification_rate_limit_attempts: '%env(int:EMAIL_VERIFICATION_RATE_LIMIT_ATTEMPTS)%'
+    app.email_verification_rate_limit_window_seconds: '%env(int:EMAIL_VERIFICATION_RATE_LIMIT_WINDOW_SECONDS)%'
+    app.email_verification_max_resends: '%env(int:EMAIL_VERIFICATION_MAX_RESENDS)%'
+    app.whatsapp_phone: '%env(string:WHATSAPP_PHONE)%'
+    app.whatsapp_api_key: '%env(string:WHATSAPP_API_KEY)%'
+    app.face_auth_similarity_threshold: '%env(float:FACE_AUTH_SIMILARITY_THRESHOLD)%'
+    app.face_auth_rate_limit_attempts: '%env(int:FACE_AUTH_RATE_LIMIT_ATTEMPTS)%'
+    app.face_auth_rate_limit_window_seconds: '%env(int:FACE_AUTH_RATE_LIMIT_WINDOW_SECONDS)%'
+    app.face_auth_recognition_model_path: '%env(string:FACE_AUTH_RECOGNITION_MODEL_PATH)%'
+    app.face_auth_onnx_runtime_library_path: '%env(string:FACE_AUTH_ONNX_RUNTIME_LIBRARY_PATH)%'
+    app.face_auth_python_command: '%env(string:FACE_AUTH_PYTHON_COMMAND)%'
+    app.face_auth_python_script_path: '%env(string:FACE_AUTH_PYTHON_SCRIPT_PATH)%'
+    app.face_auth_input_width: '%env(int:FACE_AUTH_INPUT_WIDTH)%'
+    app.face_auth_input_height: '%env(int:FACE_AUTH_INPUT_HEIGHT)%'
+    app.google_redirect_uri: '%env(string:GOOGLE_REDIRECT_URI)%'
+    app.two_factor_challenge_ttl_seconds: '%env(int:TWO_FACTOR_CHALLENGE_TTL_SECONDS)%'
+    app.two_factor_rate_limit_attempts: '%env(int:TWO_FACTOR_RATE_LIMIT_ATTEMPTS)%'
+    app.two_factor_rate_limit_window_seconds: '%env(int:TWO_FACTOR_RATE_LIMIT_WINDOW_SECONDS)%'
+    app.avatar_img2img_api_url: '%env(string:AVATAR_IMG2IMG_API_URL)%'
+    app.avatar_img2img_timeout: '%env(int:AVATAR_IMG2IMG_TIMEOUT)%'
+    app.avatar_default_prompt: '%env(string:AVATAR_DEFAULT_PROMPT)%'
+    app.avatar_default_negative_prompt: '%env(string:AVATAR_DEFAULT_NEGATIVE_PROMPT)%'
+    app.avatar_default_strength: '%env(float:AVATAR_DEFAULT_STRENGTH)%'
+    app.avatar_rate_limit_attempts: '%env(int:AVATAR_RATE_LIMIT_ATTEMPTS)%'
+    app.avatar_rate_limit_window_seconds: '%env(int:AVATAR_RATE_LIMIT_WINDOW_SECONDS)%'
+    app.avatar_generation_pending_ttl_seconds: '%env(int:AVATAR_GENERATION_PENDING_TTL_SECONDS)%'
+    app.ai_emotion_api_enabled: '%env(bool:AI_EMOTION_API_ENABLED)%'
+    app.ai_emotion_api_base_url: '%env(string:AI_EMOTION_API_BASE_URL)%'
+    app.ai_emotion_api_route: '%env(string:AI_EMOTION_API_ROUTE)%'
+    app.ai_emotion_api_timeout: '%env(float:AI_EMOTION_API_TIMEOUT)%'
+    app.ai_emotion_api_threshold: '%env(float:AI_EMOTION_API_THRESHOLD)%'
+    app.ai_emotion_api_top_k: '%env(int:AI_EMOTION_API_TOP_K)%'
+    app.forum_upload_dir: '%kernel.project_dir%/public/uploads'
+    app.forum_imgbb_api_key: '%env(string:API_IMGBB)%'
+    app.forum_translate_api_key: '%env(string:API_TRANSLATE_KEY)%'
 
+    app.account_ban_duration_minutes: '%env(int:ACCOUNT_BAN_DURATION_MINUTES)%'
+    app.spam_ban_duration_minutes: '%env(int:SPAM_BAN_DURATION_MINUTES)%'
+    app.ntfy_base_url: '%env(string:NTFY_BASE_URL)%'
+    app.ntfy_doctor_topic: '%env(string:NTFY_DOCTOR_TOPIC)%'
+    app.ntfy_enabled: '%env(bool:NTFY_ENABLED)%'
+    app.ntfy_cooldown_seconds: '%env(int:NTFY_COOLDOWN_SECONDS)%'
+    app.youtube_api_key: '%env(string:YOUTUBE_API_KEY)%'
+    app.user_lat: '%env(float:USER_LAT)%'
+    app.user_lon: '%env(float:USER_LON)%'
+    app.gemini_api_key: '%env(string:GEMINI_API_KEY)%'
+    app.gemini_model: '%env(string:GEMINI_MODEL)%'
+    app.openweather.api_key: '%env(string:OPENWEATHER_API_KEY)%'
+    app.openweather.lat: '%env(float:OPENWEATHER_LAT)%'
+    app.openweather.lon: '%env(float:OPENWEATHER_LON)%'
+    app.lm_studio.base_url: '%env(string:LM_STUDIO_BASE_URL)%'
+    app.lm_studio.model: '%env(string:LM_STUDIO_MODEL)%'
+    app.mood_ml_api_enabled: '%env(bool:MOOD_ML_API_ENABLED)%'
+    app.mood_ml_api_base_url: '%env(string:MOOD_ML_API_BASE_URL)%'
+    app.mood_ml_api_prediction_route: '%env(string:MOOD_ML_API_PREDICTION_ROUTE)%'
+    app.mood_ml_api_key: '%env(string:MOOD_ML_API_KEY)%'
+    app.mood_ml_api_timeout: '%env(float:MOOD_ML_API_TIMEOUT)%'
 services:
-  # default configuration for services in *this* file
-  _defaults:
-    autowire: true # Automatically injects dependencies in your services.
-    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
-  # makes classes in src/ available to be used as services
-  # this creates a service per class whose id is the fully-qualified class name
-  App\:
-    resource: '../src/'
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
 
-  App\Service\JwtService:
-    arguments:
-      $appSecret: '%app.jwt_secret%'
+    App\Service\JwtService:
+        arguments:
+            $appSecret: '%app.jwt_secret%'
 
-  App\Service\TwoFactorCryptoService:
-    arguments:
-      $appSecret: '%app.jwt_secret%'
+    App\Service\TwoFactorCryptoService:
+        arguments:
+            $appSecret: '%app.jwt_secret%'
 
-  App\Service\ImageUploadService:
-    arguments:
-      $imageRequestUrl: '%app.image_request_url%'
-      $imageApiKey: '%app.image_api_key%'
+    App\Service\ImageUploadService:
+        arguments:
+            $imageRequestUrl: '%app.image_request_url%'
+            $imageApiKey: '%app.image_api_key%'
 
-  App\Service\MailerService:
-    arguments:
-      $host: '%app.phpmailer_host%'
-      $port: '%app.phpmailer_port%'
-      $username: '%app.phpmailer_username%'
-      $password: '%app.phpmailer_password%'
-      $encryption: '%app.phpmailer_encryption%'
-      $fromEmail: '%app.phpmailer_from_email%'
-      $fromName: '%app.phpmailer_from_name%'
+    App\Service\ForumImageUploadService:
+        arguments:
+            $uploadDir: '%app.forum_upload_dir%'
+            $imgbbApiKey: '%app.forum_imgbb_api_key%'
 
-  App\Service\PasswordResetService:
-    arguments:
-      $codeTtlMinutes: '%app.password_reset_code_ttl_minutes%'
-      $rateLimitAttempts: '%app.password_reset_rate_limit_attempts%'
-      $rateLimitWindowSeconds: '%app.password_reset_rate_limit_window_seconds%'
-      $maxResendAttempts: '%app.password_reset_max_resends%'
+    App\Service\TranslationService:
+        arguments:
+            $apiKey: '%app.forum_translate_api_key%'
 
-  App\Service\EmailVerificationService:
-    arguments:
-      $codeTtlMinutes: '%app.email_verification_code_ttl_minutes%'
-      $verifyRateLimitAttempts: '%app.email_verification_rate_limit_attempts%'
-      $verifyRateLimitWindowSeconds: '%app.email_verification_rate_limit_window_seconds%'
-      $maxResendAttempts: '%app.email_verification_max_resends%'
+    App\Service\MailerService:
+        arguments:
+            $host: '%app.phpmailer_host%'
+            $port: '%app.phpmailer_port%'
+            $username: '%app.phpmailer_username%'
+            $password: '%app.phpmailer_password%'
+            $encryption: '%app.phpmailer_encryption%'
+            $fromEmail: '%app.phpmailer_from_email%'
+            $fromName: '%app.phpmailer_from_name%'
 
-  App\Service\User\JournalContentSanitizer:
-    arguments:
-      $sanitizer: '@html_sanitizer.sanitizer.journal_content'
+    App\Service\PasswordResetService:
+        arguments:
+            $codeTtlMinutes: '%app.password_reset_code_ttl_minutes%'
+            $rateLimitAttempts: '%app.password_reset_rate_limit_attempts%'
+            $rateLimitWindowSeconds: '%app.password_reset_rate_limit_window_seconds%'
+            $maxResendAttempts: '%app.password_reset_max_resends%'
 
-  App\Service\Api\CallMeBotClient:
-    arguments:
-      $phone: '%app.whatsapp_phone%'
-      $apiKey: '%app.whatsapp_api_key%'
+    App\Service\EmailVerificationService:
+        arguments:
+            $codeTtlMinutes: '%app.email_verification_code_ttl_minutes%'
+            $verifyRateLimitAttempts: '%app.email_verification_rate_limit_attempts%'
+            $verifyRateLimitWindowSeconds: '%app.email_verification_rate_limit_window_seconds%'
+            $maxResendAttempts: '%app.email_verification_max_resends%'
 
-  App\Service\AI\FaceRecognitionService:
-    arguments:
-      $projectDir: '%kernel.project_dir%'
-      $recognitionModelPath: '%kernel.project_dir%/%app.face_auth_recognition_model_path%'
-      $onnxRuntimeLibraryPath: '%app.face_auth_onnx_runtime_library_path%'
-      $pythonCommand: '%app.face_auth_python_command%'
-      $pythonScriptPath: '%app.face_auth_python_script_path%'
-      $similarityThreshold: '%app.face_auth_similarity_threshold%'
-      $inputWidth: '%app.face_auth_input_width%'
-      $inputHeight: '%app.face_auth_input_height%'
+    App\Service\User\JournalContentSanitizer:
+        arguments:
+            $sanitizer: '@html_sanitizer.sanitizer.journal_content'
 
-  App\Service\AI\JournalEmotionClient:
-    arguments:
-      $enabled: '%app.ai_emotion_api_enabled%'
-      $baseUrl: '%app.ai_emotion_api_base_url%'
-      $route: '%app.ai_emotion_api_route%'
-      $timeout: '%app.ai_emotion_api_timeout%'
-      $threshold: '%app.ai_emotion_api_threshold%'
-      $topK: '%app.ai_emotion_api_top_k%'
+    App\Service\Api\CallMeBotClient:
+        arguments:
+            $phone: '%app.whatsapp_phone%'
+            $apiKey: '%app.whatsapp_api_key%'
 
-  App\Service\AI\JournalEmotionTagger:
-    arguments:
-      $journalEmotionClient: '@App\Service\AI\JournalEmotionClient'
+    App\Service\AI\FaceRecognitionService:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+            $recognitionModelPath: '%kernel.project_dir%/%app.face_auth_recognition_model_path%'
+            $onnxRuntimeLibraryPath: '%app.face_auth_onnx_runtime_library_path%'
+            $pythonCommand: '%app.face_auth_python_command%'
+            $pythonScriptPath: '%app.face_auth_python_script_path%'
+            $similarityThreshold: '%app.face_auth_similarity_threshold%'
+            $inputWidth: '%app.face_auth_input_width%'
+            $inputHeight: '%app.face_auth_input_height%'
 
-  App\Service\Notification\DoctorNtfyNotifier:
-    arguments:
-      $baseUrl: '%app.ntfy_base_url%'
-      $topic: '%app.ntfy_doctor_topic%'
-      $enabled: '%app.ntfy_enabled%'
+    App\Service\AI\JournalEmotionClient:
+        arguments:
+            $enabled: '%app.ai_emotion_api_enabled%'
+            $baseUrl: '%app.ai_emotion_api_base_url%'
+            $route: '%app.ai_emotion_api_route%'
+            $timeout: '%app.ai_emotion_api_timeout%'
+            $threshold: '%app.ai_emotion_api_threshold%'
+            $topK: '%app.ai_emotion_api_top_k%'
 
-  App\Service\Notification\CriticalAlertGuard:
-    arguments:
-      $cache: '@cache.app'
+    App\Service\AI\JournalEmotionTagger:
+        arguments:
+            $journalEmotionClient: '@App\Service\AI\JournalEmotionClient'
 
-  App\Service\User\UserMoodService:
-    arguments:
-      $ntfyCooldownSeconds: '%app.ntfy_cooldown_seconds%'
+    App\Service\Notification\DoctorNtfyNotifier:
+        arguments:
+            $baseUrl: '%app.ntfy_base_url%'
+            $topic: '%app.ntfy_doctor_topic%'
+            $enabled: '%app.ntfy_enabled%'
 
-  App\Service\Security\FaceLoginRateLimiter:
-    arguments:
-      $cachePool: '@cache.app'
-      $maxAttempts: '%app.face_auth_rate_limit_attempts%'
-      $windowSeconds: '%app.face_auth_rate_limit_window_seconds%'
+    App\Service\Notification\CriticalAlertGuard:
+        arguments:
+            $cache: '@cache.app'
 
-  App\Service\Security\TwoFactorCheckRateLimiter:
-    arguments:
-      $cachePool: '@cache.app'
-      $maxAttempts: '%app.two_factor_rate_limit_attempts%'
-      $windowSeconds: '%app.two_factor_rate_limit_window_seconds%'
+    App\Service\User\UserMoodService:
+        arguments:
+            $ntfyCooldownSeconds: '%app.ntfy_cooldown_seconds%'
 
-  App\Service\Security\TwoFactorPendingLoginStore:
-    arguments:
-      $cachePool: '@cache.app'
-      $ttlSeconds: '%app.two_factor_challenge_ttl_seconds%'
+    App\Service\Security\FaceLoginRateLimiter:
+        arguments:
+            $cachePool: '@cache.app'
+            $maxAttempts: '%app.face_auth_rate_limit_attempts%'
+            $windowSeconds: '%app.face_auth_rate_limit_window_seconds%'
 
-  App\Service\Avatar\AvatarGenerator:
-    arguments:
-      $img2imgApiUrl: '%app.avatar_img2img_api_url%'
-      $timeoutSeconds: '%app.avatar_img2img_timeout%'
-      $defaultPrompt: '%app.avatar_default_prompt%'
-      $defaultNegativePrompt: '%app.avatar_default_negative_prompt%'
-      $defaultStrength: '%app.avatar_default_strength%'
+    App\Service\Security\TwoFactorCheckRateLimiter:
+        arguments:
+            $cachePool: '@cache.app'
+            $maxAttempts: '%app.two_factor_rate_limit_attempts%'
+            $windowSeconds: '%app.two_factor_rate_limit_window_seconds%'
 
-  App\Service\Security\AvatarGenerationRateLimiter:
-    arguments:
-      $cachePool: '@cache.app'
-      $maxAttempts: '%app.avatar_rate_limit_attempts%'
-      $windowSeconds: '%app.avatar_rate_limit_window_seconds%'
+    App\Service\Security\TwoFactorPendingLoginStore:
+        arguments:
+            $cachePool: '@cache.app'
+            $ttlSeconds: '%app.two_factor_challenge_ttl_seconds%'
 
-  App\Service\Avatar\AvatarGenerationPendingStore:
-    arguments:
-      $cachePool: '@cache.app'
-      $ttlSeconds: '%app.avatar_generation_pending_ttl_seconds%'
+    App\Service\Avatar\AvatarGenerator:
+        arguments:
+            $img2imgApiUrl: '%app.avatar_img2img_api_url%'
+            $timeoutSeconds: '%app.avatar_img2img_timeout%'
+            $defaultPrompt: '%app.avatar_default_prompt%'
+            $defaultNegativePrompt: '%app.avatar_default_negative_prompt%'
+            $defaultStrength: '%app.avatar_default_strength%'
 
-  App\Controller\Api\AuthController:
-    arguments:
-      $googleRedirectUri: '%app.google_redirect_uri%'
+    App\Service\Security\AvatarGenerationRateLimiter:
+        arguments:
+            $cachePool: '@cache.app'
+            $maxAttempts: '%app.avatar_rate_limit_attempts%'
+            $windowSeconds: '%app.avatar_rate_limit_window_seconds%'
 
-  App\Controller\User\ExerciceController:
-    arguments:
-      $defaultLatitude: '%app.user_lat%'
-      $defaultLongitude: '%app.user_lon%'
+    App\Service\Avatar\AvatarGenerationPendingStore:
+        arguments:
+            $cachePool: '@cache.app'
+            $ttlSeconds: '%app.avatar_generation_pending_ttl_seconds%'
 
-  App\Service\User\YouTubeRecommendationService:
-    arguments:
-      $apiKey: '%app.youtube_api_key%'
+    App\Controller\Api\AuthController:
+        arguments:
+            $googleRedirectUri: '%app.google_redirect_uri%'
 
-  App\Service\User\GeminiClient:
-    arguments:
-      $apiKey: '%app.gemini_api_key%'
-      $model: '%app.gemini_model%'
+    App\Controller\User\ExerciceController:
+        arguments:
+            $defaultLatitude: '%app.user_lat%'
+            $defaultLongitude: '%app.user_lon%'
 
-  App\Service\User\CoachCacheService:
-    arguments:
-      $cachePool: '@cache.app'
-      $environment: '%kernel.environment%'
-  App\Service\AccountAccessService:
-    arguments:
-      $banDurationMinutes: '%app.account_ban_duration_minutes%'
-  # add more service definitions when explicit configuration is needed
-  # please note that last definitions always *replace* previous ones
+    App\Service\User\YouTubeRecommendationService:
+        arguments:
+            $apiKey: '%app.youtube_api_key%'
+
+    App\Service\User\GeminiClient:
+        arguments:
+            $apiKey: '%app.gemini_api_key%'
+            $model: '%app.gemini_model%'
+
+    App\Service\User\CoachCacheService:
+        arguments:
+            $cachePool: '@cache.app'
+            $environment: '%kernel.environment%'
+    App\Service\AccountAccessService:
+        arguments:
+            $banDurationMinutes: '%app.account_ban_duration_minutes%'
+
+    App\Service\SpamRateLimiterService:
+        arguments:
+            $spamBanDurationMinutes: '%app.spam_ban_duration_minutes%'
+
+    App\Service\AI\MoodPredictionClient:
+        arguments:
+            $enabled: '%app.mood_ml_api_enabled%'
+            $baseUrl: '%app.mood_ml_api_base_url%'
+            $predictionRoute: '%app.mood_ml_api_prediction_route%'
+            $apiKey: '%app.mood_ml_api_key%'
+            $timeout: '%app.mood_ml_api_timeout%'
+            $httpClient: '@http_client'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+
+# -----------------------------------------------------------------------------
+# Module Sleep/Reve - services supplémentaires
+# -----------------------------------------------------------------------------
+    App\Service\Sleep\WeatherService:
+        arguments:
+            $apiKey:     '%app.openweather.api_key%'
+            $defaultLat: '%app.openweather.lat%'
+            $defaultLon: '%app.openweather.lon%'
+
+    App\Service\Sleep\HuggingFaceService:
+        arguments:
+            $httpClient: '@http_client'
+            $apiKey: '%env(string:HUGGINGFACE_API_KEY)%'
+
+    App\Service\Sleep\LmStudioService:
+        arguments:
+            $baseUrl: '%app.lm_studio.base_url%'
+            $model:   '%app.lm_studio.model%'

@@ -55,7 +55,8 @@ final class AccessControlUiController extends AbstractController
         private readonly UserProfileService $userProfileService,
         private readonly EntityManagerInterface $entityManager,
         private readonly PaginatorInterface $paginator,
-    ) {}
+    ) {
+    }
 
     #[Route('/login', name: 'ac_ui_login', methods: ['GET'])]
     #[Route('/register', name: 'ac_ui_register', methods: ['GET'])]
@@ -255,7 +256,7 @@ final class AccessControlUiController extends AbstractController
 
             if ($profile === null) {
                 $now = new \DateTimeImmutable();
-                $profile = new Profile()
+                $profile = (new Profile())
                     ->setId(Uuid::v4()->toRfc4122())
                     ->setUser($user)
                     ->setCreatedAt($now)
@@ -841,7 +842,7 @@ final class AccessControlUiController extends AbstractController
                     if ((int) $exists > 0) {
                         $this->addFlash('error', 'This emotion already exists.');
                     } else {
-                        $emotion = new MoodEmotion()->setName($name);
+                        $emotion = (new MoodEmotion())->setName($name);
                         $this->entityManager->persist($emotion);
                         $this->entityManager->flush();
                         $this->addFlash('success', 'Emotion created successfully.');
@@ -967,7 +968,7 @@ final class AccessControlUiController extends AbstractController
                     if ((int) $exists > 0) {
                         $this->addFlash('error', 'This influence already exists.');
                     } else {
-                        $influence = new MoodInfluence()->setName($name);
+                        $influence = (new MoodInfluence())->setName($name);
                         $this->entityManager->persist($influence);
                         $this->entityManager->flush();
                         $this->addFlash('success', 'Influence created successfully.');
@@ -1124,7 +1125,7 @@ final class AccessControlUiController extends AbstractController
     private function buildNav(string $activeRoute): array
     {
         $moodChildRoutes = ['ac_ui_mood', 'ac_ui_emotion', 'ac_ui_influence'];
-        $sleepChildRoutes = ['ac_ui_sleep', 'ac_ui_sleep_reves'];
+        $sleepChildRoutes = ['app_admin_sommeil_index'];
         $items = [
             ['section' => 'Admin self-management', 'label' => 'Dashboard', 'route' => 'ac_ui_dashboard', 'icon' => 'dashboard'],
             ['section' => 'Admin self-management', 'label' => 'Profile', 'route' => 'ac_ui_profile', 'icon' => 'person'],
@@ -1135,6 +1136,7 @@ final class AccessControlUiController extends AbstractController
             ['section' => 'Users management', 'label' => 'Consultations', 'route' => 'ac_ui_consultations', 'icon' => 'medical_services'],
             ['section' => 'Users management', 'label' => 'Exercises', 'route' => 'ac_ui_exercises', 'icon' => 'self_improvement'],
             ['section' => 'Users management', 'label' => 'Forum', 'route' => 'ac_ui_forum', 'icon' => 'forum'],
+            ['section' => 'Users management', 'label' => 'Sleep', 'route' => 'app_admin_sommeil_index', 'icon' => 'nights_stay'],
             [
                 'section' => 'Users management',
                 'label' => 'Mood',
@@ -1146,22 +1148,13 @@ final class AccessControlUiController extends AbstractController
                     ['label' => 'Influence management', 'route' => 'ac_ui_influence', 'icon' => 'tune'],
                 ],
             ],
-            [
-                'section' => 'Users management',
-                'label' => 'Sleep',
-                'route' => 'ac_ui_sleep',
-                'icon' => 'hotel',
-                'children' => [
-                    ['label' => 'Sommeil', 'route' => 'ac_ui_sleep', 'icon' => 'bedtime'],
-                    ['label' => 'Reves management', 'route' => 'ac_ui_sleep_reves', 'icon' => 'nights_stay'],
-                ],
-            ],
+
         ];
 
         return array_map(
             static function (array $item) use ($activeRoute, $moodChildRoutes, $sleepChildRoutes): array {
                 $isMoodGroup = $item['route'] === 'ac_ui_mood' && isset($item['children']);
-                $isSleepGroup = $item['route'] === 'ac_ui_sleep' && isset($item['children']);
+                $isSleepGroup = $item['route'] === 'app_admin_sommeil_index' && isset($item['children']);
                 $active = $item['route'] === $activeRoute;
 
                 if ($isMoodGroup) {

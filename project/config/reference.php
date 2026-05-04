@@ -622,7 +622,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         }>,
  *     },
  *     rate_limiter?: bool|array{ // Rate limiter configuration
- *         enabled?: bool|Param, // Default: false
+ *         enabled?: bool|Param, // Default: true
  *         limiters?: array<string, array{ // Default: []
  *             lock_factory?: scalar|Param|null, // The service ID of the lock factory used by this limiter (or null to disable locking). // Default: "auto"
  *             cache_pool?: scalar|Param|null, // The cache pool to use for storing the current limiter state. // Default: "cache.rate_limiter"
@@ -996,7 +996,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             use_underscore?: bool|Param, // Default: true
  *             unordered_list_markers?: list<scalar|Param|null>,
  *         },
- *         ...<mixed>
+ *         ...<string, mixed>
  *     },
  * }
  * @psalm-type SecurityConfig = array{
@@ -1561,6 +1561,814 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         template?: scalar|Param|null, // Default: "@SchebTwoFactor/Authentication/form.html.twig"
  *     },
  * }
+ * @psalm-type SensiolabsGotenbergConfig = array{
+ *     assets_directory?: list<scalar|Param|null>,
+ *     version?: scalar|Param|null, // Version of Gotenberg // Default: null
+ *     http_client?: scalar|Param|null, // HTTP Client reference to use. (Must have a base_uri)
+ *     request_context?: array{ // Override the request Gotenberg will make to call one of your routes.
+ *         base_uri?: scalar|Param|null, // Used only when using `->route()`. Overrides the guessed `base_url` from the request. May be useful in CLI.
+ *     },
+ *     controller_listener?: bool|Param, // Enables the listener on kernel.view to stream GotenbergFileResult object. // Default: true
+ *     webhook?: array<string, array{ // Default: []
+ *         name?: scalar|Param|null,
+ *         success?: array{
+ *             url?: scalar|Param|null, // The URL to call.
+ *             route?: mixed, // Route configuration.
+ *             method?: "POST"|"PUT"|"PATCH"|Param, // HTTP method to use on that endpoint. // Default: null
+ *         },
+ *         error?: array{
+ *             url?: scalar|Param|null, // The URL to call.
+ *             route?: mixed, // Route configuration.
+ *             method?: "POST"|"PUT"|"PATCH"|Param, // HTTP method to use on that endpoint. // Default: null
+ *         },
+ *         extra_http_headers?: array<string, mixed>,
+ *     }>,
+ *     default_options?: array{
+ *         webhook?: scalar|Param|null, // Webhook configuration name.
+ *         pdf?: array{
+ *             convert?: array{
+ *                 webhook?: string|array{
+ *                     config_name?: scalar|Param|null,
+ *                     success?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     error?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     extra_http_headers?: array<string, mixed>,
+ *                 },
+ *                 pdf_universal_access?: bool|Param,
+ *                 pdf_format?: "PDF/A-1b"|"PDF/A-2b"|"PDF/A-3b"|Param,
+ *                 flatten?: bool|Param,
+ *                 download_from?: list<array{ // Default: []
+ *                     url?: scalar|Param|null,
+ *                     extraHttpHeaders?: array<string, array{ // Default: []
+ *                         name?: scalar|Param|null,
+ *                         value?: scalar|Param|null,
+ *                     }>,
+ *                 }>,
+ *             },
+ *             encrypt?: array{
+ *                 webhook?: string|array{
+ *                     config_name?: scalar|Param|null,
+ *                     success?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     error?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     extra_http_headers?: array<string, mixed>,
+ *                 },
+ *                 owner_password?: scalar|Param|null,
+ *                 user_password?: scalar|Param|null,
+ *                 download_from?: list<array{ // Default: []
+ *                     url?: scalar|Param|null,
+ *                     extraHttpHeaders?: array<string, array{ // Default: []
+ *                         name?: scalar|Param|null,
+ *                         value?: scalar|Param|null,
+ *                     }>,
+ *                 }>,
+ *             },
+ *             embed?: array{
+ *                 webhook?: string|array{
+ *                     config_name?: scalar|Param|null,
+ *                     success?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     error?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     extra_http_headers?: array<string, mixed>,
+ *                 },
+ *                 download_from?: list<array{ // Default: []
+ *                     url?: scalar|Param|null,
+ *                     extraHttpHeaders?: array<string, array{ // Default: []
+ *                         name?: scalar|Param|null,
+ *                         value?: scalar|Param|null,
+ *                     }>,
+ *                 }>,
+ *             },
+ *             flatten?: array{
+ *                 webhook?: string|array{
+ *                     config_name?: scalar|Param|null,
+ *                     success?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     error?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     extra_http_headers?: array<string, mixed>,
+ *                 },
+ *                 download_from?: list<array{ // Default: []
+ *                     url?: scalar|Param|null,
+ *                     extraHttpHeaders?: array<string, array{ // Default: []
+ *                         name?: scalar|Param|null,
+ *                         value?: scalar|Param|null,
+ *                     }>,
+ *                 }>,
+ *             },
+ *             html?: array{
+ *                 webhook?: string|array{
+ *                     config_name?: scalar|Param|null,
+ *                     success?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     error?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     extra_http_headers?: array<string, mixed>,
+ *                 },
+ *                 split_unify?: bool|Param,
+ *                 split_span?: scalar|Param|null,
+ *                 split_mode?: "intervals"|"pages"|Param,
+ *                 pdf_universal_access?: bool|Param,
+ *                 pdf_format?: "PDF/A-1b"|"PDF/A-2b"|"PDF/A-3b"|Param,
+ *                 metadata?: array{
+ *                     Author?: scalar|Param|null,
+ *                     Copyright?: scalar|Param|null,
+ *                     CreationDate?: scalar|Param|null,
+ *                     Creator?: scalar|Param|null,
+ *                     Keywords?: scalar|Param|null,
+ *                     Marked?: bool|Param,
+ *                     ModDate?: scalar|Param|null,
+ *                     PDFVersion?: scalar|Param|null,
+ *                     Producer?: scalar|Param|null,
+ *                     Subject?: scalar|Param|null,
+ *                     Title?: scalar|Param|null,
+ *                     Trapped?: "True"|"False"|"Unknown"|Param,
+ *                 },
+ *                 flatten?: bool|Param,
+ *                 owner_password?: scalar|Param|null,
+ *                 user_password?: scalar|Param|null,
+ *                 download_from?: list<array{ // Default: []
+ *                     url?: scalar|Param|null,
+ *                     extraHttpHeaders?: array<string, array{ // Default: []
+ *                         name?: scalar|Param|null,
+ *                         value?: scalar|Param|null,
+ *                     }>,
+ *                 }>,
+ *                 wait_for_selector?: scalar|Param|null,
+ *                 wait_for_expression?: scalar|Param|null,
+ *                 wait_delay?: scalar|Param|null,
+ *                 skip_network_idle_event?: bool|Param,
+ *                 generate_tagged_pdf?: bool|Param,
+ *                 native_page_ranges?: scalar|Param|null,
+ *                 scale?: float|Param,
+ *                 landscape?: bool|Param,
+ *                 omit_background?: bool|Param,
+ *                 print_background?: bool|Param,
+ *                 generate_document_outline?: bool|Param,
+ *                 prefer_css_page_size?: bool|Param,
+ *                 margin_right?: scalar|Param|null,
+ *                 margin_left?: scalar|Param|null,
+ *                 margin_bottom?: scalar|Param|null,
+ *                 margin_top?: scalar|Param|null,
+ *                 paper_standard_size?: "letter"|"legal"|"tabloid"|"ledger"|"A0"|"A1"|"A2"|"A3"|"A4"|"A5"|"A6"|Param,
+ *                 paper_height?: scalar|Param|null,
+ *                 paper_width?: scalar|Param|null,
+ *                 single_page?: bool|Param,
+ *                 ignore_resource_http_status_domains?: list<scalar|Param|null>,
+ *                 fail_on_console_exceptions?: bool|Param,
+ *                 fail_on_resource_loading_failed?: bool|Param,
+ *                 fail_on_resource_http_status_codes?: list<int|Param>,
+ *                 fail_on_http_status_codes?: list<int|Param>,
+ *                 emulated_media_type?: "print"|"screen"|Param,
+ *                 emulated_media_features?: list<array{ // Default: []
+ *                     name?: scalar|Param|null,
+ *                     value?: scalar|Param|null,
+ *                 }>,
+ *                 extra_http_headers?: array<string, mixed>,
+ *                 user_agent?: scalar|Param|null,
+ *                 cookies?: list<array{ // Default: []
+ *                     name?: scalar|Param|null,
+ *                     value?: scalar|Param|null,
+ *                     domain?: scalar|Param|null,
+ *                     path?: scalar|Param|null,
+ *                     secure?: bool|Param,
+ *                     httpOnly?: bool|Param,
+ *                     sameSite?: "Strict"|"Lax"|"None"|Param,
+ *                 }>,
+ *                 footer?: array{
+ *                     template?: scalar|Param|null,
+ *                     context?: list<mixed>,
+ *                 },
+ *                 header?: array{
+ *                     template?: scalar|Param|null,
+ *                     context?: list<mixed>,
+ *                 },
+ *             },
+ *             office?: array{
+ *                 webhook?: string|array{
+ *                     config_name?: scalar|Param|null,
+ *                     success?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     error?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     extra_http_headers?: array<string, mixed>,
+ *                 },
+ *                 split_unify?: bool|Param,
+ *                 split_span?: scalar|Param|null,
+ *                 split_mode?: "intervals"|"pages"|Param,
+ *                 pdf_universal_access?: bool|Param,
+ *                 pdf_format?: "PDF/A-1b"|"PDF/A-2b"|"PDF/A-3b"|Param,
+ *                 metadata?: array{
+ *                     Author?: scalar|Param|null,
+ *                     Copyright?: scalar|Param|null,
+ *                     CreationDate?: scalar|Param|null,
+ *                     Creator?: scalar|Param|null,
+ *                     Keywords?: scalar|Param|null,
+ *                     Marked?: bool|Param,
+ *                     ModDate?: scalar|Param|null,
+ *                     PDFVersion?: scalar|Param|null,
+ *                     Producer?: scalar|Param|null,
+ *                     Subject?: scalar|Param|null,
+ *                     Title?: scalar|Param|null,
+ *                     Trapped?: "True"|"False"|"Unknown"|Param,
+ *                 },
+ *                 update_indexes?: bool|Param,
+ *                 max_image_resolution?: 75|150|300|600|1200|Param,
+ *                 reduce_image_resolution?: bool|Param,
+ *                 quality?: int|Param,
+ *                 lossless_image_compression?: bool|Param,
+ *                 merge?: bool|Param,
+ *                 single_page_sheets?: bool|Param,
+ *                 add_original_document_as_stream?: bool|Param,
+ *                 skip_empty_pages?: bool|Param,
+ *                 export_hidden_slides?: bool|Param,
+ *                 export_links_relative_fsys?: bool|Param,
+ *                 convert_ooo_target_to_pdf_target?: bool|Param,
+ *                 export_notes_in_margin?: bool|Param,
+ *                 export_only_notes_pages?: bool|Param,
+ *                 export_notes_pages?: bool|Param,
+ *                 export_notes?: bool|Param,
+ *                 export_placeholders?: bool|Param,
+ *                 export_bookmarks_to_pdf_destination?: bool|Param,
+ *                 do_not_export_bookmarks?: bool|Param,
+ *                 allow_duplicate_field_names?: bool|Param,
+ *                 do_not_export_form_fields?: bool|Param,
+ *                 native_page_ranges?: scalar|Param|null,
+ *                 landscape?: bool|Param,
+ *                 password?: scalar|Param|null,
+ *                 flatten?: bool|Param,
+ *                 download_from?: list<array{ // Default: []
+ *                     url?: scalar|Param|null,
+ *                     extraHttpHeaders?: array<string, array{ // Default: []
+ *                         name?: scalar|Param|null,
+ *                         value?: scalar|Param|null,
+ *                     }>,
+ *                 }>,
+ *                 owner_password?: scalar|Param|null,
+ *                 user_password?: scalar|Param|null,
+ *             },
+ *             markdown?: array{
+ *                 webhook?: string|array{
+ *                     config_name?: scalar|Param|null,
+ *                     success?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     error?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     extra_http_headers?: array<string, mixed>,
+ *                 },
+ *                 split_unify?: bool|Param,
+ *                 split_span?: scalar|Param|null,
+ *                 split_mode?: "intervals"|"pages"|Param,
+ *                 pdf_universal_access?: bool|Param,
+ *                 pdf_format?: "PDF/A-1b"|"PDF/A-2b"|"PDF/A-3b"|Param,
+ *                 metadata?: array{
+ *                     Author?: scalar|Param|null,
+ *                     Copyright?: scalar|Param|null,
+ *                     CreationDate?: scalar|Param|null,
+ *                     Creator?: scalar|Param|null,
+ *                     Keywords?: scalar|Param|null,
+ *                     Marked?: bool|Param,
+ *                     ModDate?: scalar|Param|null,
+ *                     PDFVersion?: scalar|Param|null,
+ *                     Producer?: scalar|Param|null,
+ *                     Subject?: scalar|Param|null,
+ *                     Title?: scalar|Param|null,
+ *                     Trapped?: "True"|"False"|"Unknown"|Param,
+ *                 },
+ *                 flatten?: bool|Param,
+ *                 owner_password?: scalar|Param|null,
+ *                 user_password?: scalar|Param|null,
+ *                 download_from?: list<array{ // Default: []
+ *                     url?: scalar|Param|null,
+ *                     extraHttpHeaders?: array<string, array{ // Default: []
+ *                         name?: scalar|Param|null,
+ *                         value?: scalar|Param|null,
+ *                     }>,
+ *                 }>,
+ *                 wait_for_selector?: scalar|Param|null,
+ *                 wait_for_expression?: scalar|Param|null,
+ *                 wait_delay?: scalar|Param|null,
+ *                 skip_network_idle_event?: bool|Param,
+ *                 generate_tagged_pdf?: bool|Param,
+ *                 native_page_ranges?: scalar|Param|null,
+ *                 scale?: float|Param,
+ *                 landscape?: bool|Param,
+ *                 omit_background?: bool|Param,
+ *                 print_background?: bool|Param,
+ *                 generate_document_outline?: bool|Param,
+ *                 prefer_css_page_size?: bool|Param,
+ *                 margin_right?: scalar|Param|null,
+ *                 margin_left?: scalar|Param|null,
+ *                 margin_bottom?: scalar|Param|null,
+ *                 margin_top?: scalar|Param|null,
+ *                 paper_standard_size?: "letter"|"legal"|"tabloid"|"ledger"|"A0"|"A1"|"A2"|"A3"|"A4"|"A5"|"A6"|Param,
+ *                 paper_height?: scalar|Param|null,
+ *                 paper_width?: scalar|Param|null,
+ *                 single_page?: bool|Param,
+ *                 ignore_resource_http_status_domains?: list<scalar|Param|null>,
+ *                 fail_on_console_exceptions?: bool|Param,
+ *                 fail_on_resource_loading_failed?: bool|Param,
+ *                 fail_on_resource_http_status_codes?: list<int|Param>,
+ *                 fail_on_http_status_codes?: list<int|Param>,
+ *                 emulated_media_type?: "print"|"screen"|Param,
+ *                 emulated_media_features?: list<array{ // Default: []
+ *                     name?: scalar|Param|null,
+ *                     value?: scalar|Param|null,
+ *                 }>,
+ *                 extra_http_headers?: array<string, mixed>,
+ *                 user_agent?: scalar|Param|null,
+ *                 cookies?: list<array{ // Default: []
+ *                     name?: scalar|Param|null,
+ *                     value?: scalar|Param|null,
+ *                     domain?: scalar|Param|null,
+ *                     path?: scalar|Param|null,
+ *                     secure?: bool|Param,
+ *                     httpOnly?: bool|Param,
+ *                     sameSite?: "Strict"|"Lax"|"None"|Param,
+ *                 }>,
+ *                 footer?: array{
+ *                     template?: scalar|Param|null,
+ *                     context?: list<mixed>,
+ *                 },
+ *                 header?: array{
+ *                     template?: scalar|Param|null,
+ *                     context?: list<mixed>,
+ *                 },
+ *             },
+ *             merge?: array{
+ *                 webhook?: string|array{
+ *                     config_name?: scalar|Param|null,
+ *                     success?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     error?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     extra_http_headers?: array<string, mixed>,
+ *                 },
+ *                 pdf_universal_access?: bool|Param,
+ *                 pdf_format?: "PDF/A-1b"|"PDF/A-2b"|"PDF/A-3b"|Param,
+ *                 metadata?: array{
+ *                     Author?: scalar|Param|null,
+ *                     Copyright?: scalar|Param|null,
+ *                     CreationDate?: scalar|Param|null,
+ *                     Creator?: scalar|Param|null,
+ *                     Keywords?: scalar|Param|null,
+ *                     Marked?: bool|Param,
+ *                     ModDate?: scalar|Param|null,
+ *                     PDFVersion?: scalar|Param|null,
+ *                     Producer?: scalar|Param|null,
+ *                     Subject?: scalar|Param|null,
+ *                     Title?: scalar|Param|null,
+ *                     Trapped?: "True"|"False"|"Unknown"|Param,
+ *                 },
+ *                 flatten?: bool|Param,
+ *                 owner_password?: scalar|Param|null,
+ *                 user_password?: scalar|Param|null,
+ *                 download_from?: list<array{ // Default: []
+ *                     url?: scalar|Param|null,
+ *                     extraHttpHeaders?: array<string, array{ // Default: []
+ *                         name?: scalar|Param|null,
+ *                         value?: scalar|Param|null,
+ *                     }>,
+ *                 }>,
+ *             },
+ *             split?: array{
+ *                 webhook?: string|array{
+ *                     config_name?: scalar|Param|null,
+ *                     success?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     error?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     extra_http_headers?: array<string, mixed>,
+ *                 },
+ *                 split_unify?: bool|Param,
+ *                 split_span?: scalar|Param|null,
+ *                 split_mode?: "intervals"|"pages"|Param,
+ *                 pdf_universal_access?: bool|Param,
+ *                 pdf_format?: "PDF/A-1b"|"PDF/A-2b"|"PDF/A-3b"|Param,
+ *                 metadata?: array{
+ *                     Author?: scalar|Param|null,
+ *                     Copyright?: scalar|Param|null,
+ *                     CreationDate?: scalar|Param|null,
+ *                     Creator?: scalar|Param|null,
+ *                     Keywords?: scalar|Param|null,
+ *                     Marked?: bool|Param,
+ *                     ModDate?: scalar|Param|null,
+ *                     PDFVersion?: scalar|Param|null,
+ *                     Producer?: scalar|Param|null,
+ *                     Subject?: scalar|Param|null,
+ *                     Title?: scalar|Param|null,
+ *                     Trapped?: "True"|"False"|"Unknown"|Param,
+ *                 },
+ *                 flatten?: bool|Param,
+ *                 owner_password?: scalar|Param|null,
+ *                 user_password?: scalar|Param|null,
+ *                 download_from?: list<array{ // Default: []
+ *                     url?: scalar|Param|null,
+ *                     extraHttpHeaders?: array<string, array{ // Default: []
+ *                         name?: scalar|Param|null,
+ *                         value?: scalar|Param|null,
+ *                     }>,
+ *                 }>,
+ *             },
+ *             url?: array{
+ *                 webhook?: string|array{
+ *                     config_name?: scalar|Param|null,
+ *                     success?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     error?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     extra_http_headers?: array<string, mixed>,
+ *                 },
+ *                 split_unify?: bool|Param,
+ *                 split_span?: scalar|Param|null,
+ *                 split_mode?: "intervals"|"pages"|Param,
+ *                 pdf_universal_access?: bool|Param,
+ *                 pdf_format?: "PDF/A-1b"|"PDF/A-2b"|"PDF/A-3b"|Param,
+ *                 metadata?: array{
+ *                     Author?: scalar|Param|null,
+ *                     Copyright?: scalar|Param|null,
+ *                     CreationDate?: scalar|Param|null,
+ *                     Creator?: scalar|Param|null,
+ *                     Keywords?: scalar|Param|null,
+ *                     Marked?: bool|Param,
+ *                     ModDate?: scalar|Param|null,
+ *                     PDFVersion?: scalar|Param|null,
+ *                     Producer?: scalar|Param|null,
+ *                     Subject?: scalar|Param|null,
+ *                     Title?: scalar|Param|null,
+ *                     Trapped?: "True"|"False"|"Unknown"|Param,
+ *                 },
+ *                 flatten?: bool|Param,
+ *                 owner_password?: scalar|Param|null,
+ *                 user_password?: scalar|Param|null,
+ *                 download_from?: list<array{ // Default: []
+ *                     url?: scalar|Param|null,
+ *                     extraHttpHeaders?: array<string, array{ // Default: []
+ *                         name?: scalar|Param|null,
+ *                         value?: scalar|Param|null,
+ *                     }>,
+ *                 }>,
+ *                 wait_for_selector?: scalar|Param|null,
+ *                 wait_for_expression?: scalar|Param|null,
+ *                 wait_delay?: scalar|Param|null,
+ *                 skip_network_idle_event?: bool|Param,
+ *                 generate_tagged_pdf?: bool|Param,
+ *                 native_page_ranges?: scalar|Param|null,
+ *                 scale?: float|Param,
+ *                 landscape?: bool|Param,
+ *                 omit_background?: bool|Param,
+ *                 print_background?: bool|Param,
+ *                 generate_document_outline?: bool|Param,
+ *                 prefer_css_page_size?: bool|Param,
+ *                 margin_right?: scalar|Param|null,
+ *                 margin_left?: scalar|Param|null,
+ *                 margin_bottom?: scalar|Param|null,
+ *                 margin_top?: scalar|Param|null,
+ *                 paper_standard_size?: "letter"|"legal"|"tabloid"|"ledger"|"A0"|"A1"|"A2"|"A3"|"A4"|"A5"|"A6"|Param,
+ *                 paper_height?: scalar|Param|null,
+ *                 paper_width?: scalar|Param|null,
+ *                 single_page?: bool|Param,
+ *                 ignore_resource_http_status_domains?: list<scalar|Param|null>,
+ *                 fail_on_console_exceptions?: bool|Param,
+ *                 fail_on_resource_loading_failed?: bool|Param,
+ *                 fail_on_resource_http_status_codes?: list<int|Param>,
+ *                 fail_on_http_status_codes?: list<int|Param>,
+ *                 emulated_media_type?: "print"|"screen"|Param,
+ *                 emulated_media_features?: list<array{ // Default: []
+ *                     name?: scalar|Param|null,
+ *                     value?: scalar|Param|null,
+ *                 }>,
+ *                 extra_http_headers?: array<string, mixed>,
+ *                 user_agent?: scalar|Param|null,
+ *                 cookies?: list<array{ // Default: []
+ *                     name?: scalar|Param|null,
+ *                     value?: scalar|Param|null,
+ *                     domain?: scalar|Param|null,
+ *                     path?: scalar|Param|null,
+ *                     secure?: bool|Param,
+ *                     httpOnly?: bool|Param,
+ *                     sameSite?: "Strict"|"Lax"|"None"|Param,
+ *                 }>,
+ *                 footer?: array{
+ *                     template?: scalar|Param|null,
+ *                     context?: list<mixed>,
+ *                 },
+ *                 header?: array{
+ *                     template?: scalar|Param|null,
+ *                     context?: list<mixed>,
+ *                 },
+ *             },
+ *         },
+ *         screenshot?: array{
+ *             html?: array{
+ *                 webhook?: string|array{
+ *                     config_name?: scalar|Param|null,
+ *                     success?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     error?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     extra_http_headers?: array<string, mixed>,
+ *                 },
+ *                 download_from?: list<array{ // Default: []
+ *                     url?: scalar|Param|null,
+ *                     extraHttpHeaders?: array<string, array{ // Default: []
+ *                         name?: scalar|Param|null,
+ *                         value?: scalar|Param|null,
+ *                     }>,
+ *                 }>,
+ *                 wait_for_selector?: scalar|Param|null,
+ *                 wait_for_expression?: scalar|Param|null,
+ *                 wait_delay?: scalar|Param|null,
+ *                 optimize_for_speed?: bool|Param,
+ *                 omit_background?: bool|Param,
+ *                 quality?: int|Param,
+ *                 format?: "png"|"jpeg"|"webp"|Param,
+ *                 clip?: bool|Param,
+ *                 height?: int|Param,
+ *                 width?: int|Param,
+ *                 skip_network_idle_event?: bool|Param,
+ *                 ignore_resource_http_status_domains?: list<scalar|Param|null>,
+ *                 fail_on_console_exceptions?: bool|Param,
+ *                 fail_on_resource_loading_failed?: bool|Param,
+ *                 fail_on_resource_http_status_codes?: list<int|Param>,
+ *                 fail_on_http_status_codes?: list<int|Param>,
+ *                 emulated_media_type?: "print"|"screen"|Param,
+ *                 emulated_media_features?: list<array{ // Default: []
+ *                     name?: scalar|Param|null,
+ *                     value?: scalar|Param|null,
+ *                 }>,
+ *                 extra_http_headers?: array<string, mixed>,
+ *                 user_agent?: scalar|Param|null,
+ *                 cookies?: list<array{ // Default: []
+ *                     name?: scalar|Param|null,
+ *                     value?: scalar|Param|null,
+ *                     domain?: scalar|Param|null,
+ *                     path?: scalar|Param|null,
+ *                     secure?: bool|Param,
+ *                     httpOnly?: bool|Param,
+ *                     sameSite?: "Strict"|"Lax"|"None"|Param,
+ *                 }>,
+ *                 footer?: array{
+ *                     template?: scalar|Param|null,
+ *                     context?: list<mixed>,
+ *                 },
+ *                 header?: array{
+ *                     template?: scalar|Param|null,
+ *                     context?: list<mixed>,
+ *                 },
+ *             },
+ *             markdown?: array{
+ *                 webhook?: string|array{
+ *                     config_name?: scalar|Param|null,
+ *                     success?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     error?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     extra_http_headers?: array<string, mixed>,
+ *                 },
+ *                 download_from?: list<array{ // Default: []
+ *                     url?: scalar|Param|null,
+ *                     extraHttpHeaders?: array<string, array{ // Default: []
+ *                         name?: scalar|Param|null,
+ *                         value?: scalar|Param|null,
+ *                     }>,
+ *                 }>,
+ *                 wait_for_selector?: scalar|Param|null,
+ *                 wait_for_expression?: scalar|Param|null,
+ *                 wait_delay?: scalar|Param|null,
+ *                 optimize_for_speed?: bool|Param,
+ *                 omit_background?: bool|Param,
+ *                 quality?: int|Param,
+ *                 format?: "png"|"jpeg"|"webp"|Param,
+ *                 clip?: bool|Param,
+ *                 height?: int|Param,
+ *                 width?: int|Param,
+ *                 skip_network_idle_event?: bool|Param,
+ *                 ignore_resource_http_status_domains?: list<scalar|Param|null>,
+ *                 fail_on_console_exceptions?: bool|Param,
+ *                 fail_on_resource_loading_failed?: bool|Param,
+ *                 fail_on_resource_http_status_codes?: list<int|Param>,
+ *                 fail_on_http_status_codes?: list<int|Param>,
+ *                 emulated_media_type?: "print"|"screen"|Param,
+ *                 emulated_media_features?: list<array{ // Default: []
+ *                     name?: scalar|Param|null,
+ *                     value?: scalar|Param|null,
+ *                 }>,
+ *                 extra_http_headers?: array<string, mixed>,
+ *                 user_agent?: scalar|Param|null,
+ *                 cookies?: list<array{ // Default: []
+ *                     name?: scalar|Param|null,
+ *                     value?: scalar|Param|null,
+ *                     domain?: scalar|Param|null,
+ *                     path?: scalar|Param|null,
+ *                     secure?: bool|Param,
+ *                     httpOnly?: bool|Param,
+ *                     sameSite?: "Strict"|"Lax"|"None"|Param,
+ *                 }>,
+ *                 footer?: array{
+ *                     template?: scalar|Param|null,
+ *                     context?: list<mixed>,
+ *                 },
+ *                 header?: array{
+ *                     template?: scalar|Param|null,
+ *                     context?: list<mixed>,
+ *                 },
+ *             },
+ *             url?: array{
+ *                 webhook?: string|array{
+ *                     config_name?: scalar|Param|null,
+ *                     success?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     error?: array{
+ *                         url?: scalar|Param|null,
+ *                         route?: mixed,
+ *                         method?: "POST"|"PUT"|"PATCH"|Param,
+ *                     },
+ *                     extra_http_headers?: array<string, mixed>,
+ *                 },
+ *                 download_from?: list<array{ // Default: []
+ *                     url?: scalar|Param|null,
+ *                     extraHttpHeaders?: array<string, array{ // Default: []
+ *                         name?: scalar|Param|null,
+ *                         value?: scalar|Param|null,
+ *                     }>,
+ *                 }>,
+ *                 wait_for_selector?: scalar|Param|null,
+ *                 wait_for_expression?: scalar|Param|null,
+ *                 wait_delay?: scalar|Param|null,
+ *                 optimize_for_speed?: bool|Param,
+ *                 omit_background?: bool|Param,
+ *                 quality?: int|Param,
+ *                 format?: "png"|"jpeg"|"webp"|Param,
+ *                 clip?: bool|Param,
+ *                 height?: int|Param,
+ *                 width?: int|Param,
+ *                 skip_network_idle_event?: bool|Param,
+ *                 ignore_resource_http_status_domains?: list<scalar|Param|null>,
+ *                 fail_on_console_exceptions?: bool|Param,
+ *                 fail_on_resource_loading_failed?: bool|Param,
+ *                 fail_on_resource_http_status_codes?: list<int|Param>,
+ *                 fail_on_http_status_codes?: list<int|Param>,
+ *                 emulated_media_type?: "print"|"screen"|Param,
+ *                 emulated_media_features?: list<array{ // Default: []
+ *                     name?: scalar|Param|null,
+ *                     value?: scalar|Param|null,
+ *                 }>,
+ *                 extra_http_headers?: array<string, mixed>,
+ *                 user_agent?: scalar|Param|null,
+ *                 cookies?: list<array{ // Default: []
+ *                     name?: scalar|Param|null,
+ *                     value?: scalar|Param|null,
+ *                     domain?: scalar|Param|null,
+ *                     path?: scalar|Param|null,
+ *                     secure?: bool|Param,
+ *                     httpOnly?: bool|Param,
+ *                     sameSite?: "Strict"|"Lax"|"None"|Param,
+ *                 }>,
+ *                 footer?: array{
+ *                     template?: scalar|Param|null,
+ *                     context?: list<mixed>,
+ *                 },
+ *                 header?: array{
+ *                     template?: scalar|Param|null,
+ *                     context?: list<mixed>,
+ *                 },
+ *             },
+ *         },
+ *     },
+ * }
+ * @psalm-type StofDoctrineExtensionsConfig = array{
+ *     orm?: array<string, array{ // Default: []
+ *         translatable?: scalar|Param|null, // Default: false
+ *         timestampable?: scalar|Param|null, // Default: false
+ *         blameable?: scalar|Param|null, // Default: false
+ *         sluggable?: scalar|Param|null, // Default: false
+ *         tree?: scalar|Param|null, // Default: false
+ *         loggable?: scalar|Param|null, // Default: false
+ *         ip_traceable?: scalar|Param|null, // Default: false
+ *         sortable?: scalar|Param|null, // Default: false
+ *         softdeleteable?: scalar|Param|null, // Default: false
+ *         uploadable?: scalar|Param|null, // Default: false
+ *         reference_integrity?: scalar|Param|null, // Default: false
+ *     }>,
+ *     mongodb?: array<string, array{ // Default: []
+ *         translatable?: scalar|Param|null, // Default: false
+ *         timestampable?: scalar|Param|null, // Default: false
+ *         blameable?: scalar|Param|null, // Default: false
+ *         sluggable?: scalar|Param|null, // Default: false
+ *         tree?: scalar|Param|null, // Default: false
+ *         loggable?: scalar|Param|null, // Default: false
+ *         ip_traceable?: scalar|Param|null, // Default: false
+ *         sortable?: scalar|Param|null, // Default: false
+ *         softdeleteable?: scalar|Param|null, // Default: false
+ *         uploadable?: scalar|Param|null, // Default: false
+ *         reference_integrity?: scalar|Param|null, // Default: false
+ *     }>,
+ *     class?: array{
+ *         translatable?: scalar|Param|null, // Default: "Gedmo\\Translatable\\TranslatableListener"
+ *         timestampable?: scalar|Param|null, // Default: "Gedmo\\Timestampable\\TimestampableListener"
+ *         blameable?: scalar|Param|null, // Default: "Gedmo\\Blameable\\BlameableListener"
+ *         sluggable?: scalar|Param|null, // Default: "Gedmo\\Sluggable\\SluggableListener"
+ *         tree?: scalar|Param|null, // Default: "Gedmo\\Tree\\TreeListener"
+ *         loggable?: scalar|Param|null, // Default: "Gedmo\\Loggable\\LoggableListener"
+ *         sortable?: scalar|Param|null, // Default: "Gedmo\\Sortable\\SortableListener"
+ *         softdeleteable?: scalar|Param|null, // Default: "Gedmo\\SoftDeleteable\\SoftDeleteableListener"
+ *         uploadable?: scalar|Param|null, // Default: "Gedmo\\Uploadable\\UploadableListener"
+ *         reference_integrity?: scalar|Param|null, // Default: "Gedmo\\ReferenceIntegrity\\ReferenceIntegrityListener"
+ *     },
+ *     softdeleteable?: array{
+ *         handle_post_flush_event?: bool|Param, // Default: false
+ *     },
+ *     uploadable?: array{
+ *         default_file_path?: scalar|Param|null, // Default: null
+ *         mime_type_guesser_class?: scalar|Param|null, // Default: "Stof\\DoctrineExtensionsBundle\\Uploadable\\MimeTypeGuesserAdapter"
+ *         default_file_info_class?: scalar|Param|null, // Default: "Stof\\DoctrineExtensionsBundle\\Uploadable\\UploadedFileInfo"
+ *         validate_writable_directory?: bool|Param, // Default: true
+ *     },
+ *     default_locale?: scalar|Param|null, // Default: "en"
+ *     translation_fallback?: bool|Param, // Default: false
+ *     persist_default_translation?: bool|Param, // Default: false
+ *     skip_translation_on_load?: bool|Param, // Default: false
+ *     metadata_cache_pool?: scalar|Param|null, // Default: null
+ * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
@@ -1579,6 +2387,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     knp_paginator?: KnpPaginatorConfig,
  *     knpu_oauth2_client?: KnpuOauth2ClientConfig,
  *     scheb_two_factor?: SchebTwoFactorConfig,
+ *     sensiolabs_gotenberg?: SensiolabsGotenbergConfig,
+ *     stof_doctrine_extensions?: StofDoctrineExtensionsConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -1600,6 +2410,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         knp_paginator?: KnpPaginatorConfig,
  *         knpu_oauth2_client?: KnpuOauth2ClientConfig,
  *         scheb_two_factor?: SchebTwoFactorConfig,
+ *         sensiolabs_gotenberg?: SensiolabsGotenbergConfig,
+ *         stof_doctrine_extensions?: StofDoctrineExtensionsConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
@@ -1619,6 +2431,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         knp_paginator?: KnpPaginatorConfig,
  *         knpu_oauth2_client?: KnpuOauth2ClientConfig,
  *         scheb_two_factor?: SchebTwoFactorConfig,
+ *         sensiolabs_gotenberg?: SensiolabsGotenbergConfig,
+ *         stof_doctrine_extensions?: StofDoctrineExtensionsConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -1639,6 +2453,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         knp_paginator?: KnpPaginatorConfig,
  *         knpu_oauth2_client?: KnpuOauth2ClientConfig,
  *         scheb_two_factor?: SchebTwoFactorConfig,
+ *         sensiolabs_gotenberg?: SensiolabsGotenbergConfig,
+ *         stof_doctrine_extensions?: StofDoctrineExtensionsConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,

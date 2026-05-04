@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>{% block title %}Admin — Serinity{% endblock %}</title>
+
+    {# Fonts #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
+
+    {# Icons #}
+    <link rel="stylesheet" href="{{ asset('assets/css/nucleo-icons.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/nucleo-svg.css') }}">
+
+    {# Admin CSS #}
+    <link rel="stylesheet" href="{{ asset('assets/css/tokens.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/serinity-custom.css') }}">
+
+    {# ── Power BI CSS ── #}
+    <style>
+
+            /* ── Pagination wrapper ── */
+        .adm-pagination-wrap {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        /* ── Liste de liens générée par KnpPaginatorBundle ── */
+        .adm-pagination-wrap .pagination {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .adm-pagination-wrap .pagination li a,
+        .adm-pagination-wrap .pagination li span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 2rem;
+            height: 2rem;
+            padding: 0 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            line-height: 1;
+            text-decoration: none;
+            color: var(--adm-text-muted, #94a3b8);
+            background: transparent;
+            border: 1px solid transparent;
+            transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+            cursor: pointer;
+        }
+
+        /* Hover sur les liens cliquables */
+        .adm-pagination-wrap .pagination li a:hover {
+            background: rgba(255, 255, 255, 0.07);
+            color: var(--adm-text, #e2e8f0);
+            border-color: rgba(255, 255, 255, 0.10);
+        }
+
+        /* Page courante */
+        .adm-pagination-wrap .pagination li.active a,
+        .adm-pagination-wrap .pagination li.active span,
+        .adm-pagination-wrap .pagination li.current a,
+        .adm-pagination-wrap .pagination li.current span {
+            background: var(--adm-primary, #818cf8);
+            color: #fff;
+            border-color: var(--adm-primary, #818cf8);
+            pointer-events: none;
+            cursor: default;
+        }
+
+        /* Désactivé (premier/dernier quand on est au bout) */
+        .adm-pagination-wrap .pagination li.disabled a,
+        .adm-pagination-wrap .pagination li.disabled span {
+            opacity: 0.35;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* Flèches précédent / suivant */
+        .adm-pagination-wrap .pagination li:first-child a,
+        .adm-pagination-wrap .pagination li:last-child a {
+            font-size: 1rem;
+        }
+
+        /* Points de suspension (ellipsis) */
+        .adm-pagination-wrap .pagination li.separator span,
+        .adm-pagination-wrap .pagination li.dots span {
+            border: none;
+            background: transparent;
+            color: var(--adm-text-muted, #94a3b8);
+            pointer-events: none;
+            cursor: default;
+            letter-spacing: 0.05em;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 480px) {
+            .adm-pagination-wrap .pagination li:not(:first-child):not(:last-child):not(.active):not(.current) {
+                display: none;
+            }
+        }
+
+        .adm-powerbi-card {
+            background: var(--adm-card-bg, #1e1e2e);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            margin-bottom: var(--adm-gap, 1.5rem);
+        }
+
+        .adm-powerbi-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .adm-powerbi-card-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            color: var(--adm-primary, #818cf8);
+            flex-shrink: 0;
+        }
+
+        .adm-powerbi-card-icon svg {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        .adm-powerbi-card-title {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--adm-text, #e2e8f0);
+            flex: 1;
+            margin: 0;
+        }
+
+        .adm-powerbi-badge {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #1a1a1a;
+            background: linear-gradient(135deg, #f2994a, #f2c94c);
+            padding: 0.2rem 0.55rem;
+            border-radius: 9999px;
+            flex-shrink: 0;
+        }
+
+        .adm-powerbi-frame-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: var(--adm-bg, #13131f);
+        }
+
+        .adm-powerbi-iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Grid pour le dashboard (2 colonnes côte à côte) */
+        .adm-powerbi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(560px, 100%), 1fr));
+            gap: var(--adm-gap, 1.5rem);
+            margin-bottom: var(--adm-gap, 1.5rem);
+        }
+
+        .adm-powerbi-grid .adm-powerbi-card {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 640px) {
+            .adm-powerbi-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+
+{% set current_route = app.request.attributes.get('_route') %}
+
+{# ══ SIDEBAR ══════════════════════════════════════════════ #}
+<aside class="adm-sidebar" id="adminSidebar" role="navigation" aria-label="Navigation admin">
+
+    {# Brand #}
+    <div class="adm-sidebar-brand">
+        <img src="{{ asset('assets/img/logo2.png') }}" alt="Serinity" width="36" height="36" class="adm-sidebar-logo">
+        <span class="adm-sidebar-name">Serinity <em>Admin</em></span>
+    </div>
+
+    <nav class="adm-sidebar-nav">
+
+        {# Sommeil #}
+        <a href="{{ path('app_admin_sommeil_index') }}"
+           class="adm-nav-item mod-sommeil {{ current_route starts with 'app_admin_sommeil' or current_route starts with 'app_admin_reve' or current_route starts with 'ac_ui_sleep' ? 'active' : '' }}">
+            <span class="adm-nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </span>
+            <span class="adm-nav-label">Sommeil</span>
+        </a>
+
+    </nav>
+
+    {# Footer sidebar #}
+    <div class="adm-sidebar-footer">
+        <a href="{{ path('home') }}" class="adm-sidebar-back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Retour au site
+        </a>
+    </div>
+</aside>
+
+{# ══ MAIN ══════════════════════════════════════════════════ #}
+<div class="adm-main">
+
+    {# Top bar #}
+    <header class="adm-topbar" role="banner">
+        <button class="adm-sidebar-toggle"
+                id="sidebarToggle"
+                aria-label="Ouvrir/fermer le menu"
+                aria-expanded="true"
+                aria-controls="adminSidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true">
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+        </button>
+
+        <div class="adm-topbar-breadcrumb">
+            <span>Admin</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" aria-hidden="true">
+                <polyline points="9 18 15 12 9 6"/>
+            </svg>
+            <span class="adm-topbar-current">{% block breadcrumb %}Dashboard{% endblock %}</span>
+        </div>
+
+        <div class="adm-topbar-actions">
+            {# Notif #}
+            <button class="adm-topbar-btn" aria-label="Notifications">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="18" height="18" aria-hidden="true">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                <span class="adm-notif-dot" aria-hidden="true"></span>
+            </button>
+
+            {# Avatar admin #}
+            <div class="adm-topbar-user">
+                <div class="adm-topbar-avatar" aria-hidden="true">A</div>
+                <span class="adm-topbar-username">Admin</span>
+            </div>
+        </div>
+    </header>
+
+    {# Flash messages #}
+    {% for label, messages in app.flashes %}
+        {% for msg in messages %}
+            <div class="adm-flash adm-flash-{{ label }}" role="alert">
+                <span>{{ msg }}</span>
+                <button class="adm-flash-close" type="button" onclick="this.parentElement.remove()" aria-label="Fermer">✕</button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    {# Page content #}
+    <main class="adm-content" id="main-content">
+        {% block body %}{% endblock %}
+    </main>
+
+</div>
+
+<script>
+    const sidebar = document.getElementById('adminSidebar');
+    const toggle  = document.getElementById('sidebarToggle');
+
+    if (sidebar && toggle) {
+        toggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            toggle.setAttribute('aria-expanded', String(!sidebar.classList.contains('collapsed')));
+        });
+    }
+</script>
+
+{% block javascripts %}{% endblock %}
+</body>
+</html>

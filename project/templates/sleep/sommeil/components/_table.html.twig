@@ -1,0 +1,180 @@
+{% import _self as helper %}
+
+{% macro sort_link(label, field, filters) %}
+    {% set currentSort      = filters.sort|default('date_nuit') %}
+    {% set currentDirection = filters.direction|default('DESC') %}
+    {% set direction = (currentSort == field and currentDirection == 'ASC') ? 'DESC' : 'ASC' %}
+    <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({sort: field, direction: direction})) }}"
+       style="display:inline-flex; align-items:center; gap:4px; color:inherit; text-decoration:none; font-weight:{{ currentSort == field ? '600' : '500' }};">
+        {{ label }}
+        <span style="opacity:0.6; font-size:0.8em;">
+            {% if currentSort == field %}
+                {{ currentDirection == 'ASC' ? '↑' : '↓' }}
+            {% else %}⇅{% endif %}
+        </span>
+    </a>
+{% endmacro %}
+
+{# ── HEADER ────────────────────────────────────────────────────────────── #}
+<div class="ac-row-between" style="margin-bottom: 1rem;">
+    <div>
+        <h3 style="margin:0;">Journal des nuits</h3>
+        <p style="color:var(--color-text-muted); font-size:0.875rem; margin:0.25rem 0 0;">
+            {{ sommeils.getTotalItemCount is defined ? sommeils.getTotalItemCount : sommeils|length }} élément(s) enregistrés
+        </p>
+    </div>
+</div>
+
+{# ── EMPTY STATE ───────────────────────────────────────────────────────── #}
+{% if sommeils is empty %}
+    <div style="display:flex; flex-direction:column; align-items:center; text-align:center;
+                padding: 4rem 2rem; color: var(--color-text-muted);">
+        <span class="material-symbols-outlined" style="font-size:48px; color:var(--color-text-faint); margin-bottom:1rem;">bedtime</span>
+        <h3 style="color:var(--color-text); margin-bottom:0.5rem;">Aucune nuit enregistrée</h3>
+        <p style="max-width:36ch; margin-bottom:1.5rem;">
+            Commencez à suivre votre sommeil pour obtenir une vision plus claire de vos habitudes nocturnes.
+        </p>
+        <button type="button" class="ac-btn ac-btn-primary"
+                onclick="openSommeilModal('{{ path('app_sommeil_new') }}')">
+            <span class="material-symbols-outlined" style="font-size:16px;">add</span>
+            Ajouter une nuit
+        </button>
+    </div>
+
+{% else %}
+
+    {# ── TABLEAU ───────────────────────────────────────────────────────────── #}
+    <div class="ac-table-container">
+        <table class="ac-table">
+            <thead>
+            <tr>
+                <th>{{ helper.sort_link('Date', 'date_nuit', filters) }}</th>
+                <th>Coucher</th>
+                <th>Réveil</th>
+                <th>{{ helper.sort_link('Durée', 'duree', filters) }}</th>
+                <th>{{ helper.sort_link('Qualité', 'qualite', filters) }}</th>
+                <th>Humeur réveil</th>
+                <th>Statut</th>
+                <th style="text-align:right;">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for sommeil in sommeils %}
+                {% set qualityBadge = {
+                    'Excellente': 'background:var(--color-success-highlight,#d4f0e2); color:var(--color-success,#16a34a);',
+                    'Bonne':      'background:var(--color-primary-highlight,#cedcd8); color:var(--color-primary,#01696f);',
+                    'Moyenne':    'background:var(--color-warning-highlight,#f5e4d5); color:var(--color-warning,#964219);',
+                    'Mauvaise':   'background:var(--color-error-highlight,#f0d6e8);   color:var(--color-error,#a12c7b);'
+                } %}
+                <tr>
+
+                    {# Date + meta #}
+                    <td>
+                        <button type="button"
+                                onclick="openSommeilModal('{{ path('app_sommeil_show', {id: sommeil.id}) }}')"
+                                style="background:none; border:none; cursor:pointer; padding:0;
+                                   color:var(--color-primary); font-weight:600; font-size:inherit;
+                                   text-decoration:underline; text-underline-offset:2px;">
+                            {{ sommeil.dateNuit ? sommeil.dateNuit|date('d/m/Y') : '—' }}
+                        </button>
+                        <div style="font-size:0.75rem; color:var(--color-text-muted); margin-top:2px;">
+                            {% if sommeil.isSommeilInsuffisant %}
+                                <span style="color:var(--color-warning,#964219);">Insuffisant</span>
+                            {% elseif sommeil.updatedAt is defined and sommeil.updatedAt and sommeil.createdAt is defined
+                                and sommeil.updatedAt|date('Y-m-d H:i:s') != sommeil.createdAt|date('Y-m-d H:i:s') %}
+                                Modifié le {{ sommeil.updatedAt|date('d/m/Y à H:i') }}
+                            {% elseif sommeil.createdAt is defined and sommeil.createdAt %}
+                                Enregistré le {{ sommeil.createdAt|date('d/m/Y à H:i') }}
+                            {% endif %}
+                        </div>
+                    </td>
+
+                    {# Coucher / Réveil #}
+                    <td>{{ sommeil.heureCoucher ?? '—' }}</td>
+                    <td>{{ sommeil.heureReveil  ?? '—' }}</td>
+
+                    {# Durée #}
+                    <td>
+                        {% if sommeil.dureeSommeil %}
+                            <span style="font-weight:600;">{{ sommeil.dureeSommeil }} h</span>
+                        {% else %}—{% endif %}
+                    </td>
+
+                    {# Qualité #}
+                    <td>
+                        {% if sommeil.qualite %}
+                            <span style="display:inline-flex; align-items:center; padding:2px 10px;
+                                     border-radius:9999px; font-size:0.78rem; font-weight:600;
+                                     {{ qualityBadge[sommeil.qualite] ?? 'background:var(--color-surface-offset);color:var(--color-text-muted);' }}">
+                            {{ sommeil.qualite }}
+                        </span>
+                        {% else %}—{% endif %}
+                    </td>
+
+                    {# Humeur #}
+                    <td>{{ sommeil.humeurReveil ?? '—' }}</td>
+
+                    {# Statut #}
+                    <td>
+                        {% if sommeil.isSommeilInsuffisant %}
+                            <span style="display:inline-flex; align-items:center; padding:2px 10px;
+                                     border-radius:9999px; font-size:0.78rem; font-weight:600;
+                                     background:var(--color-warning-highlight,#f5e4d5);
+                                     color:var(--color-warning,#964219);">
+                            ⚠ Insuffisant
+                        </span>
+                        {% else %}
+                            <span style="display:inline-flex; align-items:center; padding:2px 10px;
+                                     border-radius:9999px; font-size:0.78rem; font-weight:600;
+                                     background:var(--color-success-highlight,#d4f0e2);
+                                     color:var(--color-success,#16a34a);">
+                            ✓ OK
+                        </span>
+                        {% endif %}
+                    </td>
+
+                    {# Actions #}
+                    <td>
+                        <div style="display:flex; gap:6px; justify-content:flex-end;">
+                            {# Voir #}
+                            <button type="button"
+                                    class="ac-icon-btn"
+                                    title="Voir"
+                                    onclick="openSommeilModal('{{ path('app_sommeil_show', {id: sommeil.id}) }}')">
+                                <span class="material-symbols-outlined" style="font-size:18px;">visibility</span>
+                            </button>
+                            {# Modifier #}
+                            <button type="button"
+                                    class="ac-icon-btn"
+                                    title="Modifier"
+                                    onclick="openSommeilModal('{{ path('app_sommeil_edit', {id: sommeil.id}) }}')">
+                                <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
+                            </button>
+                            {# Supprimer #}
+                            <button type="button"
+                                    class="ac-icon-btn"
+                                    title="Supprimer"
+                                    style="color:var(--color-error);"
+                                    onclick="openDeleteModal(
+                                            '{{ path('app_sommeil_delete', {id: sommeil.id}) }}',
+                                            '{{ sommeil.dateNuit ? sommeil.dateNuit|date('d/m/Y')|escape('js') : sommeil.id }}',
+                                            '{{ csrf_token('delete' ~ sommeil.id) }}'
+                                            )">
+                                <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# ── PAGINATION ────────────────────────────────────────────────────────── #}
+    {% if sommeils.getPageCount is defined and sommeils.getPageCount > 1 %}
+        <div class="ac-row-between" style="margin-top:1.25rem; padding-top:1rem; border-top:1px solid var(--color-divider);">
+            {{ knp_pagination_render(sommeils) }}
+        </div>
+    {% endif %}
+
+{% endif %}

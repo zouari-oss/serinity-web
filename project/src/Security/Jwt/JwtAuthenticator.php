@@ -25,7 +25,8 @@ final class JwtAuthenticator extends AbstractAuthenticator
         private readonly JwtService $jwtService,
         private readonly UserRepository $userRepository,
         private readonly RouterInterface $router,
-    ) {}
+    ) {
+    }
 
     public function supports(Request $request): ?bool
     {
@@ -39,6 +40,9 @@ final class JwtAuthenticator extends AbstractAuthenticator
                 str_starts_with($path, '/api/')
                 || str_starts_with($path, '/admin')
                 || str_starts_with($path, '/user')
+                || str_starts_with($path, '/forum')
+                || str_starts_with($path, '/threads')
+                || str_starts_with($path, '/notifications')
                 || str_starts_with($path, '/sommeil')
                 || str_starts_with($path, '/reve')
                 || $path === '/dashboard'

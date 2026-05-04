@@ -1,0 +1,29 @@
+<div class="sl-weather-overlay" id="sleepWeatherOverlay" hidden></div>
+
+<aside class="sl-weather-widget" id="sleepWeatherWidget" aria-hidden="true">
+    <div class="sl-weather-widget__header">
+        <div>
+            <span class="sl-weather-widget__eyebrow">Bien-être & climat</span>
+            <h3>Météo sommeil</h3>
+        </div>
+
+        <button
+                type="button"
+                class="sl-weather-widget__close"
+                id="closeSleepWeatherBtn"
+                aria-label="Fermer le widget météo"
+        >
+            ×
+        </button>
+    </div>
+
+    <div class="sl-weather-widget__body" id="sleepWeatherContent" aria-live="polite">
+        <div class="sl-weather-loading sl-weather-loading--fancy">
+            <div class="slw-spinner"></div>
+            <div>
+                <strong>Chargement de la météo…</strong>
+                <div class="slw-loading-text">Analyse des conditions pour le sommeil</div>
+            </div>
+        </div>
+    </div>
+</aside>

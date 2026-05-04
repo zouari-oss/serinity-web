@@ -15,5 +15,6 @@ final readonly class ChangeAccountStatusRequest
         #[Assert\NotBlank(message: 'Account status is required')]
         #[Assert\Choice(choices: ['ACTIVE', 'DISABLED', 'BANNED'], message: 'Invalid account status. Must be ACTIVE, DISABLED, or BANNED')]
         public string $accountStatus,
-    ) {}
+    ) {
+    }
 }

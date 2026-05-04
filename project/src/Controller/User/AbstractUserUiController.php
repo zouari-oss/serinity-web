@@ -60,12 +60,12 @@ abstract class AbstractUserUiController extends AbstractController
             ],
             [
                 'label' => 'Sleep',
-                'route' => 'user_ui_sommeil_list',
+                'route' => 'app_sommeil_list',
                 'icon' => 'bedtime',
                 'section' => 'modules',
                 'children' => [
-                    ['label' => 'Sommail', 'route' => 'user_ui_sommeil_list', 'icon' => 'bedtime'],
-                    ['label' => 'Reves management', 'route' => 'user_ui_reve_index', 'icon' => 'nights_stay'],
+                    ['label' => 'gestion sommeil ', 'route' => 'app_sommeil_list', 'icon' => 'bedtime'],
+                    ['label' => 'gestion Reves ', 'route' => 'app_reve_index', 'icon' => 'nights_stay'],
                 ],
             ],
         ];

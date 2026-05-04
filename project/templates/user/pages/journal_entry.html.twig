@@ -3,221 +3,225 @@
 
 {% block content %}
 <div class="ac-app-layout">
-  {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
-  <div class="ac-main" data-controller="journal-editor">
-    {% include 'access_control/components/_topbar.html.twig' with { title: 'Journal entries', subtitle: 'Capture your
-    daily reflections', username: userName } %}
-    <div data-controller="flash-toast">
-      {% for message in app.flashes('success') %}
-      <span data-flash-toast-target="message" data-type="success" hidden>{{ message }}</span>
-      {% endfor %}
-      {% for message in app.flashes('error') %}
-      <span data-flash-toast-target="message" data-type="error" hidden>{{ message }}</span>
-      {% endfor %}
-    </div>
-
-    <div class="ac-journal-shell">
-      <section class="ac-cards ac-journal-kpis">
-        <article class="ac-stat-card ac-journal-kpi-card">
-          <h3>Current streak</h3>
-          <p>{{ current_streak }}</p>
-        </article>
-        <article class="ac-stat-card ac-journal-kpi-card">
-          <h3>Longest streak</h3>
-          <p>{{ longest_streak }}</p>
-        </article>
-        <article class="ac-stat-card ac-journal-kpi-card">
-          <h3>Best day volume</h3>
-          <p>{{ max_entries_one_day }}</p>
-        </article>
-      </section>
-
-      <section class="ac-card ac-journal-entry-card">
-        <div class="ac-row-between ac-journal-entry-head">
-          <h3>New journal entry</h3>
-          <span class="ac-journal-meta">Write your reflection with clarity</span>
-        </div>
-        <form class="ac-form ac-grid-two" method="post" action="{{ path('user_ui_journal_entry_new') }}">
-          <input type="hidden" name="month" value="{{ calendar_month }}">
-          <fieldset class="ac-col-span-2 ac-journal-form-block">
-            <legend class="ac-label">Entry details</legend>
-            <label class="ac-col-span-2">
-              <span class="ac-label">Title</span>
-              <input class="ac-input" name="title" type="text" maxlength="255" required>
-            </label>
-            <label class="ac-col-span-2">
-              <span class="ac-label">Content</span>
-              {% set createContentEditorAttrs = tinymce_attributes({
-              name: 'content',
-              placeholder: 'Write your reflection...',
-              toolbar: 'undo redo | blocks | bold italic | bullist numlist | removeformat',
-              plugins: 'autolink lists',
-              menubar: '',
-              contextmenu: '',
-              quickbars_insert_toolbar: '',
-              quickbars_selection_toolbar: '',
-              resize: 'vertical',
-              height: '260',
-              }) %}
-              <tinymce-editor {% for key, value in createContentEditorAttrs %}{{ key }}="{{ value|e('html_attr') }}" {%
-                endfor %} src="{{ asset('bundles/tinymce/ext/tinymce/tinymce.min.js') }}"></tinymce-editor>
-            </label>
-          </fieldset>
-          <div class="ac-row-end ac-col-span-2">
-            <button class="ac-btn ac-btn-primary" type="submit">Save entry</button>
-          </div>
-        </form>
-      </section>
-
-      <section class="ac-card ac-journal-history-card">
-        <div class="ac-row-between ac-journal-history-head">
-          <h3>History calendar</h3>
-          <div class="ac-journal-calendar-nav">
-            <a class="ac-ghost-btn" href="{{ path('user_ui_journal_entry', {month: previous_month}) }}"
-              aria-label="Previous month">&larr;</a>
-            <strong class="ac-journal-calendar-label">{{ calendar_label }}</strong>
-            <a class="ac-ghost-btn" href="{{ path('user_ui_journal_entry', {month: next_month}) }}"
-              aria-label="Next month">&rarr;</a>
-          </div>
-        </div>
-
-        <div class="ac-journal-calendar-weekdays">
-          {% for day_label in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}
-          <span class="ac-journal-weekday">{{ day_label }}</span>
-          {% endfor %}
-        </div>
-        <div class="ac-journal-calendar-grid">
-          {% for cell in calendar_cells %}
-          {% set dayClass = 'ac-journal-day' %}
-          {% if not cell.is_current_month %}{% set dayClass = dayClass ~ ' ac-journal-day--muted' %}{% endif %}
-          {% if cell.is_today %}{% set dayClass = dayClass ~ ' ac-journal-day--today' %}{% endif %}
-          {% if cell.has_entries %}{% set dayClass = dayClass ~ ' ac-journal-day--has-entries' %}{% endif %}
-
-          {% if cell.has_entries %}
-          <button type="button" class="{{ dayClass }}" data-action="journal-editor#openDay" data-date="{{ cell.date }}">
-            <span class="ac-journal-day-number">{{ cell.day_number }}</span>
-            <span class="ac-journal-day-badge">{{ cell.entry_count }}</span>
-          </button>
-          {% else %}
-          <div class="{{ dayClass }}">
-            <span class="ac-journal-day-number">{{ cell.day_number }}</span>
-          </div>
-          {% endif %}
-          {% endfor %}
-        </div>
-
-        <div class="ac-journal-day-data" hidden>
-          {% for day, entries in entries_by_day %}
-          <div data-journal-editor-target="dayData" data-date="{{ day }}">
-            {% for journal_entry in entries %}
-            {% set decodedAiTags = journal_entry.getDecodedAiTags() %}
-            {% set topEmotionLabel = journal_entry.getTopEmotionLabel() %}
-            {% set topEmotionClass = 'emotion-neutral' %}
-            {% set topEmotionScore = null %}
-            {% if topEmotionLabel %}
-            {% set normalizedEmotionLabel = topEmotionLabel|lower|replace({' ': '_', '-': '_'}) %}
-            {% if normalizedEmotionLabel in ['joy', 'sadness', 'nervousness', 'relief'] %}
-            {% set topEmotionClass = 'emotion-' ~ normalizedEmotionLabel %}
-            {% endif %}
-            {% endif %}
-            {% if decodedAiTags and decodedAiTags.labels is defined and decodedAiTags.labels is iterable and
-            decodedAiTags.labels is not empty %}
-            {% set firstEmotion = decodedAiTags.labels|first %}
-            {% if firstEmotion is iterable and firstEmotion.score is defined and firstEmotion.score is not null %}
-            {% set topEmotionScore = firstEmotion.score %}
-            {% endif %}
-            {% endif %}
-            <article data-entry-id="{{ journal_entry.id }}" data-entry-title="{{ journal_entry.title|e('html_attr') }}"
-              data-entry-content="{{ journal_entry.content|sanitize_html('journal_content')|e('html_attr') }}"
-              data-entry-time="{{ journal_entry.createdAt|date('H:i') }}"
-              data-entry-top-emotion="{{ topEmotionLabel ? topEmotionLabel|e('html_attr') : '' }}"
-              data-entry-top-emotion-class="{{ topEmotionClass }}"
-              data-entry-top-emotion-score="{{ topEmotionScore is not null ? topEmotionScore : '' }}"
-              data-edit-url="{{ path('user_ui_journal_entry_edit', {'id': journal_entry.id}) }}"
-              data-delete-url="{{ path('user_ui_journal_entry_delete', {'id': journal_entry.id}) }}"
-              data-edit-csrf="{{ csrf_token('journal_edit_' ~ journal_entry.id) }}"
-              data-delete-csrf="{{ csrf_token('journal_delete_' ~ journal_entry.id) }}"></article>
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main" data-controller="journal-editor">
+        {% include 'access_control/components/_topbar.html.twig' with { title: 'Journal entries', subtitle: 'Capture your daily reflections', username: userName } %}
+        <div data-controller="flash-toast">
+            {% for message in app.flashes('success') %}
+                <span data-flash-toast-target="message" data-type="success" hidden>{{ message }}</span>
             {% endfor %}
-          </div>
-          {% endfor %}
+            {% for message in app.flashes('error') %}
+                <span data-flash-toast-target="message" data-type="error" hidden>{{ message }}</span>
+            {% endfor %}
         </div>
-      </section>
-    </div>
 
-    <div class="ac-modal" data-journal-editor-target="dayModal" data-action="click->journal-editor#closeDayOnBackdrop"
-      hidden>
-      <div class="ac-modal-content ac-journal-modal">
-        <div class="ac-row-between ac-journal-modal-header">
-          <h3 data-journal-editor-target="dayTitle">Day entries</h3>
-          <button type="button" class="ac-ghost-btn" data-action="journal-editor#closeDay">Close</button>
-        </div>
-        <div class="ac-journal-day-modal-list ac-journal-entry-list" data-journal-editor-target="dayEntries"></div>
-      </div>
-    </div>
+        <div class="ac-journal-shell">
+            <section class="ac-cards ac-journal-kpis">
+                <article class="ac-stat-card ac-journal-kpi-card">
+                    <h3>Current streak</h3>
+                    <p>{{ current_streak }}</p>
+                </article>
+                <article class="ac-stat-card ac-journal-kpi-card">
+                    <h3>Longest streak</h3>
+                    <p>{{ longest_streak }}</p>
+                </article>
+                <article class="ac-stat-card ac-journal-kpi-card">
+                    <h3>Best day volume</h3>
+                    <p>{{ max_entries_one_day }}</p>
+                </article>
+            </section>
 
-    <div class="ac-modal" data-journal-editor-target="modal" data-action="click->journal-editor#closeOnBackdrop" hidden>
-      <div class="ac-modal-content ac-journal-modal">
-        <div class="ac-row-between">
-          <h3>Edit journal entry</h3>
-          <button type="button" class="ac-ghost-btn" data-action="journal-editor#close">Close</button>
-        </div>
-        <form class="ac-form" method="post" data-journal-editor-target="form">
-          <input type="hidden" name="_token" data-journal-editor-target="token">
-          <input type="hidden" name="month" value="{{ calendar_month }}">
-          <label>
-            <span class="ac-label">Title</span>
-            <input class="ac-input" type="text" name="title" maxlength="255" required
-              data-journal-editor-target="title">
-          </label>
-          <label>
-            <span class="ac-label">Content</span>
-            {% set editContentEditorAttrs = tinymce_attributes({
-            name: 'content',
-            placeholder: 'Update your reflection...',
-            toolbar: 'undo redo | blocks | bold italic | bullist numlist | removeformat',
-            plugins: 'autolink lists',
-            menubar: '',
-            contextmenu: '',
-            quickbars_insert_toolbar: '',
-            quickbars_selection_toolbar: '',
-            resize: 'vertical',
-            height: '260',
-            'data-journal-editor-target': 'content',
-            }) %}
-            <tinymce-editor {% for key, value in editContentEditorAttrs %}{{ key }}="{{ value|e('html_attr') }}" {%
-              endfor %} src="{{ asset('bundles/tinymce/ext/tinymce/tinymce.min.js') }}"></tinymce-editor>
-          </label>
-          <div class="ac-row-end">
-            <button class="ac-btn ac-btn-primary" type="submit">Save changes</button>
-          </div>
-        </form>
-      </div>
-    </div>
+            <section class="ac-card ac-journal-entry-card">
+                <div class="ac-row-between ac-journal-entry-head">
+                    <h3>New journal entry</h3>
+                    <span class="ac-journal-meta">Write your reflection with clarity</span>
+                </div>
+                <form class="ac-form ac-grid-two" method="post" action="{{ path('user_ui_journal_entry_new') }}">
+                    <input type="hidden" name="month" value="{{ calendar_month }}">
+                    <fieldset class="ac-col-span-2 ac-journal-form-block">
+                        <legend class="ac-label">Entry details</legend>
+                        <label class="ac-col-span-2">
+                            <span class="ac-label">Title</span>
+                            <input class="ac-input" name="title" type="text" maxlength="255" required>
+                        </label>
+                        <label class="ac-col-span-2">
+                            <span class="ac-label">Content</span>
+                            {% set createContentEditorAttrs = tinymce_attributes({
+                                name: 'content',
+                                placeholder: 'Write your reflection...',
+                                toolbar: 'undo redo | blocks | bold italic | bullist numlist | removeformat',
+                                plugins: 'autolink lists',
+                                menubar: '',
+                                contextmenu: '',
+                                quickbars_insert_toolbar: '',
+                                quickbars_selection_toolbar: '',
+                                resize: 'vertical',
+                                height: '260',
+                            }) %}
+                            <tinymce-editor
+                                {% for key, value in createContentEditorAttrs %}{{ key }}="{{ value|e('html_attr') }}" {% endfor %}
+                                src="{{ asset('bundles/tinymce/ext/tinymce/tinymce.min.js') }}"
+                            ></tinymce-editor>
+                        </label>
+                    </fieldset>
+                    <div class="ac-row-end ac-col-span-2">
+                        <button class="ac-btn ac-btn-primary" type="submit">Save entry</button>
+                    </div>
+                </form>
+            </section>
 
-    <div class="ac-modal" data-journal-editor-target="deleteModal"
-      data-action="click->journal-editor#closeDeleteOnBackdrop" hidden>
-      <div class="ac-modal-content ac-journal-modal">
-        <div class="ac-row-between">
-          <h3>Delete journal entry</h3>
-          <button type="button" class="ac-ghost-btn" data-action="journal-editor#closeDelete">Close</button>
+            <section class="ac-card ac-journal-history-card">
+                <div class="ac-row-between ac-journal-history-head">
+                    <h3>History calendar</h3>
+                    <div class="ac-journal-calendar-nav">
+                        <a class="ac-ghost-btn" href="{{ path('user_ui_journal_entry', {month: previous_month}) }}" aria-label="Previous month">&larr;</a>
+                        <strong class="ac-journal-calendar-label">{{ calendar_label }}</strong>
+                        <a class="ac-ghost-btn" href="{{ path('user_ui_journal_entry', {month: next_month}) }}" aria-label="Next month">&rarr;</a>
+                    </div>
+                </div>
+
+                <div class="ac-journal-calendar-weekdays">
+                    {% for day_label in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}
+                        <span class="ac-journal-weekday">{{ day_label }}</span>
+                    {% endfor %}
+                </div>
+                <div class="ac-journal-calendar-grid">
+                    {% for cell in calendar_cells %}
+                        {% set dayClass = 'ac-journal-day' %}
+                        {% if not cell.is_current_month %}{% set dayClass = dayClass ~ ' ac-journal-day--muted' %}{% endif %}
+                        {% if cell.is_today %}{% set dayClass = dayClass ~ ' ac-journal-day--today' %}{% endif %}
+                        {% if cell.has_entries %}{% set dayClass = dayClass ~ ' ac-journal-day--has-entries' %}{% endif %}
+
+                        {% if cell.has_entries %}
+                            <button
+                                type="button"
+                                class="{{ dayClass }}"
+                                data-action="journal-editor#openDay"
+                                data-date="{{ cell.date }}"
+                            >
+                                <span class="ac-journal-day-number">{{ cell.day_number }}</span>
+                                <span class="ac-journal-day-badge">{{ cell.entry_count }}</span>
+                            </button>
+                        {% else %}
+                            <div class="{{ dayClass }}">
+                                <span class="ac-journal-day-number">{{ cell.day_number }}</span>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="ac-journal-day-data" hidden>
+                    {% for day, entries in entries_by_day %}
+                        <div data-journal-editor-target="dayData" data-date="{{ day }}">
+                            {% for journal_entry in entries %}
+                                {% set decodedAiTags = journal_entry.getDecodedAiTags() %}
+                                {% set topEmotionLabel = journal_entry.getTopEmotionLabel() %}
+                                {% set topEmotionClass = 'emotion-neutral' %}
+                                {% set topEmotionScore = null %}
+                                {% if topEmotionLabel %}
+                                    {% set normalizedEmotionLabel = topEmotionLabel|lower|replace({' ': '_', '-': '_'}) %}
+                                    {% if normalizedEmotionLabel in ['joy', 'sadness', 'nervousness', 'relief'] %}
+                                        {% set topEmotionClass = 'emotion-' ~ normalizedEmotionLabel %}
+                                    {% endif %}
+                                {% endif %}
+                                {% if decodedAiTags and decodedAiTags.labels is defined and decodedAiTags.labels is iterable and decodedAiTags.labels is not empty %}
+                                    {% set firstEmotion = decodedAiTags.labels|first %}
+                                    {% if firstEmotion is iterable and firstEmotion.score is defined and firstEmotion.score is not null %}
+                                        {% set topEmotionScore = firstEmotion.score %}
+                                    {% endif %}
+                                {% endif %}
+                                <article
+                                    data-entry-id="{{ journal_entry.id }}"
+                                    data-entry-title="{{ journal_entry.title|e('html_attr') }}"
+                                    data-entry-content="{{ journal_entry.content|sanitize_html('journal_content')|e('html_attr') }}"
+                                    data-entry-time="{{ journal_entry.createdAt|date('H:i') }}"
+                                    data-entry-top-emotion="{{ topEmotionLabel ? topEmotionLabel|e('html_attr') : '' }}"
+                                    data-entry-top-emotion-class="{{ topEmotionClass }}"
+                                    data-entry-top-emotion-score="{{ topEmotionScore is not null ? topEmotionScore : '' }}"
+                                    data-edit-url="{{ path('user_ui_journal_entry_edit', {'id': journal_entry.id}) }}"
+                                    data-delete-url="{{ path('user_ui_journal_entry_delete', {'id': journal_entry.id}) }}"
+                                    data-edit-csrf="{{ csrf_token('journal_edit_' ~ journal_entry.id) }}"
+                                    data-delete-csrf="{{ csrf_token('journal_delete_' ~ journal_entry.id) }}"
+                                ></article>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
         </div>
-        <p class="ac-muted">Are you sure you want to delete this journal entry?</p>
-        <form method="post" data-journal-editor-target="deleteForm">
-          <input type="hidden" name="_token" data-journal-editor-target="deleteToken">
-          <input type="hidden" name="month" value="{{ calendar_month }}">
-          <div class="ac-row-end ac-journal-actions">
-            <button type="button" class="ac-ghost-btn" data-action="journal-editor#closeDelete">Cancel</button>
-            <button type="submit" class="ac-btn ac-btn-primary"
-              data-action="journal-editor#confirmDelete">Delete</button>
-          </div>
-        </form>
-      </div>
+
+        <div class="ac-modal" data-journal-editor-target="dayModal" data-action="click->journal-editor#closeDayOnBackdrop" hidden>
+            <div class="ac-modal-content ac-journal-modal">
+                <div class="ac-row-between ac-journal-modal-header">
+                    <h3 data-journal-editor-target="dayTitle">Day entries</h3>
+                    <button type="button" class="ac-ghost-btn" data-action="journal-editor#closeDay">Close</button>
+                </div>
+                <div class="ac-journal-day-modal-list ac-journal-entry-list" data-journal-editor-target="dayEntries"></div>
+            </div>
+        </div>
+
+        <div class="ac-modal" data-journal-editor-target="modal" data-action="click->journal-editor#closeOnBackdrop" hidden>
+            <div class="ac-modal-content ac-journal-modal">
+                <div class="ac-row-between">
+                    <h3>Edit journal entry</h3>
+                    <button type="button" class="ac-ghost-btn" data-action="journal-editor#close">Close</button>
+                </div>
+                <form class="ac-form" method="post" data-journal-editor-target="form">
+                    <input type="hidden" name="_token" data-journal-editor-target="token">
+                    <input type="hidden" name="month" value="{{ calendar_month }}">
+                    <label>
+                        <span class="ac-label">Title</span>
+                        <input class="ac-input" type="text" name="title" maxlength="255" required data-journal-editor-target="title">
+                    </label>
+                    <label>
+                        <span class="ac-label">Content</span>
+                        {% set editContentEditorAttrs = tinymce_attributes({
+                            name: 'content',
+                            placeholder: 'Update your reflection...',
+                            toolbar: 'undo redo | blocks | bold italic | bullist numlist | removeformat',
+                            plugins: 'autolink lists',
+                            menubar: '',
+                            contextmenu: '',
+                            quickbars_insert_toolbar: '',
+                            quickbars_selection_toolbar: '',
+                            resize: 'vertical',
+                            height: '260',
+                            'data-journal-editor-target': 'content',
+                        }) %}
+                        <tinymce-editor
+                            {% for key, value in editContentEditorAttrs %}{{ key }}="{{ value|e('html_attr') }}" {% endfor %}
+                            src="{{ asset('bundles/tinymce/ext/tinymce/tinymce.min.js') }}"
+                        ></tinymce-editor>
+                    </label>
+                    <div class="ac-row-end">
+                        <button class="ac-btn ac-btn-primary" type="submit">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="ac-modal" data-journal-editor-target="deleteModal" data-action="click->journal-editor#closeDeleteOnBackdrop" hidden>
+            <div class="ac-modal-content ac-journal-modal">
+                <div class="ac-row-between">
+                    <h3>Delete journal entry</h3>
+                    <button type="button" class="ac-ghost-btn" data-action="journal-editor#closeDelete">Close</button>
+                </div>
+                <p class="ac-muted">Are you sure you want to delete this journal entry?</p>
+                <form method="post" data-journal-editor-target="deleteForm">
+                    <input type="hidden" name="_token" data-journal-editor-target="deleteToken">
+                    <input type="hidden" name="month" value="{{ calendar_month }}">
+                    <div class="ac-row-end ac-journal-actions">
+                        <button type="button" class="ac-ghost-btn" data-action="journal-editor#closeDelete">Cancel</button>
+                        <button type="submit" class="ac-btn ac-btn-primary" data-action="journal-editor#confirmDelete">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 {% endblock %}
 
 {% block javascripts %}
-{{ parent() }}
-{{ tinymce_scripts() }}
+    {{ parent() }}
+    {{ tinymce_scripts() }}
 {% endblock %}

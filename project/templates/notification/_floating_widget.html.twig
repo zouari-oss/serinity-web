@@ -1,0 +1,33 @@
+<div class="floating-notify" id="floatingNotify">
+    <button
+        class="floating-notify-btn"
+        id="floatingNotifyBtn"
+        type="button"
+        aria-label="Open notifications"
+        aria-expanded="false"
+        aria-controls="floatingNotifyPanel"
+    >
+        <i class="ni ni-bell-55" aria-hidden="true"></i>
+        {% if unreadCount > 0 %}
+            <span class="floating-notify-badge">{{ unreadCount }}</span>
+        {% endif %}
+    </button>
+
+    <div class="floating-notify-panel" id="floatingNotifyPanel" role="dialog" aria-label="Notifications panel">
+        <div class="floating-notify-head">
+            <h2>Notifications</h2>
+            <a href="{{ path('app_notification_seen_all') }}" class="floating-notify-clear">Clear all</a>
+        </div>
+
+        <div class="floating-notify-list">
+            {% for notification in notifications %}
+                <a class="floating-notify-item {{ notification.seen ? '' : 'is-unread' }}" href="{{ path('app_notification_open', {id: notification.id}) }}">
+                    <p>{{ notification.content }}</p>
+                    <span>{{ notification.createdAt|date('Y-m-d H:i') }}</span>
+                </a>
+            {% else %}
+                <div class="floating-notify-empty">No notifications.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,109 @@
+<div class="ac-row-between" style="margin-bottom: 1.25rem;">
+    <div>
+        <h3 style="font-size: 1rem; font-weight: 700; margin: 0;">
+            🌙 Nuit du {{ sommeil.dateNuit ? sommeil.dateNuit|date('d/m/Y') : '#' ~ sommeil.id }}
+        </h3>
+        <p style="color: var(--color-text-muted); font-size: 0.85rem; margin-top: 0.2rem;">
+            {% if sommeil.qualite %}Qualité : {{ sommeil.qualite }}{% else %}Détail de la nuit{% endif %}
+        </p>
+    </div>
+    <div style="display: flex; gap: 0.5rem;">
+        {% if modal_mode|default(false) %}
+            <button type="button" class="ac-ghost-btn"
+                    onclick="openSommeilModal('{{ path('app_sommeil_edit', {id: sommeil.id}) }}')">
+                <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
+                Modifier
+            </button>
+        {% else %}
+            <a href="{{ path('app_sommeil_edit', {id: sommeil.id}) }}" class="ac-ghost-btn">
+                <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
+                Modifier
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{# ── Horaires ── #}
+<div class="ac-card" style="margin-bottom: 1rem;">
+    <p style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+              letter-spacing: 0.05em; color: var(--color-text-muted); margin-bottom: 0.75rem;">⏰ Horaires</p>
+    <div class="ac-kpi-grid">
+        <div><span style="font-size:0.8rem;color:var(--color-text-muted);">Date</span><strong style="display:block;margin-top:0.35rem;">{{ sommeil.dateNuit ? sommeil.dateNuit|date('d/m/Y') : '—' }}</strong></div>
+        <div><span style="font-size:0.8rem;color:var(--color-text-muted);">Coucher</span><strong style="display:block;margin-top:0.35rem;">{{ sommeil.heureCoucher ?? '—' }}</strong></div>
+        <div><span style="font-size:0.8rem;color:var(--color-text-muted);">Réveil</span><strong style="display:block;margin-top:0.35rem;">{{ sommeil.heureReveil ?? '—' }}</strong></div>
+        <div><span style="font-size:0.8rem;color:var(--color-text-muted);">Durée</span><strong style="display:block;margin-top:0.35rem;">{% if sommeil.dureeSommeil %}{{ sommeil.dureeSommeil }}h{% else %}—{% endif %}</strong></div>
+        <div><span style="font-size:0.8rem;color:var(--color-text-muted);">Interruptions</span><strong style="display:block;margin-top:0.35rem;">{{ sommeil.interruptions ?? '—' }}</strong></div>
+    </div>
+</div>
+
+{# ── Qualité & ressenti ── #}
+<div class="ac-card" style="margin-bottom: 1rem;">
+    <p style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+              letter-spacing: 0.05em; color: var(--color-text-muted); margin-bottom: 0.75rem;">⭐ Qualité &amp; ressenti</p>
+    <div class="ac-kpi-grid">
+        <div><span style="font-size:0.8rem;color:var(--color-text-muted);">Qualité</span><strong style="display:block;margin-top:0.35rem;">{{ sommeil.qualite ?? '—' }}</strong></div>
+        <div><span style="font-size:0.8rem;color:var(--color-text-muted);">Humeur réveil</span><strong style="display:block;margin-top:0.35rem;">{{ sommeil.humeurReveil ?? '—' }}</strong></div>
+        <div><span style="font-size:0.8rem;color:var(--color-text-muted);">Environnement</span><strong style="display:block;margin-top:0.35rem;">{{ sommeil.environnement ?? '—' }}</strong></div>
+        <div><span style="font-size:0.8rem;color:var(--color-text-muted);">Température</span><strong style="display:block;margin-top:0.35rem;">{% if sommeil.temperature %}{{ sommeil.temperature }}°C{% else %}—{% endif %}</strong></div>
+        <div><span style="font-size:0.8rem;color:var(--color-text-muted);">Bruit</span><strong style="display:block;margin-top:0.35rem;">{{ sommeil.bruitNiveau ?? '—' }}</strong></div>
+    </div>
+    {% if sommeil.commentaire %}
+        <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--color-border);">
+            <span style="font-size:0.8rem;color:var(--color-text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Commentaire</span>
+            <p style="margin-top:0.35rem;font-size:0.95rem;white-space:pre-wrap;">{{ sommeil.commentaire }}</p>
+        </div>
+    {% endif %}
+</div>
+
+{# ── Rêves associés ── #}
+{% if sommeil.revess is defined and sommeil.revess|length > 0 %}
+    <div class="ac-card" style="margin-bottom: 1rem;">
+        <div class="ac-row-between" style="margin-bottom: 0.75rem;">
+            <h4 style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+                       letter-spacing: 0.05em; color: var(--color-text-muted);">💤 Rêves de cette nuit</h4>
+            <button type="button" class="ac-btn ac-btn-primary"
+                    onclick="openSommeilModal('{{ path('app_reve_new') }}')">
+                <span class="material-symbols-outlined" style="font-size:15px;">add</span>
+                Ajouter
+            </button>
+        </div>
+        <div class="ac-table-container">
+            <table class="ac-table">
+                <thead>
+                <tr>
+                    <th>Titre</th>
+                    <th>Type</th>
+                    <th>Humeur</th>
+                    <th>Intensité</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for reve in sommeil.revess %}
+                    <tr>
+                        <td><strong>{{ reve.titre }}</strong></td>
+                        <td><span class="ac-badge ac-badge-secondary">{{ reve.typeReve }}</span></td>
+                        <td>{{ reve.humeur ?? '—' }}</td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:0.35rem;">
+                                <div style="display:flex;gap:3px;">
+                                    {% for i in 1..10 %}
+                                        <div style="width:9px;height:9px;border-radius:999px;
+                                                background:{{ i <= (reve.intensite ?? 0) ? 'var(--color-primary)' : 'var(--color-border)' }};"></div>
+                                    {% endfor %}
+                                </div>
+                                <span style="font-size:0.8rem;color:var(--color-text-muted);">{{ reve.intensite ?? 0 }}/10</span>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endif %}
+
+{% if modal_mode|default(false) %}
+    <div class="ac-row-end" style="margin-top: 0.5rem;">
+        <button type="button" class="ac-ghost-btn" onclick="closeSommeilModal()">Fermer</button>
+    </div>
+{% endif %}

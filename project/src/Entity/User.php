@@ -57,6 +57,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'totp_enabled_at', type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $totpEnabledAt = null;
 
+    #[ORM\Column(name: 'risk_level', type: Types::STRING, length: 20, nullable: true)]
+    private ?string $riskLevel = null;
+
     /** @var Collection<int, AuthSession> */
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: AuthSession::class, orphanRemoval: true)]
     private Collection $authSessions;
@@ -231,6 +234,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setTotpEnabledAt(?\DateTimeImmutable $totpEnabledAt): self
     {
         $this->totpEnabledAt = $totpEnabledAt;
+
+        return $this;
+    }
+
+    public function getRiskLevel(): ?string
+    {
+        return $this->riskLevel;
+    }
+
+    public function setRiskLevel(?string $riskLevel): self
+    {
+        $this->riskLevel = $riskLevel;
 
         return $this;
     }

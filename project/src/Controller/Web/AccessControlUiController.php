@@ -144,6 +144,7 @@ final class AccessControlUiController extends AbstractController
             email: $request->query->get('email'),
             role: $request->query->get('role'),
             accountStatus: $request->query->get('accountStatus'),
+            riskLevel: $request->query->get('riskLevel'),
         );
 
         $result = $this->userManagementService->getUsersPaginated($filterRequest);
@@ -164,6 +165,10 @@ final class AccessControlUiController extends AbstractController
                 'state' => $profile?->getState() ?? '',
                 'aboutMe' => $profile?->getAboutMe() ?? '',
                 'profileImageUrl' => $profile?->getProfileImageUrl() ?? '',
+                'riskLevel' => $user->getRiskLevel(),
+                'riskPrediction' => null,
+                'riskConfidence' => null,
+                'riskEvaluatedAt' => null,
             ];
         }, array_filter(
             $result['users'],
@@ -183,6 +188,7 @@ final class AccessControlUiController extends AbstractController
                 'email' => $filterRequest->email,
                 'role' => $filterRequest->role,
                 'accountStatus' => $filterRequest->accountStatus,
+                'riskLevel' => $filterRequest->riskLevel,
             ],
         ]);
     }

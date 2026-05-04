@@ -11,6 +11,7 @@ use App\Enum\AuditAction;
 use App\Repository\UserRepository;
 use App\Repository\UserFaceRepository;
 use App\Service\AI\FaceRecognitionService;
+use App\Service\Risk\UserRiskService;
 use App\Service\Security\FaceLoginRateLimiter;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -26,6 +27,7 @@ final readonly class FaceAuthenticationService
         private JwtService $jwtService,
         private TokenGenerator $tokenGenerator,
         private FaceLoginRateLimiter $faceLoginRateLimiter,
+        private UserRiskService $userRiskService,
     ) {}
 
     public function setFaceAuthentication(User $user, bool $enabled): ServiceResult
@@ -114,6 +116,8 @@ final readonly class FaceAuthenticationService
         $this->sessionService->revokeActiveSessions($user);
         $session = $this->sessionService->createSession($user);
         $this->auditLogService->log($session, AuditAction::USER_FACE_LOGIN);
+        $this->entityManager->flush();
+        $this->userRiskService->evaluateAndStore($user, true);
         $this->entityManager->flush();
 
         $this->faceLoginRateLimiter->reset($rateLimitKey);

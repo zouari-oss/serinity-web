@@ -65,7 +65,7 @@ class AuthSessionRepository extends ServiceEntityRepository
     public function findRecent(int $limit = 50): array
     {
         return $this->createQueryBuilder('s')
-            ->leftJoin('s.user', 'u')
+            ->innerJoin('s.user', 'u')
             ->addSelect('u')
             ->orderBy('s.createdAt', 'DESC')
             ->setMaxResults($limit)

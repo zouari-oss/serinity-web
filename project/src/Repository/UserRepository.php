@@ -30,14 +30,14 @@ class UserRepository extends ServiceEntityRepository
 
     /**
      * Find users with pagination and optional filters.
-     * 
+     *
      * @param array{email?: string, role?: string, accountStatus?: string, riskLevel?: string} $filters
      * @return array{users: User[], total: int, page: int, limit: int, totalPages: int}
      */
     public function findPaginated(int $page = 1, int $limit = 20, array $filters = []): array
     {
         $qb = $this->createQueryBuilder('u')
-            ->leftJoin('u.profile', 'p')
+            ->innerJoin('u.profile', 'p')
             ->addSelect('p');
 
         // Apply filters
@@ -184,7 +184,7 @@ class UserRepository extends ServiceEntityRepository
     public function findPaginatedNonAdmin(int $page = 1, int $limit = 20, array $filters = []): array
     {
         $qb = $this->createQueryBuilder('u')
-            ->leftJoin('u.profile', 'p')
+            ->innerJoin('u.profile', 'p')
             ->addSelect('p')
             ->andWhere('u.role != :adminRole')
             ->setParameter('adminRole', UserRole::ADMIN->value);
@@ -235,7 +235,7 @@ class UserRepository extends ServiceEntityRepository
     public function findAllNonAdmin(): array
     {
         return $this->createQueryBuilder('u')
-            ->leftJoin('u.profile', 'p')
+            ->innerJoin('u.profile', 'p')
             ->addSelect('p')
             ->where('u.role != :adminRole')
             ->setParameter('adminRole', UserRole::ADMIN->value)

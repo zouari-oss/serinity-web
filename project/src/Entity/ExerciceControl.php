@@ -50,7 +50,7 @@ class ExerciceControl
     private ?string $feedback = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'assigned_by', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    #[ORM\JoinColumn(name: 'assigned_by_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?User $assignedBy = null;
 
     #[ORM\Column(name: 'created_at', type: Types::DATETIME_IMMUTABLE)]

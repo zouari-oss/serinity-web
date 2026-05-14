@@ -1,0 +1,424 @@
+{% extends 'access_control/layout.html.twig' %}
+
+{% block title %}Doctors | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+
+    <div class="ac-main" data-controller="flash-toast">
+
+        {% include 'access_control/components/_topbar.html.twig' with {
+            title: 'Doctors',
+            subtitle: 'Choose your specialist and book an appointment',
+            username: userName
+        } %}
+
+        {% for message in app.flashes('success') %}
+            <span data-flash-toast-target="message" data-type="success" hidden>{{ message }}</span>
+        {% endfor %}
+
+        {% for message in app.flashes('error') %}
+            <span data-flash-toast-target="message" data-type="error" hidden>{{ message }}</span>
+        {% endfor %}
+
+        <section class="ac-card">
+{# ADD THIS INSIDE doctor/list.html.twig #}
+
+<section class="ac-card" style="margin-bottom:1rem;">
+
+    <div class="ac-row-between" style="margin-bottom:1rem;">
+        <div>
+            <h2 style="margin:0;">AI Medical Consultation</h2>
+            <p style="margin:.35rem 0 0;color:var(--text-muted);">
+                Describe your symptoms and get instant guidance
+            </p>
+        </div>
+    </div>
+
+    <textarea
+        id="aiMessage"
+        class="ac-input"
+        rows="5"
+        placeholder="Example: chest pain, dizziness, headache, fever..."></textarea>
+
+    <div style="margin-top:1rem;">
+        <button onclick="analyseMedicalAi()" class="ac-btn ac-btn-primary">
+            Analyse Symptoms
+        </button>
+    </div>
+
+    <div id="aiResult" style="margin-top:1rem;"></div>
+
+</section>
+            <div class="ac-row-between" style="margin-bottom:1rem; gap:1rem; flex-wrap:wrap;">
+                <div>
+                    <h2 style="margin:0;">Our Doctors</h2>
+                    <p style="margin:.35rem 0 0; color:var(--text-muted);">
+                        Book a consultation with available specialists
+                    </p>
+                </div>
+
+                <span class="ac-badge ac-badge-success">
+                    {{ doctors|length }} Doctors
+                </span>
+            </div>
+
+            <div class="doctor-grid">
+
+                {% for doctor in doctors %}
+<article class="doctor-card">
+
+    <div class="doctor-head">
+        <div class="doctor-avatar">
+            {{
+                doctor.profile.firstName|default(doctor.email)|slice(0,1)|upper
+            }}
+        </div>
+
+        <div>
+            <h3 class="doctor-name">
+                {{ doctor.profile.firstName|default('') }}
+                {{ doctor.profile.lastName|default('') }}
+            </h3>
+
+            <p class="doctor-speciality">
+                {{ doctor.profile.aboutMe|default('Therapist') }}
+            </p>
+        </div>
+    </div>
+
+    <div class="doctor-meta">
+
+        <div>
+            <span class="material-symbols-outlined">mail</span>
+            {{ doctor.email }}
+        </div>
+
+        {% if doctor.profile.phone %}
+        <div>
+            <span class="material-symbols-outlined">call</span>
+            {{ doctor.profile.phone }}
+        </div>
+        {% endif %}
+
+        {% if doctor.profile.country %}
+        <div>
+            <span class="material-symbols-outlined">location_on</span>
+            {{ doctor.profile.country }}
+            {% if doctor.profile.state %}
+                - {{ doctor.profile.state }}
+            {% endif %}
+        </div>
+        {% endif %}
+
+    </div>
+
+    <div class="doctor-actions">
+        <button
+            type="button"
+            class="ac-btn ac-btn-primary"
+            onclick="openModal(
+                '{{ doctor.id }}',
+                '{{ doctor.profile.firstName|default('Doctor')|e('js') }} {{ doctor.profile.lastName|default('')|e('js') }}'
+            )">
+            Book RDV
+        </button>
+
+        <a
+            href="{{ path('app_doctor_show', { id: doctor.id }) }}"
+            class="ac-ghost-btn">
+            View
+        </a>
+    </div>
+
+</article>
+{% else %}
+<div class="ac-empty-state">
+    <h3>No doctors found</h3>
+    <p>Please try again later.</p>
+</div>
+{% endfor %}
+
+            </div>
+
+        </section>
+
+    </div>
+</div>
+
+<!-- MODAL -->
+<div id="rdvModal" class="rdv-modal">
+
+    <div class="rdv-box">
+
+        <div class="ac-row-between" style="margin-bottom:1rem;">
+            <div>
+                <h3 style="margin:0;">Book Appointment</h3>
+                <p id="doctorNameLabel" style="margin:.35rem 0 0; color:var(--text-muted);"></p>
+            </div>
+
+            <button type="button" class="close-btn" onclick="closeModal()">✕</button>
+        </div>
+
+        <form method="post" action="{{ path('app_rdv_save') }}" onsubmit="return validateForm()">
+
+            <input type="hidden" name="doctor_id" id="doctor_id">
+
+            <div class="ac-form">
+
+                <label>
+                    Motif
+                    <input
+                        type="text"
+                        name="motif"
+                        id="motif"
+                        class="ac-input"
+                        placeholder="Consultation reason">
+                    <small class="error" id="motifError"></small>
+                </label>
+
+                <label>
+                    Description
+                    <textarea
+                        name="description"
+                        id="description"
+                        rows="4"
+                        class="ac-input"
+                        placeholder="Additional details"></textarea>
+                </label>
+
+                <label>
+                    Date & Time
+                    <input
+                        type="datetime-local"
+                        name="dateTime"
+                        id="dateTime"
+                        class="ac-input">
+                    <small class="error" id="dateError"></small>
+                </label>
+
+            </div>
+
+            <div class="doctor-actions" style="margin-top:1rem;">
+                <button type="submit" class="ac-btn ac-btn-primary">
+                    Confirm
+                </button>
+
+                <button type="button" class="ac-ghost-btn" onclick="closeModal()">
+                    Cancel
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<style>
+.doctor-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(290px,1fr));
+    gap:1rem;
+}
+
+.doctor-card{
+    background:var(--surface);
+    border:1px solid var(--border-color);
+    border-radius:18px;
+    padding:1rem;
+    transition:.25s ease;
+}
+
+.doctor-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 12px 24px rgba(0,0,0,.08);
+}
+
+.doctor-head{
+    display:flex;
+    gap:1rem;
+    align-items:center;
+    margin-bottom:1rem;
+}
+
+.doctor-avatar{
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-weight:700;
+    background:linear-gradient(135deg,#2f6f6d,#4bb7ae);
+    flex-shrink:0;
+}
+
+.doctor-name{
+    margin:0;
+    font-size:1rem;
+}
+
+.doctor-speciality{
+    margin:.35rem 0 0;
+    color:var(--text-muted);
+    font-size:.92rem;
+}
+
+.doctor-meta{
+    margin-bottom:1rem;
+    color:var(--text-muted);
+    font-size:.92rem;
+}
+
+.doctor-meta div{
+    display:flex;
+    gap:.45rem;
+    align-items:center;
+}
+
+.doctor-actions{
+    display:flex;
+    gap:.65rem;
+    flex-wrap:wrap;
+}
+
+.rdv-modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+    padding:1rem;
+}
+
+.rdv-box{
+    width:min(520px,100%);
+    background:var(--surface);
+    border-radius:20px;
+    padding:1.25rem;
+    box-shadow:0 20px 45px rgba(0,0,0,.15);
+}
+
+.close-btn{
+    border:none;
+    background:none;
+    font-size:1.1rem;
+    cursor:pointer;
+}
+
+.error{
+    color:#dc2626;
+    font-size:.8rem;
+}
+</style>
+
+<script>
+function openModal(id, name){
+    document.getElementById('doctor_id').value = id;
+    document.getElementById('doctorNameLabel').innerText = name;
+    document.getElementById('rdvModal').style.display = 'flex';
+}
+
+function closeModal(){
+    document.getElementById('rdvModal').style.display = 'none';
+}
+
+function validateForm(){
+    let valid = true;
+
+    const motif = document.getElementById('motif').value.trim();
+    const date  = document.getElementById('dateTime').value;
+
+    document.getElementById('motifError').innerText = '';
+    document.getElementById('dateError').innerText = '';
+
+    if(!motif){
+        document.getElementById('motifError').innerText = 'Required field';
+        valid = false;
+    }
+
+    if(!date){
+        document.getElementById('dateError').innerText = 'Required field';
+        valid = false;
+    }
+
+    return valid;
+}
+
+window.addEventListener('click', function(e){
+    const modal = document.getElementById('rdvModal');
+    if(e.target === modal){
+        closeModal();
+    }
+});
+</script>
+<script>
+async function analyseMedicalAi(){
+
+    const msg = document.getElementById('aiMessage').value.trim();
+    const box = document.getElementById('aiResult');
+
+    if(!msg){
+        box.innerHTML = `<div class="alert alert-danger">Please describe symptoms.</div>`;
+        return;
+    }
+
+    box.innerHTML = `<div class="alert alert-info">Analysing...</div>`;
+
+    const res = await fetch('{{ path('app_medical_ai_analyse') }}',{
+        method:'POST',
+        headers:{
+            'Content-Type':'application/json'
+        },
+        body:JSON.stringify({
+            message:msg
+        })
+    });
+
+    const data = await res.json();
+
+    if(!data.success){
+        box.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+        return;
+    }
+
+    let color = '#16a34a';
+
+    if(data.level === 'medium') color = '#d97706';
+    if(data.level === 'high') color = '#dc2626';
+    if(data.level === 'emergency') color = '#991b1b';
+
+    let actions = '';
+
+    data.actions.forEach(a=>{
+        actions += `<li>${a}</li>`;
+    });
+
+    box.innerHTML = `
+        <div style="
+            border:1px solid #e5e7eb;
+            border-left:6px solid ${color};
+            padding:18px;
+            border-radius:14px;
+            background:white;
+        ">
+            <h4 style="margin:0 0 10px 0;color:${color};">${data.title}</h4>
+
+            <p style="margin-bottom:10px;">${data.analysis}</p>
+
+            <strong>Recommended actions:</strong>
+            <ul>${actions}</ul>
+
+            <div style="margin-top:10px;font-weight:700;color:${color};">
+                Risk Level: ${data.level.toUpperCase()}
+            </div>
+        </div>
+    `;
+}
+</script>
+{% endblock %}

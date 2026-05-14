@@ -1,0 +1,323 @@
+{% extends 'access_control/layout.html.twig' %}
+
+{% block title %}Consultation Live | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+
+    <div class="ac-main" data-controller="flash-toast">
+
+        {% include 'access_control/components/_topbar.html.twig' with {
+            title: 'Rendez-vous en ligne',
+            subtitle: 'Consultation & vidéo meeting sécurisé',
+            username: userName
+        } %}
+
+<section class="rdv-wrapper">
+
+<style>
+.rdv-wrapper{
+    max-width:1400px;
+    margin:auto;
+    padding:1.2rem;
+}
+
+.hero-card{
+    background:linear-gradient(135deg,#0f172a,#1e293b,#2F6F6D);
+    color:#fff;
+    border-radius:24px;
+    padding:1.4rem;
+    margin-bottom:1.2rem;
+    box-shadow:0 25px 50px rgba(0,0,0,.18);
+}
+
+.hero-top{
+    display:flex;
+    justify-content:space-between;
+    gap:1rem;
+    flex-wrap:wrap;
+    align-items:center;
+}
+
+.doc-box{
+    display:flex;
+    gap:1rem;
+    align-items:center;
+}
+
+.avatar{
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    background:rgba(255,255,255,.15);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.4rem;
+    font-weight:800;
+}
+
+.doc-name{
+    margin:0;
+    font-size:1.2rem;
+    font-weight:800;
+}
+
+.doc-sub{
+    margin-top:.35rem;
+    opacity:.85;
+}
+
+.live-badge{
+    padding:.65rem 1rem;
+    border-radius:999px;
+    font-weight:800;
+    font-size:.82rem;
+    background:#16a34a;
+    color:#fff;
+}
+
+.wait-badge{
+    padding:.65rem 1rem;
+    border-radius:999px;
+    font-weight:800;
+    font-size:.82rem;
+    background:#f59e0b;
+    color:#fff;
+}
+
+.main-grid{
+    display:grid;
+    grid-template-columns:390px 1fr;
+    gap:1rem;
+}
+
+.side-panel{
+    background:#fff;
+    border:1px solid #e2e8f0;
+    border-radius:22px;
+    padding:1rem;
+}
+
+.info-box{
+    background:#f8fafc;
+    border:1px solid #eef2f7;
+    border-radius:18px;
+    padding:1rem;
+    margin-bottom:.8rem;
+}
+
+.label{
+    font-size:.75rem;
+    text-transform:uppercase;
+    color:#94a3b8;
+    font-weight:800;
+    margin-bottom:.4rem;
+}
+
+.value{
+    font-weight:700;
+    color:#0f172a;
+    line-height:1.5;
+}
+
+.meet-card{
+    background:#fff;
+    border:1px solid #e2e8f0;
+    border-radius:22px;
+    padding:1rem;
+    min-height:760px;
+}
+
+.jitsi-box{
+    overflow:hidden;
+    border-radius:18px;
+    height:720px;
+    border:1px solid #e2e8f0;
+}
+
+.empty-state{
+    height:720px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    text-align:center;
+    background:#f8fafc;
+    border-radius:18px;
+}
+
+.empty-state h3{
+    margin:.8rem 0 .35rem;
+}
+
+.btn-back{
+    margin-top:1rem;
+    display:inline-flex;
+    gap:.6rem;
+    align-items:center;
+    text-decoration:none;
+    padding:.9rem 1.2rem;
+    border-radius:14px;
+    background:#0f172a;
+    color:#fff;
+    font-weight:700;
+}
+
+@media(max-width:1100px){
+    .main-grid{
+        grid-template-columns:1fr;
+    }
+
+    .jitsi-box,
+    .empty-state{
+        height:620px;
+    }
+}
+</style>
+
+{% set doctorName = rdv.doctor.fullName is defined and rdv.doctor.fullName ? rdv.doctor.fullName : rdv.doctor.email %}
+
+<div class="hero-card">
+
+    <div class="hero-top">
+
+        <div class="doc-box">
+
+            <div class="avatar">
+                {{ doctorName|slice(0,1)|upper }}
+            </div>
+
+            <div>
+                <h2 class="doc-name">{{ doctorName }}</h2>
+                <div class="doc-sub">
+                    Consultation médicale digitale sécurisée
+                </div>
+            </div>
+
+        </div>
+
+        {% if canJoinMeet %}
+            <div class="live-badge">
+                ● Live Meeting Available
+            </div>
+        {% else %}
+            <div class="wait-badge">
+                Starts at {{ rdv.proposedDateTime|date('H:i') }}
+            </div>
+        {% endif %}
+
+    </div>
+
+</div>
+
+<div class="main-grid">
+
+    <div class="side-panel">
+
+        <div class="info-box">
+            <div class="label">Date proposé</div>
+            <div class="value">
+                {{ rdv.proposedDateTime|date('d/m/Y H:i') }}
+            </div>
+        </div>
+
+        <div class="info-box">
+            <div class="label">Status</div>
+            <div class="value">{{ rdv.status }}</div>
+        </div>
+
+        <div class="info-box">
+            <div class="label">Motif</div>
+            <div class="value">
+                {{ rdv.motif ?: 'Consultation générale' }}
+            </div>
+        </div>
+
+        <div class="info-box">
+            <div class="label">Description</div>
+            <div class="value">
+                {{ rdv.description ?: 'Aucune description.' }}
+            </div>
+        </div>
+
+        {% if rdv.doctorNote %}
+        <div class="info-box">
+            <div class="label">Doctor Note</div>
+            <div class="value">{{ rdv.doctorNote }}</div>
+        </div>
+        {% endif %}
+
+        <a href="{{ path('app_patient_rdv') }}" class="btn-back">
+            <i class="bi bi-arrow-left"></i>
+            Retour
+        </a>
+
+    </div>
+
+
+    <div class="meet-card">
+
+        {% if canJoinMeet %}
+
+            <div id="jitsi-container" class="jitsi-box"></div>
+
+        {% else %}
+
+            <div class="empty-state">
+                <i class="bi bi-camera-video-off" style="font-size:3rem;color:#94a3b8;"></i>
+                <h3>Meeting not available yet</h3>
+                <p>
+                    Your secure consultation room opens automatically
+                    at the appointment time.
+                </p>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</section>
+
+{% if canJoinMeet %}
+<script src="https://meet.jit.si/external_api.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const domain = "meet.jit.si";
+
+    const options = {
+        roomName: "{{ roomName }}",
+        width: "100%",
+        height: "100%",
+        parentNode: document.querySelector('#jitsi-container'),
+
+        userInfo: {
+            displayName: "{{ userName|e('js') }}"
+        },
+
+        configOverwrite: {
+            prejoinPageEnabled: false,
+            startWithAudioMuted: false,
+            startWithVideoMuted: false
+        },
+
+        interfaceConfigOverwrite: {
+            SHOW_JITSI_WATERMARK: false,
+            SHOW_BRAND_WATERMARK: false
+        }
+    };
+
+    new JitsiMeetExternalAPI(domain, options);
+});
+</script>
+{% endif %}
+
+    </div>
+</div>
+{% endblock %}

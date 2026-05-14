@@ -1,0 +1,250 @@
+{% extends 'access_control/layout.html.twig' %}
+
+{% block title %}Valider Rendez-vous | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+
+    <div class="ac-main" data-controller="flash-toast">
+
+        {% include 'access_control/components/_topbar.html.twig' with {
+            title: 'Validation Rendez-vous',
+            subtitle: 'Confirmer ou reprogrammer une consultation',
+            username: userName
+        } %}
+
+        {% for message in app.flashes('success') %}
+            <span data-flash-toast-target="message" data-type="success" hidden>{{ message }}</span>
+        {% endfor %}
+
+        {% for message in app.flashes('error') %}
+            <span data-flash-toast-target="message" data-type="error" hidden>{{ message }}</span>
+        {% endfor %}
+
+        <section class="ac-card accept-shell">
+
+            <style>
+                .accept-shell{
+                    max-width:760px;
+                    margin:auto;
+                    padding:1.4rem;
+                }
+
+                .accept-header{
+                    display:flex;
+                    align-items:center;
+                    gap:1rem;
+                    margin-bottom:1.4rem;
+                    padding-bottom:1rem;
+                    border-bottom:1px solid #eef2f7;
+                }
+
+                .accept-avatar{
+                    width:62px;
+                    height:62px;
+                    border-radius:50%;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    color:#fff;
+                    font-size:1.15rem;
+                    font-weight:800;
+                    background:linear-gradient(135deg,#2F6F6D,#57a7a3);
+                    flex-shrink:0;
+                }
+
+                .accept-name{
+                    margin:0;
+                    font-size:1.1rem;
+                    font-weight:800;
+                    color:#0f172a;
+                }
+
+                .accept-sub{
+                    color:#64748b;
+                    margin-top:.2rem;
+                    font-size:.9rem;
+                }
+
+                .info-strip{
+                    display:grid;
+                    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+                    gap:.8rem;
+                    margin-bottom:1.2rem;
+                }
+
+                .info-box{
+                    background:#f8fafc;
+                    border:1px solid #eef2f7;
+                    border-radius:16px;
+                    padding:.9rem;
+                }
+
+                .info-label{
+                    font-size:.76rem;
+                    color:#94a3b8;
+                    text-transform:uppercase;
+                    font-weight:700;
+                    letter-spacing:.04em;
+                    margin-bottom:.35rem;
+                }
+
+                .info-value{
+                    font-weight:700;
+                    color:#0f172a;
+                }
+
+                .form-grid{
+                    display:grid;
+                    gap:1rem;
+                }
+
+                .field-box{
+                    background:#fff;
+                    border:1px solid #eef2f7;
+                    border-radius:18px;
+                    padding:1rem;
+                }
+
+                .field-box label{
+                    display:block;
+                    font-weight:700;
+                    margin-bottom:.55rem;
+                    color:#0f172a;
+                }
+
+                .field-box input,
+                .field-box textarea,
+                .field-box select{
+                    width:100%;
+                    border:1px solid #dbe3ee;
+                    border-radius:14px;
+                    padding:.8rem .95rem;
+                    outline:none;
+                    transition:.2s;
+                    background:#fff;
+                }
+
+                .field-box input:focus,
+                .field-box textarea:focus,
+                .field-box select:focus{
+                    border-color:#2F6F6D;
+                    box-shadow:0 0 0 4px rgba(47,111,109,.08);
+                }
+
+                .form-error{
+                    margin-top:.45rem;
+                    color:#dc2626;
+                    font-size:.84rem;
+                }
+
+                .action-row{
+                    display:flex;
+                    gap:.8rem;
+                    flex-wrap:wrap;
+                    margin-top:1.2rem;
+                }
+
+                .btn-main{
+                    border:none;
+                    padding:.9rem 1.2rem;
+                    border-radius:14px;
+                    font-weight:800;
+                    color:#fff;
+                    text-decoration:none;
+                    background:linear-gradient(135deg,#16a34a,#22c55e);
+                    box-shadow:0 10px 25px rgba(34,197,94,.18);
+                    transition:.2s;
+                }
+
+                .btn-main:hover{
+                    transform:translateY(-2px);
+                }
+
+                .btn-ghost{
+                    padding:.9rem 1.2rem;
+                    border-radius:14px;
+                    font-weight:700;
+                    text-decoration:none;
+                    color:#334155;
+                    background:#f8fafc;
+                    border:1px solid #e2e8f0;
+                }
+            </style>
+
+            {% set patientName = rdv.patient.fullName is defined and rdv.patient.fullName ? rdv.patient.fullName : rdv.patient.email %}
+
+            <div class="accept-header">
+
+                <div class="accept-avatar">
+                    {{ patientName|slice(0,1)|upper }}
+                </div>
+
+                <div>
+                    <h3 class="accept-name">{{ patientName }}</h3>
+                    <div class="accept-sub">
+                        Validation du rendez-vous demandé
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="info-strip">
+
+                <div class="info-box">
+                    <div class="info-label">Date demandée</div>
+                    <div class="info-value">
+                        {{ rdv.dateTime ? rdv.dateTime|date('d/m/Y H:i') : 'Non définie' }}
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-label">Statut</div>
+                    <div class="info-value">{{ rdv.status }}</div>
+                </div>
+
+            </div>
+
+            {{ form_start(form, {'attr': {'novalidate':'novalidate'}}) }}
+
+                <div class="form-grid">
+
+                    <div class="field-box">
+                        {{ form_label(form.proposedDateTime) }}
+                        {{ form_widget(form.proposedDateTime) }}
+                        <div class="form-error">
+                            {{ form_errors(form.proposedDateTime) }}
+                        </div>
+                    </div>
+
+                    <div class="field-box">
+                        {{ form_label(form.doctorNote) }}
+                        {{ form_widget(form.doctorNote, {'attr': {'rows': 5}}) }}
+                        <div class="form-error">
+                            {{ form_errors(form.doctorNote) }}
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="action-row">
+                    <button class="btn-main">
+                        <i class="bi bi-check-circle"></i>
+                        Confirmer le rendez-vous
+                    </button>
+
+                    <a href="{{ path('app_therapist_rdv') }}" class="btn-ghost">
+                        Retour
+                    </a>
+                </div>
+
+            {{ form_end(form) }}
+
+        </section>
+
+    </div>
+
+</div>
+{% endblock %}

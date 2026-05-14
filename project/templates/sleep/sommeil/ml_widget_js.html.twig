@@ -1,0 +1,141 @@
+<script>
+    window.initSleepMLWidget = function () {
+        console.log('ML init OK');
+
+        const form = document.getElementById('sleepMLForm');
+        if (!form || form.dataset.bound === '1') return;
+        form.dataset.bound = '1';
+
+        const btn = document.getElementById('analyseBtn');
+        const btnText = document.getElementById('btnText');
+        const errBox = document.getElementById('mlError');
+        const results = document.getElementById('mlResults');
+        const stressSlider = document.getElementById('stress_level');
+        const stressVal = document.getElementById('stressVal');
+        const stressDisp = document.getElementById('stressDisplay');
+
+        if (stressSlider) {
+            stressSlider.addEventListener('input', () => {
+                if (stressVal) stressVal.textContent = stressSlider.value;
+                if (stressDisp) stressDisp.textContent = stressSlider.value;
+            });
+        }
+
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            setLoading(true);
+
+            if (errBox) {
+                errBox.style.display = 'none';
+                errBox.textContent = '';
+            }
+
+            if (results) {
+                results.style.display = 'none';
+            }
+
+            const fd = new FormData(form);
+            const payload = {
+                bedtime_hour: Number(fd.get('bedtime_hour')),
+                stress_level: Number(fd.get('stress_level')),
+                physical_activity_minutes: Number(fd.get('physical_activity_minutes')),
+                temperature: Number(fd.get('temperature')),
+                noise_level: fd.get('noise_level'),
+                mood_bedtime: fd.get('mood_bedtime'),
+                age: Number(fd.get('age')),
+                bmi_category: fd.get('bmi_category'),
+                sleep_duration: Number(fd.get('sleep_duration')),
+            };
+
+            try {
+                const res = await fetch('/sleep/ml/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                const raw = await res.text();
+                console.log('ML RAW RESPONSE:', raw);
+
+                let data;
+                try {
+                    data = JSON.parse(raw);
+                } catch (parseErr) {
+                    showError('Réponse non JSON : ' + raw.substring(0, 200));
+                    return;
+                }
+
+                if (!res.ok || data.error) {
+                    showError(data.error || 'Erreur serveur.');
+                    return;
+                }
+
+                renderResults(data);
+            } catch (err) {
+                showError('Erreur réseau JS: ' + err.message);
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function renderResults(data) {
+            const q = data.sleep_quality || {};
+            const wt = data.wake_time || {};
+            const ins = data.insights || {};
+
+            const qualityIcon = document.getElementById('resQualityIcon');
+            const qualityLabel = document.getElementById('resQualityLabel');
+            const qualityNum = document.getElementById('resQualityNum');
+            const qualityBar = document.getElementById('resQualityBar');
+            const wakeTime = document.getElementById('resWakeTime');
+            const cycles = document.getElementById('resCycles');
+            const advice = document.getElementById('resAdvice');
+            const tipsList = document.getElementById('resTips');
+
+            if (qualityIcon) qualityIcon.textContent = q.icon || '😐';
+            if (qualityLabel) qualityLabel.textContent = q.label || '—';
+            if (qualityNum) qualityNum.textContent = `Score : ${q.score ?? '—'}/10`;
+
+            if (qualityBar) {
+                qualityBar.style.width = '0%';
+                qualityBar.style.background = q.color || 'var(--color-primary)';
+                setTimeout(() => {
+                    qualityBar.style.width = (((q.score || 0) / 10) * 100) + '%';
+                }, 50);
+            }
+
+            if (wakeTime) wakeTime.textContent = wt.time || '—h—';
+            if (cycles) cycles.textContent = `${wt.cycles ?? '—'} cycles de sommeil`;
+            if (advice) advice.textContent = q.advice || '';
+
+            if (tipsList) {
+                tipsList.innerHTML = '';
+                (ins.tips || []).forEach(tip => {
+                    const li = document.createElement('li');
+                    li.textContent = tip;
+                    tipsList.appendChild(li);
+                });
+            }
+
+            if (results) {
+                results.style.display = 'flex';
+            }
+        }
+
+        function showError(msg) {
+            if (!errBox) return;
+            errBox.textContent = '❌ ' + msg;
+            errBox.style.display = 'block';
+        }
+
+        function setLoading(on) {
+            if (btn) btn.disabled = on;
+            if (btnText) btnText.textContent = on ? 'Analyse en cours…' : '🔍 Analyser mon sommeil';
+        }
+    };
+</script>

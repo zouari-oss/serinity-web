@@ -45,6 +45,12 @@
                     <span class="material-symbols-outlined" style="font-size:18px;">cloud</span>
                     Météo sommeil
                 </button>
+
+                <button type="button" class="ac-ghost-btn" id="openSleepMLBtn">
+                    <span class="material-symbols-outlined" style="font-size:18px;">auto_awesome</span>
+                    Prédiction sommeil
+                </button>
+
                 <button type="button" class="ac-btn ac-btn-primary"
                         onclick="openSommeilModal('{{ path('app_sommeil_new') }}')">
                     <span class="material-symbols-outlined" style="font-size:18px;">add</span>
@@ -68,6 +74,15 @@
                     frameborder="0" allowFullScreen="true" loading="lazy"></iframe>
         </div>
     </section>
+
+    <div class="rv-modal-overlay" id="sleepMlModal" hidden>
+        <div class="rv-modal-dialog" role="dialog" aria-modal="true" aria-label="Fenêtre de prédiction sommeil">
+            <button type="button" class="rv-modal-close" onclick="closeSleepMlModal()" aria-label="Fermer">×</button>
+            <div class="rv-modal-content" id="sleepMlContent">
+                <div class="rv-modal-loading">Chargement...</div>
+            </div>
+        </div>
+    </div>
 
     {# ── Filtres ── #}
     <section class="ac-card" style="margin-bottom: 1.5rem;">
@@ -156,7 +171,8 @@
         function openDeleteModal(url, label, token) {
             document.getElementById('deleteForm').action = url;
             document.getElementById('deleteForm').querySelector('[name="_token"]').value = token;
-            document.getElementById('deleteModalBody').textContent = 'Supprimer la nuit du "' + label + '" ? Action irréversible.';
+            document.getElementById('deleteModalBody').textContent =
+                'Supprimer la nuit du "' + label + '" ? Action irréversible.';
             document.getElementById('deleteModal').hidden = false;
         }
         function closeDeleteModal() {
@@ -173,7 +189,10 @@
             fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
                 .then(r => r.text())
                 .then(html => { content.innerHTML = html; bindSommeilModalForms(); })
-                .catch(() => { content.innerHTML = '<div class="rv-modal-error">Impossible de charger le contenu.</div>'; });
+                .catch(() => {
+                    content.innerHTML =
+                        '<div class="rv-modal-error">Impossible de charger le contenu.</div>';
+                });
             return false;
         }
         function closeSommeilModal() {
@@ -199,26 +218,99 @@
                         const ct = response.headers.get('content-type') || '';
                         if (ct.includes('application/json')) {
                             const data = await response.json();
-                            if (data.success) { closeSommeilModal(); window.location.reload(); return; }
+                            if (data.success) {
+                                closeSommeilModal();
+                                window.location.reload();
+                                return;
+                            }
                         }
                         content.innerHTML = await response.text();
                         bindSommeilModalForms();
                     }).catch(() => {
-                        content.innerHTML = '<div class="rv-modal-error">Erreur lors de la soumission.</div>';
+                        content.innerHTML =
+                            '<div class="rv-modal-error">Erreur lors de la soumission.</div>';
                     });
                 });
             });
         }
 
+        // IIFE 1 : gestion modales delete + sommeil
         (function() {
             const dm = document.getElementById('deleteModal');
             const sm = document.getElementById('sommeilModal');
-            if (dm) dm.addEventListener('click', e => { if (e.target === e.currentTarget) closeDeleteModal(); });
-            if (sm) sm.addEventListener('click', e => { if (e.target === e.currentTarget) closeSommeilModal(); });
+            if (dm) dm.addEventListener('click', e => {
+                if (e.target === e.currentTarget) closeDeleteModal();
+            });
+            if (sm) sm.addEventListener('click', e => {
+                if (e.target === e.currentTarget) closeSommeilModal();
+            });
             document.addEventListener('keydown', e => {
-                if (e.key === 'Escape') { closeDeleteModal(); closeSommeilModal(); }
+                if (e.key === 'Escape') {
+                    closeDeleteModal();
+                    closeSommeilModal();
+                }
+            });
+        })();  // ← il manquait ça dans ton code
+
+        // IIFE 2 : bouton Prédiction sommeil ML
+        function openSleepMlModal() {
+            const modal = document.getElementById('sleepMlModal');
+            const content = document.getElementById('sleepMlContent');
+            if (!modal || !content) return false;
+
+            modal.hidden = false;
+            modal.classList.add('open');
+            content.innerHTML = '<div class="rv-modal-loading">Chargement...</div>';
+
+            fetch('{{ path("ml_widget") }}', {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(r => r.text())
+                .then(html => {
+                    content.innerHTML = html;
+                    if (window.initSleepMLWidget) {
+                        window.initSleepMLWidget();
+                    }
+                })
+                .catch(() => {
+                    content.innerHTML =
+                        '<div class="rv-modal-error">Erreur lors du chargement du module ML.</div>';
+                });
+
+            return false;
+        }
+
+        function closeSleepMlModal() {
+            const modal = document.getElementById('sleepMlModal');
+            const content = document.getElementById('sleepMlContent');
+            if (!modal || !content) return;
+            modal.classList.remove('open');
+            modal.hidden = true;
+            content.innerHTML = '<div class="rv-modal-loading">Chargement...</div>';
+        }
+
+        (function () {
+            const btn = document.getElementById('openSleepMLBtn');
+            const modal = document.getElementById('sleepMlModal');
+
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    openSleepMlModal();
+                });
+            }
+
+            if (modal) {
+                modal.addEventListener('click', e => {
+                    if (e.target === e.currentTarget) closeSleepMlModal();
+                });
+            }
+
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape') closeSleepMlModal();
             });
         })();
     </script>
+    {% include 'sleep/sommeil/ml_widget_js.html.twig' %}
+
     <script src="{{ asset('assets/js/sleep-weather-widget.js') }}"></script>
 {% endblock %}

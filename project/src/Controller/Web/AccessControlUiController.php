@@ -517,7 +517,7 @@ final class AccessControlUiController extends AbstractController
             'nav' => $this->buildNav('ac_ui_exercises'),
             'userName' => $this->getUser()?->getEmail() ?? 'Admin',
             'summary' => $this->adminExerciceService->summary(),
-            'exercices' => $this->paginator->paginate($exercices, max(1, $request->query->getInt('page', 1)), 8),
+            'exercices' => $this->paginator->paginate($exercices, max(1, $request->query->getInt('page', 1)), 3),
             'exerciseTypeChart' => $this->buildPieChart(
                 'Exercises by type',
                 ['Type', 'Exercises'],
@@ -756,6 +756,14 @@ final class AccessControlUiController extends AbstractController
         $dto->durationMinutes = max(1, min(300, (int) $request->request->get('durationMinutes', 10)));
         $description = trim((string) $request->request->get('description', ''));
         $dto->description = $description !== '' ? $description : null;
+        $benefits = trim((string) $request->request->get('benefits', ''));
+        $dto->benefits = $benefits !== '' ? $benefits : null;
+        $tips = trim((string) $request->request->get('tips', ''));
+        $dto->tips = $tips !== '' ? $tips : null;
+        $theme = trim((string) $request->request->get('theme', ''));
+        $dto->theme = $theme !== '' ? $theme : null;
+        $guidedInstructionsText = trim((string) $request->request->get('guidedInstructionsText', ''));
+        $dto->guidedInstructionsText = $guidedInstructionsText !== '' ? $guidedInstructionsText : null;
         $dto->isActive = $request->request->has('isActive');
 
         return $dto;
@@ -799,18 +807,6 @@ final class AccessControlUiController extends AbstractController
         $chart->getOptions()->getLegend()->setPosition('none');
 
         return $chart;
-    }
-
-    #[Route('/admin/forum', name: 'ac_ui_forum', methods: ['GET'])]
-    #[IsGranted('ROLE_ADMIN')]
-    public function forum(): Response
-    {
-        return $this->render('access_control/pages/coming_soon.html.twig', [
-            'nav' => $this->buildNav('ac_ui_forum'),
-            'userName' => $this->getUser()?->getEmail() ?? 'Admin',
-            'title' => 'Forum',
-            'subtitle' => 'Forum moderation and insights are coming soon.',
-        ]);
     }
 
     #[Route('/admin/mood', name: 'ac_ui_mood', methods: ['GET'])]
@@ -1141,7 +1137,7 @@ final class AccessControlUiController extends AbstractController
             ['section' => 'Users management', 'label' => 'Users', 'route' => 'ac_ui_users', 'icon' => 'group'],
             ['section' => 'Users management', 'label' => 'Consultations', 'route' => 'ac_ui_consultations', 'icon' => 'medical_services'],
             ['section' => 'Users management', 'label' => 'Exercises', 'route' => 'ac_ui_exercises', 'icon' => 'self_improvement'],
-            ['section' => 'Users management', 'label' => 'Forum', 'route' => 'ac_ui_forum', 'icon' => 'forum'],
+            ['section' => 'Users management', 'label' => 'Forum', 'route' => 'app_admin_forum', 'icon' => 'forum'],
             ['section' => 'Users management', 'label' => 'Sleep', 'route' => 'app_admin_sommeil_index', 'icon' => 'nights_stay'],
             [
                 'section' => 'Users management',

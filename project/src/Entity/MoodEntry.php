@@ -20,7 +20,11 @@ class MoodEntry
     #[ORM\Column(type: Types::BIGINT)]
     private ?string $id = null;
 
-    #[ORM\Column(name: 'entry_date', type: Types::DATETIME_IMMUTABLE)]
+    #[ORM\Column(
+        name: 'entry_date',
+        type: Types::DATETIME_IMMUTABLE,
+        options: ['default' => 'CURRENT_TIMESTAMP']
+    )]
     private \DateTimeImmutable $entryDate;
 
     #[ORM\Column(name: 'moment_type', type: Types::STRING, length: 16)]
@@ -29,8 +33,19 @@ class MoodEntry
     #[ORM\Column(name: 'mood_level', type: Types::SMALLINT)]
     private int $moodLevel;
 
-    #[ORM\Column(name: 'updated_at', type: Types::DATETIME_IMMUTABLE)]
+    #[ORM\Column(
+        name: 'updated_at',
+        type: Types::DATETIME_IMMUTABLE,
+        options: ['default' => 'CURRENT_TIMESTAMP']
+    )]
     private \DateTimeImmutable $updatedAt;
+
+    #[ORM\Column(
+        name: 'created_at',
+        type: Types::DATETIME_IMMUTABLE,
+        options: ['default' => 'CURRENT_TIMESTAMP']
+    )]
+    private \DateTimeImmutable $createdAt;
 
     #[ORM\ManyToOne(inversedBy: 'moodEntries')]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]

@@ -7,24 +7,56 @@ namespace App\Controller;
 use App\Entity\ForumThread;
 use App\Enum\ThreadStatus;
 use App\Form\ForumThreadType;
+use App\Service\AuthenticationService;
 use App\Service\ForumCurrentUserService;
 use App\Service\ForumImageUploadService;
-use App\Service\ForumRateLimitService;
 use App\Service\InteractionService;
 use App\Service\SpamRateLimiterService;
 use App\Service\ThreadDuplicateRadarService;
 use App\Service\ThreadService;
 use App\Service\User\UserNavService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/threads')]
 #[IsGranted('IS_AUTHENTICATED_FULLY')]
 class ThreadManageController extends AbstractController
 {
+    public function __construct(
+        private readonly TokenStorageInterface $tokenStorage,
+        private readonly AuthenticationService $authenticationService,
+    ) {
+    }
+
+    /**
+     * Invalidates the JWT server-side, clears both auth cookies,
+     * adds the ban flash, and redirects to the home page.
+     */
+    private function banAndLogout(Request $request, string $message): Response
+    {
+        // Invalidate refresh token server-side
+        $refreshToken = (string) $request->cookies->get('refresh_token', '');
+        if ($refreshToken !== '') {
+            $this->authenticationService->logout($refreshToken);
+        }
+
+        // Clear the in-memory security token
+        $this->tokenStorage->setToken(null);
+
+        $this->addFlash('danger', $message);
+
+        $response = $this->redirectToRoute('home');
+        $response->headers->clearCookie('access_token', '/', null, false, false, 'lax');
+        $response->headers->clearCookie('refresh_token', '/', null, false, true, 'lax');
+
+        return $response;
+    }
+
     #[Route('/new', name: 'app_thread_new')]
     public function new(
         Request $request,
@@ -40,16 +72,14 @@ class ThreadManageController extends AbstractController
             return $this->redirectToRoute('app_admin_forum');
         }
 
-       
- // Check if user is currently banned
+        // Check if user is currently banned
         if ($spamRateLimiterService->isUserBannedForSpam($currentUser)) {
             $remainingSeconds = $spamRateLimiterService->getRemainingBanSeconds($currentUser);
-            $this->addFlash('danger', sprintf(
+
+            return $this->banAndLogout($request, sprintf(
                 'Your account is temporarily banned due to spam activity. Please try again in %s.',
                 $spamRateLimiterService->formatRemainingBanTime($remainingSeconds)
             ));
-
-            return $this->redirectToRoute('app_forum_feed');
         }
 
         $threadError = null;
@@ -65,12 +95,11 @@ class ThreadManageController extends AbstractController
                 // Ban user for 12 hours due to spam
                 $spamRateLimiterService->banUserForSpam($currentUser);
                 $remainingSeconds = $spamRateLimiterService->getRemainingBanSeconds($currentUser);
-                $this->addFlash('danger', sprintf(
+
+                return $this->banAndLogout($request, sprintf(
                     'You have been temporarily banned due to spam activity. Please try again in %s.',
                     $spamRateLimiterService->formatRemainingBanTime($remainingSeconds)
                 ));
-
-                return $this->redirectToRoute('app_forum_feed');
             }
 
             $forcePublish = $request->request->getBoolean('force_publish');
@@ -293,6 +322,7 @@ class ThreadManageController extends AbstractController
     #[Route('/{id}/upvote', name: 'app_thread_upvote')]
     public function upvote(
         ForumThread $thread,
+        Request $request,
         InteractionService $interactionService,
         ForumCurrentUserService $currentUserService,
         SpamRateLimiterService $spamRateLimiterService,
@@ -305,12 +335,11 @@ class ThreadManageController extends AbstractController
         // Check if user is banned
         if ($spamRateLimiterService->isUserBannedForSpam($currentUser)) {
             $remainingSeconds = $spamRateLimiterService->getRemainingBanSeconds($currentUser);
-            $this->addFlash('danger', sprintf(
+
+            return $this->banAndLogout($request, sprintf(
                 'Your account is temporarily banned due to spam activity. Please try again in %s.',
                 $spamRateLimiterService->formatRemainingBanTime($remainingSeconds)
             ));
-
-            return $this->redirectToRoute('app_forum_thread_detail', ['id' => $thread->getId()]);
         }
 
         // Check spam rate limit for interactions
@@ -319,12 +348,11 @@ class ThreadManageController extends AbstractController
             // Ban user for 12 hours due to spam
             $spamRateLimiterService->banUserForSpam($currentUser);
             $remainingSeconds = $spamRateLimiterService->getRemainingBanSeconds($currentUser);
-            $this->addFlash('danger', sprintf(
+
+            return $this->banAndLogout($request, sprintf(
                 'You have been temporarily banned due to spam activity. Please try again in %s.',
                 $spamRateLimiterService->formatRemainingBanTime($remainingSeconds)
             ));
-
-            return $this->redirectToRoute('app_forum_thread_detail', ['id' => $thread->getId()]);
         }
 
         $interactionService->toggleUpvote($thread, $currentUser);
@@ -335,6 +363,7 @@ class ThreadManageController extends AbstractController
     #[Route('/{id}/downvote', name: 'app_thread_downvote')]
     public function downvote(
         ForumThread $thread,
+        Request $request,
         InteractionService $interactionService,
         ForumCurrentUserService $currentUserService,
         SpamRateLimiterService $spamRateLimiterService,
@@ -347,12 +376,11 @@ class ThreadManageController extends AbstractController
         // Check if user is banned
         if ($spamRateLimiterService->isUserBannedForSpam($currentUser)) {
             $remainingSeconds = $spamRateLimiterService->getRemainingBanSeconds($currentUser);
-            $this->addFlash('danger', sprintf(
+
+            return $this->banAndLogout($request, sprintf(
                 'Your account is temporarily banned due to spam activity. Please try again in %s.',
                 $spamRateLimiterService->formatRemainingBanTime($remainingSeconds)
             ));
-
-            return $this->redirectToRoute('app_forum_thread_detail', ['id' => $thread->getId()]);
         }
 
         // Check spam rate limit for interactions
@@ -361,12 +389,11 @@ class ThreadManageController extends AbstractController
             // Ban user for 12 hours due to spam
             $spamRateLimiterService->banUserForSpam($currentUser);
             $remainingSeconds = $spamRateLimiterService->getRemainingBanSeconds($currentUser);
-            $this->addFlash('danger', sprintf(
+
+            return $this->banAndLogout($request, sprintf(
                 'You have been temporarily banned due to spam activity. Please try again in %s.',
                 $spamRateLimiterService->formatRemainingBanTime($remainingSeconds)
             ));
-
-            return $this->redirectToRoute('app_forum_thread_detail', ['id' => $thread->getId()]);
         }
 
         $interactionService->toggleDownvote($thread, $currentUser);
@@ -380,7 +407,6 @@ class ThreadManageController extends AbstractController
         Request $request,
         InteractionService $interactionService,
         ForumCurrentUserService $currentUserService,
-        ForumRateLimitService $forumRateLimitService,
         SpamRateLimiterService $spamRateLimiterService,
     ): Response {
         $currentUser = $currentUserService->requireUser();
@@ -405,12 +431,10 @@ class ThreadManageController extends AbstractController
                 ], Response::HTTP_FORBIDDEN);
             }
 
-            $this->addFlash('danger', $message);
-
-            return $this->redirectToRoute('app_forum_thread_detail', ['id' => $thread->getId()]);
+            return $this->banAndLogout($request, $message);
         }
 
-        // Check spam rate limit for interactions (before the follow-specific limiter)
+        // Check spam rate limit for interactions
         $spamRateLimit = $spamRateLimiterService->checkInteractionSpam($currentUser->getId());
         if (!$spamRateLimit->isAccepted()) {
             // Ban user for 12 hours due to spam
@@ -430,12 +454,8 @@ class ThreadManageController extends AbstractController
                 ], Response::HTTP_FORBIDDEN);
             }
 
-            $this->addFlash('danger', $message);
-
-            return $this->redirectToRoute('app_forum_thread_detail', ['id' => $thread->getId()]);
+            return $this->banAndLogout($request, $message);
         }
-
-        
 
         $interactionService->toggleFollow($thread, $currentUser);
 
@@ -452,12 +472,12 @@ class ThreadManageController extends AbstractController
         return $this->redirectToRoute('app_forum_thread_detail', ['id' => $thread->getId()]);
     }
 
-    private function expectsJson(Request $request): bool
+    protected function expectsJson(Request $request): bool
     {
         return $request->isXmlHttpRequest() || str_contains((string) $request->headers->get('Accept', ''), 'application/json');
     }
 
-    private function storeReplyPrefill(Request $request, ForumThread $thread, string $content): void
+    protected function storeReplyPrefill(Request $request, ForumThread $thread, string $content): void
     {
         $text = trim($content);
         if ($text === '' || !$request->hasSession()) {
@@ -467,7 +487,7 @@ class ThreadManageController extends AbstractController
         $request->getSession()->set($this->replyPrefillKey((int) $thread->getId()), mb_substr($text, 0, 5000));
     }
 
-    private function replyPrefillKey(int $threadId): string
+    protected function replyPrefillKey(int $threadId): string
     {
         return 'thread_reply_prefill_'.$threadId;
     }

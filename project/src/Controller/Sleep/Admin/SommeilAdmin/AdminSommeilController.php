@@ -232,6 +232,8 @@ final class AdminSommeilController extends AbstractController
         ]);
     }
 
+
+
     #[Route('/modal/reve/{id}', name: 'modal_reve_show', methods: ['GET'])]
     public function modalReve(Reves $reve): Response
     {
@@ -259,6 +261,7 @@ final class AdminSommeilController extends AbstractController
 
         return $this->redirectToRoute('app_admin_sommeil_index');
     }
+
 
     #[Route('/delete/reve/{id}', name: 'delete_reve', methods: ['POST', 'DELETE'])]
     public function deleteReve(
@@ -299,7 +302,16 @@ final class AdminSommeilController extends AbstractController
             default => 'emotion-neutre',
         };
     }
-
+    /**
+     * @return array<int, array{
+     *     section: string,
+     *     label: string,
+     *     route: string,
+     *     icon: string,
+     *     active: bool,
+     *     children?: array<int, array<string, string|bool>>
+     * }>
+     */
     private function buildNav(string $activeRoute): array
     {
         $items = [
@@ -312,7 +324,7 @@ final class AdminSommeilController extends AbstractController
             ['section' => 'Users management', 'label' => 'Users', 'route' => 'ac_ui_users', 'icon' => 'group'],
             ['section' => 'Users management', 'label' => 'Consultations', 'route' => 'ac_ui_consultations', 'icon' => 'medical_services'],
             ['section' => 'Users management', 'label' => 'Exercises', 'route' => 'ac_ui_exercises', 'icon' => 'self_improvement'],
-            ['section' => 'Users management', 'label' => 'Forum', 'route' => 'ac_ui_forum', 'icon' => 'forum'],
+            ['section' => 'Users management', 'label' => 'Forum', 'route' => 'app_admin_forum', 'icon' => 'forum'],
             ['section' => 'Users management', 'label' => 'Sleep', 'route' => 'app_admin_sommeil_index', 'icon' => 'hotel'],
             [
                 'section' => 'Users management',

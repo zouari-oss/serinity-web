@@ -100,17 +100,30 @@ final readonly class UserExerciceService
         }
 
         $now = new \DateTimeImmutable();
-        $control->setStatus(ExerciceControl::STATUS_COMPLETED);
+        $newActiveSeconds = $control->getActiveSeconds() + max(0, $activeSeconds);
+        $targetSeconds = max(0, $control->getExercice()->getDurationMinutes() * 60);
+
         if ($control->getStartedAt() === null) {
             $control->setStartedAt($now);
         }
-        $control->setCompletedAt($now);
+
+        $control->setActiveSeconds($newActiveSeconds);
         $control->setFeedback($feedback);
-        $control->setActiveSeconds($control->getActiveSeconds() + max(0, $activeSeconds));
         $control->setUpdatedAt($now);
+
+        if ($newActiveSeconds >= $targetSeconds) {
+            $control->setStatus(ExerciceControl::STATUS_COMPLETED);
+            $control->setCompletedAt($now);
+            $this->entityManager->flush();
+
+            return ServiceResult::success('Exercice completed successfully.', $this->toControlArray($control));
+        }
+
+        $control->setStatus(ExerciceControl::STATUS_IN_PROGRESS);
+        $control->setCompletedAt(null);
         $this->entityManager->flush();
 
-        return ServiceResult::success('Exercice completed successfully.', $this->toControlArray($control));
+        return ServiceResult::success('Exercice session saved. Keep going to complete it.', $this->toControlArray($control));
     }
 
     public function history(User $user): ServiceResult
@@ -215,6 +228,10 @@ final readonly class UserExerciceService
                 'level' => $exercice->getLevel(),
                 'durationMinutes' => $exercice->getDurationMinutes(),
                 'description' => $exercice->getDescription(),
+                'benefits' => $exercice->getBenefits(),
+                'tips' => $exercice->getTips(),
+                'theme' => $exercice->getTheme(),
+                'guidedInstructions' => $exercice->getGuidedInstructions() ?? [],
                 'isActive' => $exercice->isActive(),
                 'favorite' => isset($favoriteMap[ExerciceFavorite::TYPE_EXERCICE . ':' . $exercice->getId()]),
                 'resources' => $resourceRows,
@@ -225,7 +242,7 @@ final readonly class UserExerciceService
     private function statusMessage(string $status): string
     {
         return match ($status) {
-            ExerciceControl::STATUS_ASSIGNED => 'Assigned',
+            ExerciceControl::STATUS_ASSIGNED => 'Not started',
             ExerciceControl::STATUS_IN_PROGRESS => 'In progress',
             ExerciceControl::STATUS_COMPLETED => 'Completed',
             ExerciceControl::STATUS_CANCELLED => 'Cancelled',
@@ -246,7 +263,7 @@ final readonly class UserExerciceService
             ];
         }
 
-        $status = $control?->getStatus() ?? 'NOT_STARTED';
+        $status = $this->catalogStatus($control);
 
         return [
             'controlId' => $control?->getId() !== null ? (int) $control->getId() : null,
@@ -263,10 +280,35 @@ final readonly class UserExerciceService
                 'level' => $exercice->getLevel(),
                 'durationMinutes' => $exercice->getDurationMinutes(),
                 'description' => $exercice->getDescription(),
+                'benefits' => $exercice->getBenefits(),
+                'tips' => $exercice->getTips(),
+                'theme' => $exercice->getTheme(),
+                'guidedInstructions' => $exercice->getGuidedInstructions() ?? [],
                 'isActive' => $exercice->isActive(),
                 'favorite' => isset($favoriteMap[ExerciceFavorite::TYPE_EXERCICE . ':' . $exercice->getId()]),
                 'resources' => $resourceRows,
             ],
         ];
+    }
+
+    private function catalogStatus(?ExerciceControl $control): string
+    {
+        if (!$control instanceof ExerciceControl) {
+            return 'NOT_STARTED';
+        }
+
+        if ($control->getStatus() === ExerciceControl::STATUS_COMPLETED && $control->getCompletedAt() instanceof \DateTimeImmutable) {
+            return ExerciceControl::STATUS_COMPLETED;
+        }
+
+        if (
+            $control->getStatus() === ExerciceControl::STATUS_IN_PROGRESS
+            || $control->getStartedAt() instanceof \DateTimeImmutable
+            || $control->getActiveSeconds() > 0
+        ) {
+            return ExerciceControl::STATUS_IN_PROGRESS;
+        }
+
+        return 'NOT_STARTED';
     }
 }

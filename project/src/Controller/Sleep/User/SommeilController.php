@@ -117,6 +117,12 @@ final class SommeilController extends AbstractController
         ]);
     }
 
+    #[Route('/ml-widget', name: 'ml_widget', methods: ['GET'])]
+    public function mlWidget(): Response
+    {
+        return $this->render('sleep/sommeil/components/_ml_widget_inner.html.twig');
+    }
+
     #[Route('/new', name: 'app_sommeil_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $em): Response
     {
@@ -128,7 +134,12 @@ final class SommeilController extends AbstractController
             if ($form->isValid()) {
                 $sommeil->setCreatedAt(new \DateTimeImmutable());
                 $sommeil->setUpdatedAt(new \DateTimeImmutable());
-                $sommeil->setUser($this->getUser());
+                $user = $this->getUser();
+                if (!$user instanceof User) {
+                    throw $this->createAccessDeniedException('Utilisateur non connecté.');
+                }
+
+                $sommeil->setUser($user);
 
                 $em->persist($sommeil);
                 $em->flush();

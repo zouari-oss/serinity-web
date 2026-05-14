@@ -82,6 +82,147 @@
             font-weight: 700;
             color: var(--text);
         }
+        .ac-guide-card {
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 1rem;
+            background:
+                radial-gradient(circle at top right, rgba(91, 147, 255, .10), transparent 35%),
+                linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.92));
+        }
+        .ac-guide-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: .85rem;
+            margin-bottom: 1rem;
+        }
+        .ac-guide-progress {
+            height: .55rem;
+            width: 100%;
+            border-radius: 999px;
+            background: rgba(17, 24, 39, .08);
+            overflow: hidden;
+            margin-bottom: .9rem;
+        }
+        .ac-guide-progress-fill {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, rgba(37,99,235,.88), rgba(16,185,129,.75));
+            transition: width .55s ease;
+        }
+        .ac-guide-status {
+            margin: 0 0 1rem;
+            font-size: .9rem;
+            color: var(--muted);
+        }
+        .ac-guide-list {
+            display: grid;
+            gap: .8rem;
+        }
+        .ac-guide-step {
+            position: relative;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: .9rem;
+            align-items: flex-start;
+            padding: 1rem;
+            border-radius: 16px;
+            background: rgba(255,255,255,.68);
+            border: 1px solid rgba(148, 163, 184, .2);
+            box-shadow: 0 10px 22px rgba(15, 23, 42, .04);
+            transition: transform .35s ease, border-color .35s ease, background .35s ease, box-shadow .35s ease, opacity .35s ease;
+        }
+        .ac-guide-step-marker {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            font-size: .82rem;
+            font-weight: 700;
+            color: var(--muted);
+            background: rgba(226, 232, 240, .95);
+            border: 1px solid rgba(148, 163, 184, .28);
+            transition: transform .35s ease, background .35s ease, border-color .35s ease, color .35s ease;
+        }
+        .ac-guide-step-copy {
+            min-width: 0;
+        }
+        .ac-guide-step-copy h4 {
+            margin: 0 0 .4rem;
+            font-size: 1.02rem;
+        }
+        .ac-guide-step-copy p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.7;
+            white-space: pre-line;
+        }
+        .ac-guide-step-badge {
+            display: inline-flex;
+            margin-top: .65rem;
+            padding: .18rem .55rem;
+            border-radius: 999px;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+            background: rgba(148, 163, 184, .12);
+            color: var(--muted);
+            opacity: 0;
+            transform: translateY(4px);
+            transition: opacity .3s ease, transform .3s ease, background .3s ease, color .3s ease;
+        }
+        .ac-guide-step.is-active {
+            border-color: rgba(37,99,235,.42);
+            background: linear-gradient(135deg, rgba(219,234,254,.78), rgba(255,255,255,.96));
+            box-shadow: 0 16px 34px rgba(37,99,235,.14);
+            transform: translateY(-2px);
+        }
+        .ac-guide-step.is-active .ac-guide-step-marker {
+            background: rgba(37,99,235,.94);
+            border-color: rgba(37,99,235,1);
+            color: #fff;
+            transform: scale(1.08);
+        }
+        .ac-guide-step.is-active .ac-guide-step-badge {
+            opacity: 1;
+            transform: translateY(0);
+            background: rgba(37,99,235,.12);
+            color: rgb(37,99,235);
+        }
+        .ac-guide-step.is-complete {
+            border-color: rgba(16,185,129,.34);
+            background: linear-gradient(135deg, rgba(236,253,245,.82), rgba(255,255,255,.96));
+        }
+        .ac-guide-step.is-complete .ac-guide-step-marker {
+            background: rgba(16,185,129,.9);
+            border-color: rgba(16,185,129,1);
+            color: #fff;
+        }
+        .ac-guide-step.is-complete .ac-guide-step-badge {
+            opacity: 1;
+            transform: translateY(0);
+            background: rgba(16,185,129,.12);
+            color: rgb(5,150,105);
+        }
+        .ac-guide-step.is-upcoming {
+            opacity: .92;
+        }
+        @media (max-width: 720px) {
+            .ac-guide-head {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .ac-guide-step {
+                grid-template-columns: 1fr;
+            }
+            .ac-guide-step-marker {
+                width: 1.8rem;
+                height: 1.8rem;
+            }
+        }
         @keyframes acOrbitSpin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
@@ -94,6 +235,8 @@
     {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
     <div class="ac-main">
         {% include 'access_control/components/_topbar.html.twig' with { title: 'Session active', subtitle: session.exercice.title, username: userName } %}
+        {% set guidedInstructions = session.exercice.guidedInstructions|default([]) %}
+        {% set exerciseTheme = session.exercice.theme ?: 'balanced' %}
 
         <section class="ac-card" data-session-root data-target-seconds="{{ (session.exercice.durationMinutes ?? 1) * 60 }}">
             <div class="ac-row-between" style="margin-bottom: 1rem;">
@@ -101,8 +244,25 @@
                     <h3 style="margin:0;">{{ session.exercice.title }}</h3>
                     <p class="ac-muted" style="margin:.2rem 0 0;" data-session-copy>Session is running. Keep your pace.</p>
                 </div>
-                <div class="ac-badge ac-badge-warning" data-session-status>Running</div>
+                <div style="display:flex; gap:.5rem; align-items:center; flex-wrap:wrap;">
+                    <span class="ac-badge ac-badge-secondary">Theme {{ exerciseTheme|capitalize }}</span>
+                    <div class="ac-badge ac-badge-warning" data-session-status>Running</div>
+                </div>
             </div>
+
+            {% if session.exercice.benefits %}
+                <section class="ac-card" style="margin:0 0 1rem; padding:1rem;">
+                    <p class="ac-muted" style="margin:0 0 .25rem;">Why this helps</p>
+                    <p style="margin:0; white-space: pre-line;">{{ session.exercice.benefits }}</p>
+                </section>
+            {% endif %}
+
+            {% if session.exercice.tips %}
+                <section class="ac-card" style="margin:0 0 1rem; padding:1rem;">
+                    <p class="ac-muted" style="margin:0 0 .25rem;">Tips</p>
+                    <p style="margin:0; white-space: pre-line;">{{ session.exercice.tips }}</p>
+                </section>
+            {% endif %}
 
             <div class="ac-cards" style="margin-bottom: 1rem;">
                 <article class="ac-stat-card">
@@ -160,25 +320,62 @@
                 </div>
             </div>
 
-            <div class="ac-breathing-card">
-                <div class="ac-breathing-head">
-                    <div>
-                        <p class="ac-muted" style="margin:0;">Guided breathing</p>
-                        <h4 style="margin:.2rem 0 0;">Breathing circle</h4>
+            {% if guidedInstructions is not empty %}
+                <section class="ac-guide-card" style="margin:0 0 1rem;" data-guided-root data-step-duration="20">
+                    <div class="ac-guide-head">
+                        <div>
+                            <p class="ac-muted" style="margin:0;">Guided instructions</p>
+                            <h4 style="margin:.2rem 0 0;">Follow your exercise steps</h4>
+                        </div>
+                        <span class="ac-badge ac-badge-secondary" data-guide-counter>Step 1 of {{ guidedInstructions|length }}</span>
                     </div>
-                    <span class="ac-badge ac-badge-secondary" data-breath-cycle>Cycle 1</span>
-                </div>
-                <div class="ac-breathing-stage">
-                    <div class="ac-breathing-orbit" aria-hidden="true"></div>
-                    <div class="ac-breathing-circle is-inhale" data-breath-circle>
-                        <div class="ac-breathing-inner">
-                            <span class="ac-breathing-label" data-breath-label>Inhale deeply</span>
-                            <strong class="ac-breathing-count" data-breath-count>4s</strong>
+
+                    <div class="ac-guide-progress" aria-hidden="true">
+                        <div class="ac-guide-progress-fill" data-guide-progress-fill></div>
+                    </div>
+
+                    <p class="ac-guide-status" data-guide-status>
+                        Automatic guidance is active. The highlight will move every 20 seconds.
+                    </p>
+
+                    <div class="ac-guide-list" data-guide-list aria-label="Exercise steps progress">
+                        {% for step in guidedInstructions %}
+                            <article
+                                class="ac-guide-step {{ loop.first ? 'is-active' : 'is-upcoming' }}"
+                                data-guide-step
+                                aria-label="Step {{ loop.index }} of {{ guidedInstructions|length }}"
+                            >
+                                <div class="ac-guide-step-marker" data-guide-marker>{{ loop.index }}</div>
+                                <div class="ac-guide-step-copy">
+                                    <h4>{{ step.title }}</h4>
+                                    <p>{{ step.description }}</p>
+                                    <span class="ac-guide-step-badge" data-guide-badge>{{ loop.first ? 'Current' : 'Upcoming' }}</span>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% else %}
+                <div class="ac-breathing-card">
+                    <div class="ac-breathing-head">
+                        <div>
+                            <p class="ac-muted" style="margin:0;">Guided breathing</p>
+                            <h4 style="margin:.2rem 0 0;">Breathing circle</h4>
+                        </div>
+                        <span class="ac-badge ac-badge-secondary" data-breath-cycle>Cycle 1</span>
+                    </div>
+                    <div class="ac-breathing-stage">
+                        <div class="ac-breathing-orbit" aria-hidden="true"></div>
+                        <div class="ac-breathing-circle is-inhale" data-breath-circle>
+                            <div class="ac-breathing-inner">
+                                <span class="ac-breathing-label" data-breath-label>Inhale deeply</span>
+                                <strong class="ac-breathing-count" data-breath-count>4s</strong>
+                            </div>
                         </div>
                     </div>
+                    <p class="ac-muted" style="margin:0;" data-breath-note>Inhale slowly and settle your rhythm.</p>
                 </div>
-                <p class="ac-muted" style="margin:0;" data-breath-note>Inhale slowly and settle your rhythm.</p>
-            </div>
+            {% endif %}
 
             <form method="post" action="{{ path('user_ui_exercises_session_finish', { id: session.controlId }) }}" class="ac-form">
                 <input type="hidden" name="activeSeconds" value="0" data-session-active-seconds>
@@ -226,17 +423,26 @@
             const breathCountNode = root.querySelector('[data-breath-count]');
             const breathNoteNode = root.querySelector('[data-breath-note]');
             const breathCycleNode = root.querySelector('[data-breath-cycle]');
+            const guidedRoot = root.querySelector('[data-guided-root]');
             const target = parseInt(root.getAttribute('data-target-seconds') || '0', 10);
             let seconds = 0;
             let running = true;
             let breathElapsed = 0;
+            let guideElapsed = 0;
+            let guideStepIndex = 0;
                 let timerIntervalId = null;
                 let breathIntervalId = null;
+                let guideIntervalId = null;
             const breathingStages = [
                 { key: 'inhale', className: 'is-inhale', label: 'Inhale deeply', note: 'Inhale slowly and settle your rhythm.', duration: 4 },
                 { key: 'hold', className: 'is-hold', label: 'Hold gently', note: 'Keep still for a short pause.', duration: 2 },
                 { key: 'exhale', className: 'is-exhale', label: 'Exhale softly', note: 'Release tension and relax your shoulders.', duration: 4 },
             ];
+            const guidedStepDuration = guidedRoot ? Math.max(5, parseInt(guidedRoot.getAttribute('data-step-duration') || '20', 10)) : 20;
+            const guideCounterNode = guidedRoot ? guidedRoot.querySelector('[data-guide-counter]') : null;
+            const guideStatusNode = guidedRoot ? guidedRoot.querySelector('[data-guide-status]') : null;
+            const guideProgressFillNode = guidedRoot ? guidedRoot.querySelector('[data-guide-progress-fill]') : null;
+            const guidedSteps = guidedRoot ? Array.from(guidedRoot.querySelectorAll('[data-guide-step]')) : [];
 
             const getBreathingStage = () => {
                 const cycleDuration = breathingStages.reduce((sum, stage) => sum + stage.duration, 0);
@@ -286,6 +492,87 @@
                     const cycle = Math.floor(breathElapsed / cycleDuration) + 1;
                     breathCycleNode.textContent = `Cycle ${cycle}`;
                 }
+            };
+
+            const updateGuideProgress = () => {
+                if (!guidedRoot || guidedSteps.length === 0) {
+                    return;
+                }
+
+                const totalSteps = guidedSteps.length;
+                const completedSteps = guideStepIndex;
+                const intraStepRatio = guideStepIndex >= totalSteps - 1
+                    ? 1
+                    : Math.min(1, guideElapsed / guidedStepDuration);
+                const progressRatio = Math.min(1, (completedSteps + intraStepRatio) / totalSteps);
+
+                if (guideProgressFillNode) {
+                    guideProgressFillNode.style.width = `${Math.max(6, Math.round(progressRatio * 100))}%`;
+                }
+
+                guidedSteps.forEach((stepNode, index) => {
+                    const badgeNode = stepNode.querySelector('[data-guide-badge]');
+                    stepNode.classList.toggle('is-complete', index < guideStepIndex);
+                    stepNode.classList.toggle('is-active', index === guideStepIndex);
+                    stepNode.classList.toggle('is-upcoming', index > guideStepIndex);
+
+                    if (badgeNode) {
+                        badgeNode.textContent = index < guideStepIndex
+                            ? 'Completed'
+                            : (index === guideStepIndex ? 'Current' : 'Upcoming');
+                    }
+                });
+            };
+
+            const updateGuideStepFocus = (shouldScroll = false) => {
+                if (!guidedRoot || guidedSteps.length === 0) {
+                    return;
+                }
+
+                const totalSteps = guidedSteps.length;
+                const stepLabel = `Step ${guideStepIndex + 1} of ${totalSteps}`;
+                const statusMessage = guideStepIndex >= totalSteps - 1
+                    ? 'Exercise guidance completed. Stay with this final step as long as you need.'
+                    : `Automatic guidance is active. Next step in ${Math.max(0, guidedStepDuration - guideElapsed)}s.`;
+
+                if (guideCounterNode) {
+                    guideCounterNode.textContent = stepLabel;
+                }
+                if (guideStatusNode) {
+                    guideStatusNode.textContent = statusMessage;
+                }
+
+                updateGuideProgress();
+
+                const activeStepNode = guidedSteps[guideStepIndex];
+                if (shouldScroll && activeStepNode) {
+                    activeStepNode.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest',
+                    });
+                }
+            };
+
+            const tickGuide = () => {
+                if (!guidedRoot || guidedSteps.length === 0 || !running) {
+                    return;
+                }
+
+                if (guideStepIndex >= guidedSteps.length - 1) {
+                    guideElapsed = guidedStepDuration;
+                    updateGuideStepFocus();
+                    return;
+                }
+
+                guideElapsed += 1;
+                if (guideElapsed >= guidedStepDuration) {
+                    guideStepIndex += 1;
+                    guideElapsed = 0;
+                    updateGuideStepFocus(true);
+                    return;
+                }
+
+                updateGuideStepFocus();
             };
 
             const updateAudioStatus = (message) => {
@@ -411,6 +698,7 @@
             };
 
             render();
+            updateGuideStepFocus();
             resolveAudioSource();
 
             if (ambientAudioNode) {
@@ -485,6 +773,10 @@
                 }
             }, 1000);
 
+            guideIntervalId = window.setInterval(() => {
+                tickGuide();
+            }, 1000);
+
                 const cleanup = () => {
                     stopAudio();
                     if (timerIntervalId !== null) {
@@ -492,6 +784,9 @@
                     }
                     if (breathIntervalId !== null) {
                         window.clearInterval(breathIntervalId);
+                    }
+                    if (guideIntervalId !== null) {
+                        window.clearInterval(guideIntervalId);
                     }
                     root.dataset.sessionInitialized = '0';
                 };

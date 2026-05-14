@@ -1,0 +1,209 @@
+ 
+
+<style>
+.doctor-container {
+    max-width: 900px;
+    margin: auto;
+}
+
+.profile-card {
+    background: white;
+    border-radius: 22px;
+    padding: 30px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.06);
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.avatar-large {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(to right,#2F6F6D,#88BDBC);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: white;
+    font-weight: bold;
+}
+
+.doctor-name {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.speciality {
+    color: #2F6F6D;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.info-box {
+    margin-top: 25px;
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 15px;
+}
+
+.info-card {
+    background: #F9FAFB;
+    padding: 16px;
+    border-radius: 14px;
+    font-size: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.info-card i {
+    color: #2F6F6D;
+    font-size: 18px;
+}
+
+.actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+}
+
+.btn-rdv {
+    flex: 1;
+    background: #2F6F6D;
+    color: white;
+    padding: 12px;
+    border-radius: 12px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.btn-rdv:hover {
+    background: #255d5b;
+}
+
+.btn-back {
+    flex: 1;
+    background: #E6F2F1;
+    color: #2F6F6D;
+    padding: 12px;
+    border-radius: 12px;
+    text-align: center;
+    text-decoration: none;
+}
+
+.btn-back:hover {
+    background: #d6ebe9;
+}
+</style>
+<div class="doctor-container">
+
+    <div class="profile-card">
+
+        <!-- HEADER -->
+        <div class="profile-header">
+
+            <div class="avatar-large">
+                {{
+                    doctor.profile.firstName|default(doctor.email)|slice(0,1)|upper
+                }}
+            </div>
+
+            <div>
+                <div class="doctor-name">
+                    <i class="bi bi-person-badge-fill"></i>
+
+                    {{ doctor.profile.firstName|default('') }}
+                    {{ doctor.profile.lastName|default('') }}
+                </div>
+
+                <div class="speciality">
+                    <i class="bi bi-patch-check-fill"></i>
+
+                    {{ doctor.profile.aboutMe|default('Therapist') }}
+                </div>
+            </div>
+
+        </div>
+
+        <!-- INFOS -->
+        <div class="info-box">
+
+            <div class="info-card">
+                <i class="bi bi-envelope-fill"></i>
+                <div>
+                    <strong>Email</strong><br>
+                    {{ doctor.email }}
+                </div>
+            </div>
+
+            <div class="info-card">
+                <i class="bi bi-telephone-fill"></i>
+                <div>
+                    <strong>Téléphone</strong><br>
+                    {{ doctor.profile.phone|default('Not specified') }}
+                </div>
+            </div>
+
+            <div class="info-card">
+                <i class="bi bi-geo-alt-fill"></i>
+                <div>
+                    <strong>Adresse</strong><br>
+
+                    {{ doctor.profile.country|default('') }}
+                    {% if doctor.profile.state %}
+                        - {{ doctor.profile.state }}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="info-card">
+                <i class="bi bi-calendar-event-fill"></i>
+                <div>
+                    <strong>Membre depuis</strong><br>
+                    {{ doctor.createdAt|date('d/m/Y') }}
+                </div>
+            </div>
+
+        </div>
+        {# ADD THIS INSIDE doctor/show.html.twig #}
+
+<div class="info-card"
+     style="grid-column:1/-1;justify-content:center;text-align:center;flex-direction:column;">
+
+    <strong style="margin-bottom:10px;">
+        Scanner pour enregistrer le contact
+    </strong>
+
+    <img src="{{ qrCode }}"
+         alt="QR Code Contact"
+         style="width:220px;height:220px;border-radius:14px;">
+
+    <small style="margin-top:10px;color:#64748b;">
+        Scan QR → ajoute le thérapeute dans vos contacts
+    </small>
+
+</div>
+
+        <!-- ACTIONS -->
+        <div class="actions">
+
+            <a href="{{ path('app_doctors') }}" class="btn-back">
+                <i class="bi bi-arrow-left"></i>
+                Retour
+            </a>
+
+<a href="{{ path('app_rdv_new', { id: doctor.id }) }}" class="btn-rdv">
+    <i class="bi bi-calendar-plus-fill"></i>
+    Prendre Rendez-vous
+</a>
+
+        </div>
+
+    </div>
+
+</div>

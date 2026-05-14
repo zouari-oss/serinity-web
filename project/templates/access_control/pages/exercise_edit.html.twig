@@ -30,6 +30,12 @@
                 <label>Level<input class="ac-input" name="level" type="number" min="1" max="10" value="{{ exercice.level }}"></label>
                 <label>Duration (minutes)<input class="ac-input" name="durationMinutes" type="number" min="1" max="300" value="{{ exercice.durationMinutes }}"></label>
                 <label class="ac-col-span-2">Description<textarea class="ac-input" name="description" rows="4">{{ exercice.description }}</textarea></label>
+                <label class="ac-col-span-2">Benefits<textarea class="ac-input" name="benefits" rows="4">{{ exercice.benefits }}</textarea></label>
+                <label class="ac-col-span-2">Tips<textarea class="ac-input" name="tips" rows="4">{{ exercice.tips }}</textarea></label>
+                <label>Theme<input class="ac-input" name="theme" value="{{ exercice.theme }}"></label>
+                <label class="ac-col-span-2">Guided instructions
+                    <textarea class="ac-input" name="guidedInstructionsText" rows="6" placeholder="One instruction per line">{{ exercice.guidedInstructionsText }}</textarea>
+                </label>
                 <label class="ac-col-span-2">
                     <span class="ac-label">Active</span>
                     <input type="checkbox" name="isActive" value="1" {{ exercice.isActive ? 'checked' : '' }}>

@@ -7,6 +7,7 @@ use App\Enum\ThreadType;
 use App\Repository\ForumThreadRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -48,25 +49,47 @@ class ForumThread
     #[ORM\Column]
     private bool $isPinned = false;
 
-    #[ORM\Column]
+    #[ORM\Column(
+        type: Types::DATETIME_IMMUTABLE,
+        options: ['default' => 'CURRENT_TIMESTAMP']
+    )]
     private \DateTimeImmutable $createdAt;
 
-    #[ORM\Column]
+    #[ORM\Column(
+        type: Types::DATETIME_IMMUTABLE,
+        options: ['default' => 'CURRENT_TIMESTAMP']
+    )]
     private \DateTimeImmutable $updatedAt;
 
     #[ORM\Column(nullable: true, length: 500)]
     private ?string $imageUrl = null;
 
-    #[ORM\Column(name: 'likecount')]
+    #[ORM\Column(
+        name: 'likecount',
+        type: Types::INTEGER,
+        options: ['default' => '0']
+    )]
     private int $likeCount = 0;
 
-    #[ORM\Column(name: 'dislikecount')]
+    #[ORM\Column(
+        name: 'dislikecount',
+        type: Types::INTEGER,
+        options: ['default' => '0']
+    )]
     private int $dislikeCount = 0;
 
-    #[ORM\Column(name: 'followcount')]
+    #[ORM\Column(
+        name: 'followcount',
+        type: Types::INTEGER,
+        options: ['default' => '0']
+    )]
     private int $followCount = 0;
 
-    #[ORM\Column(name: 'repliescount')]
+    #[ORM\Column(
+        name: 'repliescount',
+        type: Types::INTEGER,
+        options: ['default' => '0']
+    )]
     private int $replyCount = 0;
 
     #[ORM\OneToMany(mappedBy: 'thread', targetEntity: Reply::class, orphanRemoval: true)]

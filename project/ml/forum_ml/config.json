@@ -1,0 +1,10 @@
+{
+  "model_dir": "/content/forum_toxicity_bert",
+  "threshold": 0.9,
+  "max_len": 128,
+  "labels": {
+    "0": "clean",
+    "1": "toxic"
+  },
+  "bert_model": "bert-base-uncased"
+}

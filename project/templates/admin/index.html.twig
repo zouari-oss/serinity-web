@@ -1,7 +1,7 @@
 {# templates/admin/index.html.twig #}
-{% extends 'forum/embedded_layout.html.twig' %}
+{% extends 'access_control/layout.html.twig' %}
 
-{% block title %}Forum Backoffice{% endblock %}
+{% block title %}Forum Backoffice | Serinity{% endblock %}
 
 {% block stylesheets %}
 {{ parent() }}
@@ -106,19 +106,23 @@
 </style>
 {% endblock %}
 
-{% block forum_content %}
-<main>
-  <div class="page-shell">
-    <div class="top-bar">
-      <div>
-        <div class="top-bar-label">Administration</div>
-        <div class="top-bar-title">Forum Backoffice</div>
-      </div>
-      <div class="top-bar-actions">
-        <a class="nav-btn nav-btn-primary" href="{{ path('app_admin_category_new') }}">Add Category</a>
-        <a class="nav-btn nav-btn-outline" href="{{ path('app_admin_statistics') }}">Statistics</a>
-      </div>
-    </div>
+{% block content %}
+<div class="ac-app-layout">
+  {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+  <div class="ac-main">
+    {% include 'access_control/components/_topbar.html.twig' with { title: topbarTitle, subtitle: topbarSubtitle, username: userName } %}
+    <main>
+      <div class="page-shell">
+        <div class="top-bar">
+          <div>
+            <div class="top-bar-label">Administration</div>
+            <div class="top-bar-title">Forum Backoffice</div>
+          </div>
+          <div class="top-bar-actions">
+            <a class="nav-btn nav-btn-primary" href="{{ path('app_admin_category_new') }}">Add Category</a>
+            <a class="nav-btn nav-btn-outline" href="{{ path('app_admin_statistics') }}">Statistics</a>
+          </div>
+        </div>
 
     <div class="cat-card">
       <div class="cat-card-header">All Categories</div>
@@ -171,6 +175,8 @@
         </tbody>
       </table>
     </div>
+      </div>
+    </main>
   </div>
-</main>
+</div>
 {% endblock %}

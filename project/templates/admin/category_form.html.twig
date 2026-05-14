@@ -1,20 +1,26 @@
-{% extends 'forum/embedded_layout.html.twig' %}
+{% extends 'access_control/layout.html.twig' %}
 
-{% block title %}{{ mode == 'create' ? 'New Category' : 'Edit Category' }}{% endblock %}
+{% block title %}{{ mode == 'create' ? 'New Category' : 'Edit Category' }} | Serinity{% endblock %}
 
-{% block forum_content %}
-<main class="page-shell">
-    <div class="container" style="max-width: 760px;">
-        <section class="card-soft p-4">
-            <h1 class="h4 mb-3">{{ mode == 'create' ? 'Add Category' : 'Edit Category' }}</h1>
-            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-            {{ form_row(form.name) }}
-            {{ form_row(form.slug) }}
-            {{ form_row(form.description) }}
-            {{ form_row(form.parent) }}
-            <button class="btn btn-primary">Save</button>
-            {{ form_end(form) }}
-        </section>
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: topbarTitle, subtitle: topbarSubtitle, username: userName } %}
+        <main class="page-shell">
+            <div class="container" style="max-width: 760px;">
+                <section class="card-soft p-4">
+                    <h1 class="h4 mb-3">{{ mode == 'create' ? 'Add Category' : 'Edit Category' }}</h1>
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                    {{ form_row(form.name) }}
+                    {{ form_row(form.slug) }}
+                    {{ form_row(form.description) }}
+                    {{ form_row(form.parent) }}
+                    <button class="btn btn-primary">Save</button>
+                    {{ form_end(form) }}
+                </section>
+            </div>
+        </main>
     </div>
-</main>
+</div>
 {% endblock %}

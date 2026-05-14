@@ -2,8 +2,11 @@
 # `root` .gitignore file
 
 ### CUSTOM IGNORES ###
+.gitignore
 public/antelopev2
-.venv/
+*.venv*
+*/__pycache__/*
+ml/forum_ml/model.safetensors
 ### !CUSTOM IGNORES ###
 
 ###> symfony/framework-bundle ###
@@ -18,9 +21,11 @@ config/secrets/prod/prod.decrypt.private.php
 public/bundles/
 var/
 vendor/
+.idea/
 .php-cs-fixer.cache
 ###< symfony/framework-bundle ###
-
+forum_toxicity_bert/
+forum_toxicity_bert.zip
 ###> phpunit/phpunit ###
 phpunit.xml
 .phpunit.cache/

@@ -14,6 +14,7 @@ use App\Repository\ExerciceControlRepository;
 use App\Repository\ExerciceRepository;
 use App\Repository\ExerciceResourceRepository;
 use App\Repository\UserRepository;
+use App\Service\Exercice\GuidedInstructionsFormatter;
 use Doctrine\ORM\EntityManagerInterface;
 
 final readonly class AdminExerciceService
@@ -23,6 +24,7 @@ final readonly class AdminExerciceService
         private ExerciceControlRepository $controlRepository,
         private ExerciceResourceRepository $resourceRepository,
         private UserRepository $userRepository,
+        private GuidedInstructionsFormatter $guidedInstructionsFormatter,
         private EntityManagerInterface $entityManager,
     ) {
     }
@@ -53,6 +55,10 @@ final readonly class AdminExerciceService
             ->setLevel($request->level)
             ->setDurationMinutes($request->durationMinutes)
             ->setDescription($request->description)
+            ->setBenefits($request->benefits)
+            ->setTips($request->tips)
+            ->setTheme($request->theme)
+            ->setGuidedInstructions($this->normalizeGuidedInstructions($request->guidedInstructionsText))
             ->setIsActive($request->isActive);
 
         $this->entityManager->persist($exercice);
@@ -74,6 +80,10 @@ final readonly class AdminExerciceService
             ->setLevel($request->level)
             ->setDurationMinutes($request->durationMinutes)
             ->setDescription($request->description)
+            ->setBenefits($request->benefits)
+            ->setTips($request->tips)
+            ->setTheme($request->theme)
+            ->setGuidedInstructions($this->normalizeGuidedInstructions($request->guidedInstructionsText))
             ->setIsActive($request->isActive)
             ->setUpdatedAt(new \DateTimeImmutable());
 
@@ -268,6 +278,11 @@ final readonly class AdminExerciceService
             'level' => $exercice->getLevel(),
             'durationMinutes' => $exercice->getDurationMinutes(),
             'description' => $exercice->getDescription(),
+            'benefits' => $exercice->getBenefits(),
+            'tips' => $exercice->getTips(),
+            'theme' => $exercice->getTheme(),
+            'guidedInstructions' => $exercice->getGuidedInstructions() ?? [],
+            'guidedInstructionsText' => $this->guidedInstructionsFormatter->structuredToText($exercice->getGuidedInstructions()),
             'isActive' => $exercice->isActive(),
             'resources' => $resources,
             'createdAt' => $exercice->getCreatedAt()->format('c'),
@@ -385,5 +400,17 @@ final readonly class AdminExerciceService
             ExerciceControl::STATUS_CANCELLED => 'Cancelled',
             default => ucfirst(strtolower(str_replace('_', ' ', $status))),
         };
+    }
+
+    /**
+     * Admins write plain text lines; the user UI consumes structured JSON steps.
+     *
+     * @return list<array{title: string, description: string}>|null
+     */
+    private function normalizeGuidedInstructions(?string $text): ?array
+    {
+        $rows = $this->guidedInstructionsFormatter->textToStructured($text);
+
+        return $rows !== [] ? $rows : null;
     }
 }

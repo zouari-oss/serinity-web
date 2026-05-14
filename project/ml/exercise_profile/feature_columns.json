@@ -1,0 +1,15 @@
+[
+  "total_sessions",
+  "completed_sessions",
+  "completion_rate",
+  "favorite_count",
+  "favorite_rate",
+  "avg_duration_minutes",
+  "avg_active_seconds",
+  "avg_engagement_ratio",
+  "calm_type_ratio",
+  "balanced_type_ratio",
+  "active_type_ratio",
+  "feedback_positive_score",
+  "feedback_present_rate"
+]

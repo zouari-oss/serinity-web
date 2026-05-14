@@ -1,0 +1,243 @@
+{% extends 'access_control/layout.html.twig' %}
+
+{% block title %}Mes Rendez-vous | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+
+    <div class="ac-main" data-controller="flash-toast">
+
+        {% include 'access_control/components/_topbar.html.twig' with {
+            title: 'Mes Rendez-vous',
+            subtitle: 'Suivez et gérez vos consultations',
+            username: userName
+        } %}
+
+        {% for message in app.flashes('success') %}
+            <span data-flash-toast-target="message" data-type="success" hidden>{{ message }}</span>
+        {% endfor %}
+
+        {% for message in app.flashes('error') %}
+            <span data-flash-toast-target="message" data-type="error" hidden>{{ message }}</span>
+        {% endfor %}
+
+        <section class="ac-card">
+
+            <div class="ac-row-between" style="margin-bottom:1rem; gap:1rem; flex-wrap:wrap;">
+                <div>
+                    <h2 style="margin:0;">Appointments</h2>
+                    <p style="margin:.35rem 0 0; color:var(--text-muted);">
+                        Your booked consultations and statuses
+                    </p>
+                </div>
+
+                <span class="ac-badge ac-badge-success">
+                    {{ rdvs|length }} RDV
+                </span>
+            </div>
+
+            <div class="doctor-grid">
+
+                {% for rdv in rdvs %}
+
+                    <article class="doctor-card">
+
+                        <div class="doctor-head">
+
+                            <div class="doctor-avatar">
+                                {{ rdv.firstName|default(rdv.doctor_email)|slice(0,1)|upper }}
+                            </div>
+
+                            <div>
+                                <h3 class="doctor-name">
+                                    {% set fullName = (rdv.firstName|default('') ~ ' ' ~ rdv.lastName|default(''))|trim %}
+                                    {{ fullName != '' ? fullName : rdv.doctor_email }}
+                                </h3>
+
+                                <p class="doctor-speciality">
+                                    {{ rdv.motif ?: 'Consultation' }}
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <div class="doctor-meta">
+
+                            <div>
+                                <span class="material-symbols-outlined">calendar_month</span>
+                                {{ rdv.date_time|date('d/m/Y H:i') }}
+                            </div>
+
+                            <div>
+                                <span class="material-symbols-outlined">mail</span>
+                                {{ rdv.doctor_email }}
+                            </div>
+
+                            {% if rdv.phone %}
+                            <div>
+                                <span class="material-symbols-outlined">call</span>
+                                {{ rdv.phone }}
+                            </div>
+                            {% endif %}
+
+                        </div>
+
+                        <div class="doctor-actions">
+
+                            <span class="rdv-status
+                                {% if rdv.status == 'EN_ATTENTE' %}status-wait
+                                {% elseif rdv.status == 'VALIDE' %}status-ok
+                                {% else %}status-refused{% endif %}
+                            ">
+                                {{ rdv.status }}
+                            </span>
+
+                            {% if rdv.status == 'EN_ATTENTE' %}
+
+                                <a href="{{ path('app_rdv_edit', {id: rdv.id}) }}" class="ac-ghost-btn">
+                                    Edit
+                                </a>
+
+                                <a href="{{ path('app_rdv_delete', {id: rdv.id}) }}" class="ac-btn ac-btn-primary">
+                                    Delete
+                                </a>
+
+                         {% elseif rdv.status == 'VALIDE' %}
+
+    <a href="{{ path('app_rdv_show', {id: rdv.id}) }}" class="ac-btn ac-btn-primary">
+        View
+    </a>
+
+    <a href="{{ path('app_rdv_google_calendar', {id: rdv.id}) }}"
+       class="ac-ghost-btn"
+       target="_blank">
+        <span class="material-symbols-outlined" style="font-size:18px;">calendar_month</span>
+        Google Calendar
+    </a>
+
+                            {% else %}
+
+                                <a href="{{ path('app_rdv_delete', {id: rdv.id}) }}" class="ac-ghost-btn">
+                                    Remove
+                                </a>
+
+                            {% endif %}
+
+                        </div>
+
+                    </article>
+
+                {% else %}
+
+                    <div class="ac-empty-state">
+                        <h3>No appointments found</h3>
+                        <p>You have no booked consultations yet.</p>
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+
+<style>
+.doctor-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(310px,1fr));
+    gap:1rem;
+}
+
+.doctor-card{
+    background:var(--surface);
+    border:1px solid var(--border-color);
+    border-radius:18px;
+    padding:1rem;
+    transition:.25s ease;
+}
+
+.doctor-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 12px 24px rgba(0,0,0,.08);
+}
+
+.doctor-head{
+    display:flex;
+    gap:1rem;
+    align-items:center;
+    margin-bottom:1rem;
+}
+
+.doctor-avatar{
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-weight:700;
+    background:linear-gradient(135deg,#2f6f6d,#4bb7ae);
+    flex-shrink:0;
+}
+
+.doctor-name{
+    margin:0;
+    font-size:1rem;
+}
+
+.doctor-speciality{
+    margin:.35rem 0 0;
+    color:var(--text-muted);
+    font-size:.92rem;
+}
+
+.doctor-meta{
+    margin-bottom:1rem;
+    color:var(--text-muted);
+    font-size:.92rem;
+}
+
+.doctor-meta div{
+    display:flex;
+    gap:.45rem;
+    align-items:center;
+    margin-bottom:.35rem;
+}
+
+.doctor-actions{
+    display:flex;
+    gap:.65rem;
+    flex-wrap:wrap;
+    align-items:center;
+}
+
+.rdv-status{
+    padding:8px 14px;
+    border-radius:999px;
+    font-size:.8rem;
+    font-weight:700;
+}
+
+.status-wait{
+    background:#fff3e0;
+    color:#e65100;
+}
+
+.status-ok{
+    background:#e8f5e9;
+    color:#2e7d32;
+}
+
+.status-refused{
+    background:#ffebee;
+    color:#c62828;
+}
+</style>
+
+{% endblock %}

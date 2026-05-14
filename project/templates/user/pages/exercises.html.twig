@@ -15,6 +15,20 @@
         {% endfor %}
 
         <section class="ac-card">
+            <div class="ac-row-between" style="gap: 1rem; align-items: start;">
+                <div>
+                    <h3 style="margin-bottom: .35rem;">Your Exercise Profile{% if exerciseProfile.status == 'ready' %}: {{ exerciseProfile.displayLabel }}{% endif %}</h3>
+                    <p class="ac-muted" style="margin: 0;">{{ exerciseProfile.message }}</p>
+                </div>
+                <div style="display:flex; gap:.5rem; flex-wrap:wrap; justify-content:flex-end;">
+                    <span class="ac-badge {{ exerciseProfile.status == 'ready' ? 'ac-badge-primary' : 'ac-badge-secondary' }}">{{ exerciseProfile.displayLabel }}</span>
+                    <span class="ac-badge ac-badge-secondary">{{ exerciseProfile.totals.totalSessions }} sessions</span>
+                    <span class="ac-badge ac-badge-secondary">{{ exerciseProfile.totals.completedSessions }} completed</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="ac-card">
             <h3>My exercise progress</h3>
             <div class="ac-cards ac-cards-two">
                 <div id="user_exercise_status_chart" style="width:100%; height:320px; min-height:320px;"></div>
@@ -185,7 +199,7 @@
                                 <span class="ac-badge ac-badge-secondary">{{ item.exercice.type }}</span>
                                 <span class="ac-badge ac-badge-secondary">Level {{ item.exercice.level }}</span>
                                 <span class="ac-badge ac-badge-secondary">{{ item.exercice.durationMinutes }} min</span>
-                                <span class="ac-badge {{ item.status == 'COMPLETED' ? 'ac-badge-success' : (item.status == 'NOT_STARTED' ? 'ac-badge-secondary' : 'ac-badge-warning') }}">{{ item.statusMessage ?? item.status }}</span>
+                                <span class="ac-badge {{ item.status == 'COMPLETED' ? 'ac-badge-success' : (item.status == 'NOT_STARTED' ? 'ac-badge-secondary' : 'ac-badge-warning') }}">{{ (item.statusMessage ?? item.status)|upper }}</span>
                             </div>
                             <div class="ac-row-between">
                                 <a class="ac-ghost-btn" href="{{ path('user_ui_exercises_show', { id: item.exercice.id }) }}">View exercise</a>

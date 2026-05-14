@@ -14,6 +14,9 @@
             <section class="ac-card"><p style="color: var(--danger);">{{ message }}</p></section>
         {% endfor %}
 
+        {% set exerciseTheme = item.exercice.theme ?: 'balanced' %}
+        {% set guidedPreview = item.exercice.guidedInstructions|default([])|slice(0, 3) %}
+
         <section class="ac-card ac-grid-two">
             <article>
                 <h3 style="margin-top:0;">{{ item.exercice.title }}</h3>
@@ -22,7 +25,8 @@
                     <span class="ac-badge ac-badge-secondary">{{ item.exercice.type }}</span>
                     <span class="ac-badge ac-badge-secondary">Level {{ item.exercice.level }}</span>
                     <span class="ac-badge ac-badge-secondary">{{ item.exercice.durationMinutes }} min</span>
-                    <span class="ac-badge {{ item.status == 'COMPLETED' ? 'ac-badge-success' : (item.status == 'NOT_STARTED' ? 'ac-badge-secondary' : 'ac-badge-warning') }}">{{ item.statusMessage ?? item.status }}</span>
+                    <span class="ac-badge ac-badge-secondary">Theme {{ exerciseTheme|capitalize }}</span>
+                    <span class="ac-badge {{ item.status == 'COMPLETED' ? 'ac-badge-success' : (item.status == 'NOT_STARTED' ? 'ac-badge-secondary' : 'ac-badge-warning') }}">{{ (item.statusMessage ?? item.status)|upper }}</span>
                 </div>
             </article>
 
@@ -42,6 +46,34 @@
                 {% endif %}
             </aside>
         </section>
+
+        {% if item.exercice.benefits %}
+            <section class="ac-card">
+                <h4 style="margin-top:0;">Why this exercise helps</h4>
+                <p class="ac-muted" style="white-space: pre-line;">{{ item.exercice.benefits }}</p>
+            </section>
+        {% endif %}
+
+        {% if item.exercice.tips %}
+            <section class="ac-card">
+                <h4 style="margin-top:0;">Tips</h4>
+                <p class="ac-muted" style="white-space: pre-line;">{{ item.exercice.tips }}</p>
+            </section>
+        {% endif %}
+
+        {% if guidedPreview is not empty %}
+            <section class="ac-card">
+                <h4 style="margin-top:0;">Guided preview</h4>
+                <div style="display:grid; gap:.75rem;">
+                    {% for step in guidedPreview %}
+                        <article class="ac-card" style="margin:0; padding: .9rem 1rem;">
+                            <strong>{{ step.title }}</strong>
+                            <p class="ac-muted" style="margin:.35rem 0 0;">{{ step.description }}</p>
+                        </article>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
 
         <section class="ac-card">
             <div class="ac-row-end" style="gap:.5rem;">

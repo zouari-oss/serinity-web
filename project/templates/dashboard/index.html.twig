@@ -1,0 +1,1025 @@
+{% extends 'access_control/layout.html.twig' %}
+
+{% block title %}Dashboard Thérapeute | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+
+    <div class="ac-main" data-controller="flash-toast">
+
+        {% include 'access_control/components/_topbar.html.twig' with {
+            title: 'Dashboard Thérapeute',
+            subtitle: 'Gestion intelligente des rendez-vous et patients',
+            username: userName
+        } %}
+
+        {% for message in app.flashes('success') %}
+            <span data-flash-toast-target="message" data-type="success" hidden>{{ message }}</span>
+        {% endfor %}
+
+        {% for message in app.flashes('error') %}
+            <span data-flash-toast-target="message" data-type="error" hidden>{{ message }}</span>
+        {% endfor %}
+
+<section class="ac-card therapist-dashboard">
+
+<style>
+.therapist-dashboard{
+    padding:1.5rem;
+}
+
+/* =======================
+   GLOBAL
+======================= */
+.dashboard-grid{
+    display:grid;
+    grid-template-columns:1.45fr .95fr;
+    gap:1.2rem;
+}
+
+.panel-box{
+    background:#fff;
+    border:1px solid #eef2f7;
+    border-radius:24px;
+    padding:1.1rem;
+    box-shadow:0 12px 35px rgba(15,23,42,.04);
+}
+
+.panel-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:1rem;
+    margin-bottom:1rem;
+}
+
+.panel-title h5{
+    margin:0;
+    font-size:1.05rem;
+    font-weight:800;
+    color:#0f172a;
+}
+
+.panel-sub{
+    font-size:.84rem;
+    color:#64748b;
+}
+
+/* =======================
+   STATS
+======================= */
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:1rem;
+    margin-bottom:1.3rem;
+}
+
+.stat-box{
+    background:linear-gradient(135deg,#ffffff,#f8fafc);
+    border:1px solid #edf2f7;
+    border-radius:22px;
+    padding:1.1rem;
+}
+
+.stat-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:.7rem;
+}
+
+.stat-icon{
+    width:46px;
+    height:46px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-size:1.15rem;
+    background:linear-gradient(135deg,#2F6F6D,#57a7a3);
+}
+
+.stat-label{
+    font-size:.9rem;
+    color:#64748b;
+    font-weight:700;
+}
+
+.stat-value{
+    font-size:1.85rem;
+    font-weight:900;
+    color:#0f172a;
+}
+
+/* =======================
+   FILTER BAR
+======================= */
+.toolbar{
+    display:flex;
+    gap:.8rem;
+    flex-wrap:wrap;
+    margin-bottom:1rem;
+}
+
+.search-box{
+    flex:1;
+    min-width:220px;
+    position:relative;
+}
+
+.search-box i{
+    position:absolute;
+    left:14px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#94a3b8;
+}
+
+.search-input{
+    width:100%;
+    border:1px solid #e2e8f0;
+    background:#fff;
+    border-radius:14px;
+    padding:.8rem .9rem .8rem 2.4rem;
+    outline:none;
+    font-size:.92rem;
+}
+
+.search-input:focus{
+    border-color:#2F6F6D;
+    box-shadow:0 0 0 4px rgba(47,111,109,.08);
+}
+
+.select-filter{
+    border:1px solid #e2e8f0;
+    border-radius:14px;
+    padding:.8rem .9rem;
+    background:#fff;
+    min-width:160px;
+    font-size:.9rem;
+    outline:none;
+}
+
+/* =======================
+   TABLE
+======================= */
+.table-wrap{
+    overflow:auto;
+}
+
+.table-modern{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0 10px;
+    min-width:780px;
+}
+
+.table-modern thead th{
+    font-size:.74rem;
+    text-transform:uppercase;
+    color:#94a3b8;
+    padding:.25rem .6rem;
+    letter-spacing:.05em;
+}
+
+.table-modern tbody tr{
+    background:#f8fafc;
+    transition:.18s;
+}
+
+.table-modern tbody tr:hover{
+    transform:translateY(-2px);
+    background:#f1f5f9;
+}
+
+.table-modern td{
+    padding:.9rem .65rem;
+    vertical-align:middle;
+}
+
+.table-modern tbody tr td:first-child{
+    border-radius:14px 0 0 14px;
+}
+
+.table-modern tbody tr td:last-child{
+    border-radius:0 14px 14px 0;
+}
+
+.rdv-urgent{
+    border-left:6px solid #dc2626;
+}
+
+/* =======================
+   USER
+======================= */
+.user-line,
+.patient-left{
+    display:flex;
+    align-items:center;
+    gap:.75rem;
+}
+
+.avatar-sm{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#2F6F6D,#57a7a3);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:800;
+    font-size:.95rem;
+    flex-shrink:0;
+}
+
+.user-name{
+    font-weight:800;
+    color:#0f172a;
+}
+
+.user-mail{
+    color:#64748b;
+    font-size:.82rem;
+}
+
+/* =======================
+   BADGES
+======================= */
+.badge-status{
+    display:inline-flex;
+    align-items:center;
+    padding:.45rem .8rem;
+    border-radius:999px;
+    font-size:.72rem;
+    font-weight:800;
+}
+
+.status-attente{
+    background:#fff7ed;
+    color:#ea580c;
+}
+
+.status-valide{
+    background:#ecfdf5;
+    color:#16a34a;
+}
+
+.status-refuse{
+    background:#fef2f2;
+    color:#dc2626;
+}
+
+.ai-pill{
+    display:inline-block;
+    margin-top:6px;
+    font-size:.72rem;
+    font-weight:800;
+}
+
+.ai-emergency{color:#991b1b;}
+.ai-high{color:#dc2626;}
+.ai-medium{color:#d97706;}
+.ai-low{color:#16a34a;}
+
+/* =======================
+   BUTTONS
+======================= */
+.action-group{
+    display:flex;
+    gap:.45rem;
+    flex-wrap:wrap;
+}
+/* EXCEL BUTTON PREMIUM */
+
+.ac-btn-success{
+    display:inline-flex;
+    align-items:center;
+    gap:.55rem;
+    padding:.9rem 1.15rem;
+    border:none;
+    border-radius:14px;
+    text-decoration:none;
+    font-weight:800;
+    font-size:.92rem;
+    color:#ffffff;
+    cursor:pointer;
+    transition:all .25s ease;
+    background:linear-gradient(135deg,#16a34a,#22c55e);
+    box-shadow:0 12px 24px rgba(34,197,94,.22);
+}
+
+.ac-btn-success i{
+    font-size:1rem;
+}
+
+.ac-btn-success:hover{
+    transform:translateY(-3px);
+    box-shadow:0 18px 30px rgba(34,197,94,.28);
+    filter:brightness(1.04);
+}
+
+.ac-btn-success:active{
+    transform:translateY(0);
+}
+
+.ac-btn-success:focus{
+    outline:none;
+    box-shadow:
+        0 0 0 4px rgba(34,197,94,.15),
+        0 18px 30px rgba(34,197,94,.28);
+}
+
+/* SMALL VERSION */
+.ac-btn-success.sm{
+    padding:.7rem .95rem;
+    font-size:.85rem;
+    border-radius:12px;
+}
+
+/* FULL WIDTH MOBILE */
+@media(max-width:768px){
+    .ac-btn-success{
+        width:100%;
+        justify-content:center;
+    }
+}
+.btn-mini{
+    display:inline-flex;
+    align-items:center;
+    gap:.35rem;
+    border:none;
+    text-decoration:none;
+    padding:.52rem .7rem;
+    border-radius:12px;
+    font-size:.8rem;
+    font-weight:800;
+    transition:.18s;
+}
+
+.btn-mini:hover{
+    transform:translateY(-1px);
+}
+
+.btn-view{
+    background:#eff6ff;
+    color:#2563eb;
+}
+
+.btn-ok{
+    background:#ecfdf5;
+    color:#16a34a;
+}
+
+.btn-no{
+    background:#fef2f2;
+    color:#dc2626;
+}
+
+.btn-report{
+    background:linear-gradient(135deg,#2F6F6D,#57a7a3);
+    color:#fff;
+    text-decoration:none;
+    padding:.55rem .85rem;
+    border-radius:12px;
+    font-size:.82rem;
+    font-weight:800;
+}
+
+/* =======================
+   PATIENTS
+======================= */
+.patient-list{
+    display:flex;
+    flex-direction:column;
+    gap:.75rem;
+}
+
+.patient-card{
+    background:#f8fafc;
+    border-radius:18px;
+    padding:.9rem;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:1rem;
+}
+
+/* =======================
+   PAGINATION
+======================= */
+.pagination-box{
+    margin-top:1rem;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:1rem;
+    flex-wrap:wrap;
+}
+
+.pagination-pages{
+    display:flex;
+    gap:.45rem;
+    flex-wrap:wrap;
+}
+
+.page-btn{
+    border:none;
+    background:#f1f5f9;
+    padding:.55rem .8rem;
+    border-radius:10px;
+    font-weight:800;
+    color:#0f172a;
+}
+
+.page-btn.active{
+    background:#2F6F6D;
+    color:#fff;
+}
+
+.empty-box{
+    text-align:center;
+    color:#94a3b8;
+    padding:1.5rem;
+}
+
+@media(max-width:1100px){
+    .dashboard-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+</style>
+
+{# ========================
+   STATS
+======================== #}
+
+{% set total = rdvs|length %}
+{% set pending = 0 %}
+{% set valid = 0 %}
+{% set refused = 0 %}
+
+{% for rdv in rdvs %}
+    {% if rdv.status == 'EN_ATTENTE' %}
+        {% set pending = pending + 1 %}
+    {% elseif rdv.status == 'VALIDE' %}
+        {% set valid = valid + 1 %}
+    {% else %}
+        {% set refused = refused + 1 %}
+    {% endif %}
+{% endfor %}
+
+<div class="stats-grid">
+
+    <div class="stat-box">
+        <div class="stat-top">
+            <span class="stat-label">Total RDV</span>
+            <div class="stat-icon"><i class="bi bi-calendar2-check"></i></div>
+        </div>
+        <div class="stat-value">{{ total }}</div>
+    </div>
+
+    <div class="stat-box">
+        <div class="stat-top">
+            <span class="stat-label">En attente</span>
+            <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
+        </div>
+        <div class="stat-value">{{ pending }}</div>
+    </div>
+
+    <div class="stat-box">
+        <div class="stat-top">
+            <span class="stat-label">Validés</span>
+            <div class="stat-icon"><i class="bi bi-check2-circle"></i></div>
+        </div>
+        <div class="stat-value">{{ valid }}</div>
+    </div>
+
+    <div class="stat-box">
+        <div class="stat-top">
+            <span class="stat-label">Patients</span>
+            <div class="stat-icon"><i class="bi bi-people"></i></div>
+        </div>
+        <div class="stat-value">{{ patients|length }}</div>
+    </div>
+
+</div>
+{# ========================= #}
+{# PUT THIS IN dashboard/index.html.twig #}
+{# ========================= #}
+
+<section class="ac-card" style="margin-bottom:1.5rem;">
+
+    <div class="ac-row-between" style="margin-bottom:1rem;">
+        <div>
+            <h2 style="margin:0;">Statistics Dashboard</h2>
+            <p style="margin:.35rem 0 0;color:var(--text-muted);">
+                Performance & appointments analytics
+            </p>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+
+        <div class="chart-box">
+            <h3>Appointments by Status</h3>
+            <canvas id="statusChart"></canvas>
+        </div>
+
+        <div class="chart-box">
+            <h3>Appointments by Month</h3>
+            <canvas id="monthChart"></canvas>
+        </div>
+
+        <div class="chart-box">
+            <h3>Appointments by Week Day</h3>
+            <canvas id="dayChart"></canvas>
+        </div>
+
+        <div class="chart-box">
+            <h3>Emergency Levels (AI)</h3>
+            <canvas id="emergencyChart"></canvas>
+        </div>
+
+    </div>
+
+</section>
+
+
+<style>
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
+    gap:1rem;
+}
+
+.chart-box{
+    background:var(--surface);
+    border:1px solid var(--border-color);
+    border-radius:18px;
+    padding:1rem;
+    box-shadow:0 10px 25px rgba(0,0,0,.05);
+}
+
+.chart-box h3{
+    margin:0 0 1rem;
+    font-size:1rem;
+}
+
+.chart-box canvas{
+    width:100%!important;
+    height:320px!important;
+}
+
+@media(max-width:768px){
+    .stats-grid{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+/* =========================
+   STATUS
+========================= */
+new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+        labels: [
+            {% for row in statusStats %}
+                '{{ row.status }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for row in statusStats %}
+                    {{ row.total }},
+                {% endfor %}
+            ],
+            backgroundColor: [
+                '#16a34a',
+                '#f59e0b',
+                '#ef4444',
+                '#3b82f6'
+            ]
+        }]
+    },
+    options:{
+        responsive:true,
+        maintainAspectRatio:false
+    }
+});
+
+
+/* =========================
+   MONTH
+========================= */
+new Chart(document.getElementById('monthChart'), {
+    type: 'line',
+    data: {
+        labels: [
+            {% for row in monthStats %}
+                '{{ row.month_label }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            label:'Appointments',
+            data: [
+                {% for row in monthStats %}
+                    {{ row.total }},
+                {% endfor %}
+            ],
+            borderColor:'#3b82f6',
+            backgroundColor:'rgba(59,130,246,.15)',
+            fill:true,
+            tension:.35
+        }]
+    },
+    options:{
+        responsive:true,
+        maintainAspectRatio:false
+    }
+});
+
+
+/* =========================
+   DAY
+========================= */
+new Chart(document.getElementById('dayChart'), {
+    type: 'bar',
+    data: {
+        labels: [
+            {% for row in dayStats %}
+                '{{ row.day_name }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            label:'Appointments',
+            data: [
+                {% for row in dayStats %}
+                    {{ row.total }},
+                {% endfor %}
+            ],
+            backgroundColor:'#10b981',
+            borderRadius:10
+        }]
+    },
+    options:{
+        responsive:true,
+        maintainAspectRatio:false
+    }
+});
+
+
+/* =========================
+   EMERGENCY
+========================= */
+new Chart(document.getElementById('emergencyChart'), {
+    type: 'polarArea',
+    data: {
+        labels: ['Low','Medium','High','Emergency'],
+        datasets: [{
+            data: [
+                {{ emergencyStats.low }},
+                {{ emergencyStats.medium }},
+                {{ emergencyStats.high }},
+                {{ emergencyStats.emergency }}
+            ],
+            backgroundColor:[
+                '#22c55e',
+                '#eab308',
+                '#f97316',
+                '#dc2626'
+            ]
+        }]
+    },
+    options:{
+        responsive:true,
+        maintainAspectRatio:false
+    }
+});
+</script>
+<div class="dashboard-grid">
+
+{# =========================================================
+   RDV PANEL
+========================================================= #}
+<div class="panel-box">
+
+    <div class="panel-title">
+        <div>
+            <h5>Rendez-vous</h5>
+            <div class="panel-sub">Recherche, filtre, pagination intelligente</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" id="rdvSearch" class="search-input" placeholder="Rechercher patient, email, motif...">
+        </div>
+
+        <select id="rdvStatusFilter" class="select-filter">
+            <option value="">Tous statuts</option>
+            <option value="EN_ATTENTE">En attente</option>
+            <option value="VALIDE">Validé</option>
+            <option value="REFUSE">Refusé</option>
+        </select>
+
+        <select id="rdvAiFilter" class="select-filter">
+            <option value="">Toutes urgences</option>
+            <option value="emergency">Emergency</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+        </select>
+    </div>
+
+    <div class="table-wrap">
+    {# ADD BUTTON IN dashboard/index.html.twig #}
+
+<a href="{{ path('app_therapist_export_excel') }}" class="ac-btn ac-btn-success">
+    <i class="bi bi-file-earmark-excel"></i>
+    Export Excel
+</a>
+        <table class="table-modern">
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Date</th>
+                    <th>Statut</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="rdvBody">
+
+            {% for rdv in rdvs %}
+
+                {% set fullname = (rdv.firstName|default('') ~ ' ' ~ rdv.lastName|default(''))|trim %}
+                {% set displayName = fullname != '' ? fullname : rdv.patient_email %}
+
+                <tr class="rdv-row
+                    {% if rdv.status == 'EN_ATTENTE' and (rdv.ai_level == 'high' or rdv.ai_level == 'emergency') %}
+                        rdv-urgent
+                    {% endif %}
+                "
+                    data-search="{{ displayName|lower }} {{ rdv.patient_email|lower }} {{ rdv.motif|default('')|lower }}"
+                    data-status="{{ rdv.status }}"
+                    data-ai="{{ rdv.ai_level|default('') }}"
+                >
+
+                    <td>
+                        <div class="user-line">
+                            <div class="avatar-sm">
+                                {{ displayName|slice(0,1)|upper }}
+                            </div>
+
+                            <div>
+                                <div class="user-name">{{ displayName }}</div>
+                                <div class="user-mail">{{ rdv.patient_email }}</div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>date proposé client : {{ rdv.date_time|date('d/m/Y H:i') }}
+                        proposed datetime doctor: {{ rdv.proposed_date_time|date('d/m/Y H:i') }}
+                    </td>
+ 
+                    <td>
+                        <span class="badge-status
+                            {% if rdv.status == 'EN_ATTENTE' %}status-attente
+                            {% elseif rdv.status == 'VALIDE' %}status-valide
+                            {% else %}status-refuse{% endif %}
+                        ">
+                            {{ rdv.status }}
+                        </span>
+
+                        {% if rdv.status == 'EN_ATTENTE' and rdv.ai_level %}
+                            <div class="ai-pill ai-{{ rdv.ai_level }}">
+                                AI: {{ rdv.ai_level|upper }}
+                            </div>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <div class="action-group">
+
+                            <a href="{{ path('app_dashboard_rdv_show', {id: rdv.id}) }}" class="btn-mini btn-view">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+
+                            {% if rdv.status == 'EN_ATTENTE' %}
+                                <a href="{{ path('app_rdv_accept', {id: rdv.id}) }}" class="btn-mini btn-ok">
+                                    <i class="bi bi-check2"></i> Accept
+                                </a>
+
+                                <a href="{{ path('app_rdv_refuse', {id: rdv.id}) }}" class="btn-mini btn-no">
+                                    <i class="bi bi-x-lg"></i> Refuse
+                                </a>
+                            {% endif %}
+
+                        </div>
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination-box">
+        <div id="rdvCount" class="panel-sub"></div>
+        <div class="pagination-pages" id="rdvPages"></div>
+    </div>
+
+</div>
+
+{# =========================================================
+   PATIENTS PANEL
+========================================================= #}
+
+<div class="panel-box">
+
+    <div class="panel-title">
+        <div>
+            <h5>Patients</h5>
+            <div class="panel-sub">Recherche rapide & pagination</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" id="patientSearch" class="search-input" placeholder="Rechercher patient...">
+        </div>
+    </div>
+
+    <div class="patient-list" id="patientList">
+
+        {% for patient in patients %}
+
+            {% set pname = (patient.firstName|default('') ~ ' ' ~ patient.lastName|default(''))|trim %}
+            {% set displayPatient = pname != '' ? pname : patient.email %}
+
+            <div class="patient-card patient-row"
+                 data-search="{{ displayPatient|lower }} {{ patient.email|lower }}">
+
+                <div class="patient-left">
+
+                    <div class="avatar-sm">
+                        {{ displayPatient|slice(0,1)|upper }}
+                    </div>
+
+                    <div>
+                        <div class="user-name">{{ displayPatient }}</div>
+                        <div class="user-mail">{{ patient.email }}</div>
+                    </div>
+
+                </div>
+
+                <a href="{{ path('app_rapport_show', {id: patient.id}) }}" class="btn-report">
+                    Voir
+                </a>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+    <div class="pagination-box">
+        <div id="patientCount" class="panel-sub"></div>
+        <div class="pagination-pages" id="patientPages"></div>
+    </div>
+
+</div>
+
+</div>
+
+</section>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    function setupTable({
+        rowsSelector,
+        searchInput,
+        statusFilter = null,
+        aiFilter = null,
+        pagesContainer,
+        countContainer,
+        perPage = 6
+    }) {
+        const rows = [...document.querySelectorAll(rowsSelector)];
+        const search = document.querySelector(searchInput);
+        const status = statusFilter ? document.querySelector(statusFilter) : null;
+        const ai = aiFilter ? document.querySelector(aiFilter) : null;
+        const pages = document.querySelector(pagesContainer);
+        const count = document.querySelector(countContainer);
+
+        let currentPage = 1;
+
+        function render() {
+            const term = search ? search.value.toLowerCase().trim() : '';
+            const statusVal = status ? status.value : '';
+            const aiVal = ai ? ai.value : '';
+
+            const filtered = rows.filter(row => {
+                const txt = row.dataset.search || '';
+                const rowStatus = row.dataset.status || '';
+                const rowAi = row.dataset.ai || '';
+
+                const matchSearch = txt.includes(term);
+                const matchStatus = !statusVal || rowStatus === statusVal;
+                const matchAi = !aiVal || rowAi === aiVal;
+
+                return matchSearch && matchStatus && matchAi;
+            });
+
+            const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+            if (currentPage > totalPages) currentPage = 1;
+
+            rows.forEach(r => r.style.display = 'none');
+
+            const start = (currentPage - 1) * perPage;
+            const end = start + perPage;
+
+            filtered.slice(start, end).forEach(row => {
+                row.style.display = '';
+            });
+
+            count.innerHTML = filtered.length + ' résultat(s)';
+
+            pages.innerHTML = '';
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'page-btn' + (i === currentPage ? ' active' : '');
+                btn.innerText = i;
+
+                btn.addEventListener('click', () => {
+                    currentPage = i;
+                    render();
+                });
+
+                pages.appendChild(btn);
+            }
+
+            if (filtered.length === 0) {
+                count.innerHTML = 'Aucun résultat';
+            }
+        }
+
+        [search, status, ai].forEach(el => {
+            if (el) {
+                el.addEventListener('input', () => {
+                    currentPage = 1;
+                    render();
+                });
+
+                el.addEventListener('change', () => {
+                    currentPage = 1;
+                    render();
+                });
+            }
+        });
+
+        render();
+    }
+
+    setupTable({
+        rowsSelector: '.rdv-row',
+        searchInput: '#rdvSearch',
+        statusFilter: '#rdvStatusFilter',
+        aiFilter: '#rdvAiFilter',
+        pagesContainer: '#rdvPages',
+        countContainer: '#rdvCount',
+        perPage: 6
+    });
+
+    setupTable({
+        rowsSelector: '.patient-row',
+        searchInput: '#patientSearch',
+        pagesContainer: '#patientPages',
+        countContainer: '#patientCount',
+        perPage: 5
+    });
+
+});
+</script>
+
+{% endblock %}

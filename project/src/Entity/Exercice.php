@@ -35,6 +35,21 @@ class Exercice
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $benefits = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $tips = null;
+
+    #[ORM\Column(type: Types::STRING, length: 50, nullable: true)]
+    private ?string $theme = null;
+
+    /**
+     * @var list<array{title: string, description: string}>|null
+     */
+    #[ORM\Column(name: 'guided_instructions', type: Types::JSON, nullable: true)]
+    private ?array $guidedInstructions = null;
+
     #[ORM\Column(name: 'is_active', type: Types::BOOLEAN)]
     private bool $isActive = true;
 
@@ -122,6 +137,83 @@ class Exercice
     public function setDescription(?string $description): self
     {
         $this->description = $description === null ? null : trim($description);
+
+        return $this;
+    }
+
+    public function getBenefits(): ?string
+    {
+        return $this->benefits;
+    }
+
+    public function setBenefits(?string $benefits): self
+    {
+        $this->benefits = $benefits === null ? null : trim($benefits);
+
+        return $this;
+    }
+
+    public function getTips(): ?string
+    {
+        return $this->tips;
+    }
+
+    public function setTips(?string $tips): self
+    {
+        $this->tips = $tips === null ? null : trim($tips);
+
+        return $this;
+    }
+
+    public function getTheme(): ?string
+    {
+        return $this->theme;
+    }
+
+    public function setTheme(?string $theme): self
+    {
+        $theme = $theme === null ? null : trim($theme);
+        $this->theme = $theme !== '' ? $theme : null;
+
+        return $this;
+    }
+
+    /**
+     * @return list<array{title: string, description: string}>|null
+     */
+    public function getGuidedInstructions(): ?array
+    {
+        if (!is_array($this->guidedInstructions)) {
+            return null;
+        }
+
+        $rows = [];
+        foreach ($this->guidedInstructions as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+
+            $title = trim((string) ($row['title'] ?? ''));
+            $description = trim((string) ($row['description'] ?? ''));
+            if ($title === '' || $description === '') {
+                continue;
+            }
+
+            $rows[] = [
+                'title' => $title,
+                'description' => $description,
+            ];
+        }
+
+        return $rows !== [] ? $rows : null;
+    }
+
+    /**
+     * @param list<array{title: string, description: string}>|null $guidedInstructions
+     */
+    public function setGuidedInstructions(?array $guidedInstructions): self
+    {
+        $this->guidedInstructions = $guidedInstructions;
 
         return $this;
     }

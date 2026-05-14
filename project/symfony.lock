@@ -8,7 +8,7 @@
             "ref": "0a0c0e3972f784e628c4f759d2fb446e9eeb4959"
         },
         "files": [
-            "config/packages/doctrine_doctor.yaml"
+            "./config/packages/doctrine_doctor.yaml"
         ]
     },
     "cmen/google-charts-bundle": {

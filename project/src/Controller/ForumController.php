@@ -44,7 +44,7 @@ class ForumController extends AbstractController
         UserNavService $navService,
     ): Response {
         $currentUser = $currentUserService->requireUser();
-        if ($currentUserService->isBackofficeUser($currentUser)) {
+        if ($currentUserService->isAdmin($currentUser)) {
             return $this->redirectToRoute('app_admin_forum');
         }
 
@@ -75,7 +75,7 @@ class ForumController extends AbstractController
         UserNavService $navService,
     ): Response {
         $currentUser = $currentUserService->requireUser();
-        if ($currentUserService->isBackofficeUser($currentUser)) {
+        if ($currentUserService->isAdmin($currentUser)) {
             return $this->redirectToRoute('app_admin_forum');
         }
 
@@ -109,7 +109,7 @@ class ForumController extends AbstractController
         UserNavService $navService,
     ): Response {
         $currentUser = $currentUserService->requireUser();
-        if ($currentUserService->isBackofficeUser($currentUser)) {
+        if ($currentUserService->isAdmin($currentUser)) {
             return $this->redirectToRoute('app_admin_forum');
         }
 
@@ -140,7 +140,7 @@ class ForumController extends AbstractController
         UserNavService $navService,
     ): Response {
         $currentUser = $currentUserService->requireUser();
-        if ($currentUserService->isBackofficeUser($currentUser)) {
+        if ($currentUserService->isAdmin($currentUser)) {
             return $this->redirectToRoute('app_admin_forum');
         }
 
@@ -172,7 +172,7 @@ class ForumController extends AbstractController
         UserNavService $navService,
     ): Response {
         $currentUser = $currentUserService->requireUser();
-        if ($currentUserService->isBackofficeUser($currentUser)) {
+        if ($currentUserService->isAdmin($currentUser)) {
             return $this->redirectToRoute('app_admin_forum');
         }
 
@@ -214,7 +214,7 @@ class ForumController extends AbstractController
         SpamRateLimiterService $spamRateLimiterService,
     ): Response {
         $currentUser = $currentUserService->requireUser();
-        if ($currentUserService->isBackofficeUser($currentUser)) {
+        if ($currentUserService->isAdmin($currentUser)) {
             return $this->redirectToRoute('app_admin_forum');
         }
 
@@ -241,7 +241,6 @@ class ForumController extends AbstractController
             // Check spam rate limit for replies before creating reply
             $rateLimit = $spamRateLimiterService->checkReplyCreationSpam($currentUser->getId());
             if (!$rateLimit->isAccepted()) {
-                // Ban user for 12 hours due to spam
                 $spamRateLimiterService->banUserForSpam($currentUser);
                 $remainingSeconds = $spamRateLimiterService->getRemainingBanSeconds($currentUser);
                 $this->addFlash('danger', sprintf(
@@ -262,7 +261,17 @@ class ForumController extends AbstractController
 
             $reply->setThread($thread);
             $reply->setAuthorId($currentUser->getId());
-            $replyService->add($reply, $currentUser);
+
+            try {
+                $replyService->add($reply, $currentUser);
+            } catch (\RuntimeException $exception) {
+                if ($request->hasSession()) {
+                    $request->getSession()->set($prefillKey, (string) $reply->getContent());
+                }
+                $this->addFlash('danger', $exception->getMessage());
+
+                return $this->redirectToRoute('app_forum_thread_detail', ['id' => $thread->getId()]);
+            }
 
             return $this->redirectToRoute('app_forum_thread_detail', ['id' => $thread->getId()]);
         }
@@ -319,7 +328,7 @@ class ForumController extends AbstractController
         ThreadService $threadService,
     ): Response {
         $currentUser = $currentUserService->requireUser();
-        if ($currentUserService->isBackofficeUser($currentUser)) {
+        if ($currentUserService->isAdmin($currentUser)) {
             return $this->redirectToRoute('app_admin_forum');
         }
 
@@ -350,7 +359,7 @@ class ForumController extends AbstractController
      *
      * @return ForumThread[]
      */
-    private function applyThreadFilters(array $threads, Request $request): array
+    protected function applyThreadFilters(array $threads, Request $request): array
     {
         $pinned = array_values(array_filter($threads, static fn (ForumThread $t): bool => $t->isPinned()));
         $filtered = array_values(array_filter($threads, static fn (ForumThread $t): bool => !$t->isPinned()));
@@ -385,7 +394,7 @@ class ForumController extends AbstractController
         return array_merge($pinned, $filtered);
     }
 
-    private function compareThreads(ForumThread $a, ForumThread $b, string $sort): int
+    protected function compareThreads(ForumThread $a, ForumThread $b, string $sort): int
     {
         return match ($sort) {
             'oldest' => $a->getCreatedAt() <=> $b->getCreatedAt(),
@@ -402,7 +411,7 @@ class ForumController extends AbstractController
     /**
      * @return list<string>
      */
-    private function readStatuses(Request $request): array
+    protected function readStatuses(Request $request): array
     {
         $allowed = ['open', 'locked'];
         $raw = $request->query->all('status');
@@ -414,7 +423,7 @@ class ForumController extends AbstractController
     /**
      * @return list<string>
      */
-    private function readTypes(Request $request): array
+    protected function readTypes(Request $request): array
     {
         $allowed = ['discussion', 'question', 'announcement'];
         $raw = $request->query->all('type');
@@ -426,7 +435,7 @@ class ForumController extends AbstractController
     /**
      * @return list<int>
      */
-    private function readCategoryIds(Request $request): array
+    protected function readCategoryIds(Request $request): array
     {
         $raw = $request->query->all('category');
         $ids = [];
@@ -441,7 +450,7 @@ class ForumController extends AbstractController
         return array_values(array_unique($ids));
     }
 
-    private function readSort(Request $request): string
+    protected function readSort(Request $request): string
     {
         $allowed = ['newest', 'oldest', 'most_points', 'least_points', 'most_comments', 'least_comments', 'most_followers', 'least_followers'];
         $value = (string) $request->query->get('sort', 'most_followers');
@@ -453,7 +462,7 @@ class ForumController extends AbstractController
     public function editReply(Reply $reply, Request $request, ForumCurrentUserService $currentUserService, ReplyService $replyService): Response
     {
         $currentUser = $currentUserService->requireUser();
-        if ($currentUserService->isBackofficeUser($currentUser)) {
+        if ($currentUserService->isAdmin($currentUser)) {
             return $this->redirectToRoute('app_admin_forum');
         }
 
@@ -474,7 +483,7 @@ class ForumController extends AbstractController
     public function deleteReply(Reply $reply, Request $request, ForumCurrentUserService $currentUserService, ReplyService $replyService): Response
     {
         $currentUser = $currentUserService->requireUser();
-        if ($currentUserService->isBackofficeUser($currentUser)) {
+        if ($currentUserService->isAdmin($currentUser)) {
             return $this->redirectToRoute('app_admin_forum');
         }
 

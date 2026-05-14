@@ -1,0 +1,150 @@
+{# templates/rapport/pdf.html.twig #}
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body{
+    font-family: DejaVu Sans, sans-serif;
+    font-size:13px;
+    color:#1e293b;
+}
+
+.header{
+    background:#2F6F6D;
+    color:white;
+    padding:18px;
+    border-radius:10px;
+}
+
+.title{
+    font-size:22px;
+    font-weight:bold;
+}
+
+.sub{
+    font-size:12px;
+    margin-top:4px;
+}
+
+.section{
+    margin-top:22px;
+}
+
+.card{
+    border:1px solid #e2e8f0;
+    border-radius:10px;
+    padding:14px;
+    margin-bottom:12px;
+}
+
+.grid{
+    width:100%;
+}
+
+.grid td{
+    padding:6px 0;
+    vertical-align:top;
+}
+
+.label{
+    color:#64748b;
+    width:170px;
+}
+
+.consult{
+    border-left:5px solid #2F6F6D;
+    background:#f8fafc;
+    padding:12px;
+    margin-bottom:14px;
+}
+
+.badge{
+    background:#dcfce7;
+    color:#166534;
+    padding:4px 8px;
+    font-size:11px;
+    border-radius:20px;
+}
+
+.footer{
+    margin-top:25px;
+    text-align:center;
+    font-size:11px;
+    color:#94a3b8;
+}
+</style>
+</head>
+<body>
+
+{% set fullName = (patient.firstName ~ ' ' ~ patient.lastName)|trim %}
+{% set displayName = fullName != '' ? fullName : patient.email %}
+
+<div class="header">
+    <div class="title">Rapport Médical</div>
+    <div class="sub">Serinity Healthcare Platform</div>
+</div>
+
+<div class="section">
+    <div class="card">
+
+        <table class="grid">
+            <tr>
+                <td class="label"><strong>Patient</strong></td>
+                <td>{{ displayName }}</td>
+            </tr>
+            <tr>
+                <td class="label"><strong>Email</strong></td>
+                <td>{{ patient.email }}</td>
+            </tr>
+            <tr>
+                <td class="label"><strong>Téléphone</strong></td>
+                <td>{{ patient.phone ?: 'Non renseigné' }}</td>
+            </tr>
+            <tr>
+                <td class="label"><strong>Pays</strong></td>
+                <td>{{ patient.country ?: 'Non renseigné' }}</td>
+            </tr>
+            <tr>
+                <td class="label"><strong>Région</strong></td>
+                <td>{{ patient.state ?: 'Non renseigné' }}</td>
+            </tr>
+        </table>
+
+    </div>
+</div>
+
+<div class="section">
+    <h3>Historique des consultations</h3>
+
+    {% for c in consultations %}
+        <div class="consult">
+
+            <div style="margin-bottom:8px;">
+                <span class="badge">Consultation</span>
+                <strong style="margin-left:10px;">
+                    {{ c.dateConsultation|date('d/m/Y H:i') }}
+                </strong>
+            </div>
+
+            <p><strong>Diagnostic :</strong><br>{{ c.diagnostic ?: 'Non renseigné' }}</p>
+
+            <p><strong>Prescription :</strong><br>{{ c.prescription ?: 'Non renseigné' }}</p>
+
+            <p><strong>Notes :</strong><br>{{ c.notes ?: 'Aucune note' }}</p>
+
+        </div>
+    {% else %}
+        <div class="card">
+            Aucune consultation disponible.
+        </div>
+    {% endfor %}
+</div>
+
+<div class="footer">
+    Généré automatiquement par Serinity • {{ "now"|date("d/m/Y H:i") }}
+</div>
+
+</body>
+</html>

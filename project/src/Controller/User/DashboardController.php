@@ -49,16 +49,16 @@ final class DashboardController extends AbstractUserUiController
     }
 
     #[Route('/consultations', name: 'user_ui_consultations', methods: ['GET'])]
-    public function consultations(): Response
+    public function consultations(): RedirectResponse
     {
         $user = $this->currentUser();
 
-        return $this->render('access_control/pages/coming_soon.html.twig', [
-            'nav' => $this->buildNav('user_ui_consultations'),
-            'userName' => $user->getEmail(),
-            'title' => 'Consultations',
-            'subtitle' => 'User consultations module will be available soon.',
-        ]);
+        if ($user->getRole() === 'THERAPIST') {
+            return $this->redirectToRoute('app_therapist_rdv');
+        }
+
+        // Redirect users to the rendez-vous (RDV) page by route name
+        return $this->redirectToRoute('app_patient_rdv');
     }
 
     #[Route('/forum', name: 'user_ui_forum', methods: ['GET'])]

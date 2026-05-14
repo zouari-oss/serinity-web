@@ -41,6 +41,12 @@
                 <label>Level<input class="ac-input" name="level" type="number" value="1"></label>
                 <label>Duration (minutes)<input class="ac-input" name="durationMinutes" type="number" value="10"></label>
                 <label class="ac-col-span-2">Description<textarea class="ac-input" name="description" rows="3"></textarea></label>
+                <label class="ac-col-span-2">Benefits<textarea class="ac-input" name="benefits" rows="3" placeholder="Improves focus&#10;Supports relaxation"></textarea></label>
+                <label class="ac-col-span-2">Tips<textarea class="ac-input" name="tips" rows="3" placeholder="Keep shoulders relaxed&#10;Breathe gently"></textarea></label>
+                <label>Theme<input class="ac-input" name="theme" placeholder="calm / balanced / active"></label>
+                <label class="ac-col-span-2">Guided instructions
+                    <textarea class="ac-input" name="guidedInstructionsText" rows="5" placeholder="Prepare: Sit comfortably and relax your shoulders.&#10;Focus: Bring your attention to your breathing.&#10;Finish: Take a final deep breath."></textarea>
+                </label>
                 <label class="ac-col-span-2">
                     <span class="ac-label">Active</span>
                     <input type="checkbox" name="isActive" value="1" checked>
@@ -141,6 +147,10 @@
                         <label>Level<input class="ac-input" type="text" value="{{ ex.level }}" readonly></label>
                         <label>Duration<input class="ac-input" type="text" value="{{ ex.durationMinutes }} min" readonly></label>
                         <label>Description<textarea class="ac-input" rows="3" readonly>{{ ex.description }}</textarea></label>
+                        <label>Benefits<textarea class="ac-input" rows="3" readonly>{{ ex.benefits }}</textarea></label>
+                        <label>Tips<textarea class="ac-input" rows="3" readonly>{{ ex.tips }}</textarea></label>
+                        <label>Theme<input class="ac-input" type="text" value="{{ ex.theme ?: 'balanced' }}" readonly></label>
+                        <label>Guided instructions<textarea class="ac-input" rows="5" readonly>{{ ex.guidedInstructionsText }}</textarea></label>
                         <label>Resources
                             <textarea class="ac-input" rows="4" readonly>{% if ex.resources is empty %}No resources{% else %}{% for resource in ex.resources %}{{ resource.title }} ({{ resource.resourceType }}) - {{ resource.resourceUrl }}{% if not loop.last %}\n{% endif %}{% endfor %}{% endif %}</textarea>
                         </label>

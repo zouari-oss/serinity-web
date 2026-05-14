@@ -57,6 +57,8 @@ parameters:
     app.forum_upload_dir: '%kernel.project_dir%/public/uploads'
     app.forum_imgbb_api_key: '%env(string:API_IMGBB)%'
     app.forum_translate_api_key: '%env(string:API_TRANSLATE_KEY)%'
+    app.toxicity_api_url: '%env(string:TOXICITY_API_URL)%'
+    app.toxicity_api_timeout: '%env(float:TOXICITY_API_TIMEOUT)%'
 
     app.account_ban_duration_minutes: '%env(int:ACCOUNT_BAN_DURATION_MINUTES)%'
     app.spam_ban_duration_minutes: '%env(int:SPAM_BAN_DURATION_MINUTES)%'
@@ -79,6 +81,11 @@ parameters:
     app.mood_ml_api_prediction_route: '%env(string:MOOD_ML_API_PREDICTION_ROUTE)%'
     app.mood_ml_api_key: '%env(string:MOOD_ML_API_KEY)%'
     app.mood_ml_api_timeout: '%env(float:MOOD_ML_API_TIMEOUT)%'
+    app.exercise_profile_ml_api_enabled: '%env(bool:EXERCISE_PROFILE_ML_API_ENABLED)%'
+    app.exercise_profile_ml_api_base_url: '%env(string:EXERCISE_PROFILE_ML_API_BASE_URL)%'
+    app.exercise_profile_ml_api_prediction_route: '%env(string:EXERCISE_PROFILE_ML_API_PREDICTION_ROUTE)%'
+    app.exercise_profile_ml_api_key: '%env(string:EXERCISE_PROFILE_ML_API_KEY)%'
+    app.exercise_profile_ml_api_timeout: '%env(float:EXERCISE_PROFILE_ML_API_TIMEOUT)%'
     app.user_risk_detection_url: '%env(string:USER_RISK_DETECTION_URL)%'
     app.user_risk_api_timeout: '%env(float:USER_RISK_API_TIMEOUT)%'
     app.user_risk_cache_ttl_seconds: '%env(int:USER_RISK_CACHE_TTL_SECONDS)%'
@@ -114,6 +121,11 @@ services:
     App\Service\TranslationService:
         arguments:
             $apiKey: '%app.forum_translate_api_key%'
+
+    App\Service\ModerationService:
+        arguments:
+            $toxicityApiUrl: '%app.toxicity_api_url%'
+            $toxicityTimeout: '%app.toxicity_api_timeout%'
 
     App\Service\MailerService:
         arguments:
@@ -259,6 +271,15 @@ services:
             $predictionRoute: '%app.mood_ml_api_prediction_route%'
             $apiKey: '%app.mood_ml_api_key%'
             $timeout: '%app.mood_ml_api_timeout%'
+            $httpClient: '@http_client'
+
+    App\Service\User\ExerciseProfileApiClient:
+        arguments:
+            $enabled: '%app.exercise_profile_ml_api_enabled%'
+            $baseUrl: '%app.exercise_profile_ml_api_base_url%'
+            $predictionRoute: '%app.exercise_profile_ml_api_prediction_route%'
+            $apiKey: '%app.exercise_profile_ml_api_key%'
+            $timeout: '%app.exercise_profile_ml_api_timeout%'
             $httpClient: '@http_client'
 
     App\Service\Risk\UserRiskService:

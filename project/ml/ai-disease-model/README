@@ -1,0 +1,21 @@
+Run these commands from `project/ai-disease-model`.
+
+Install Python deps:
+`python -m pip install -r requirements.txt`
+
+Quick environment check:
+`python -c "import pandas, sklearn, flask, flask_cors, joblib; print('EVERYTHING OK')"`
+
+Train or retrain the bundle: //only when dataset available and also when needed (not needed probably)
+`python train_model.py`
+
+Run the API:
+`python api.py`
+
+API URL:
+`http://127.0.0.1:5001`
+
+Notes:
+- `train_model.py` now searches the current folder, the working directory, and the parent project folder for the dataset CSV.
+- The API adds `confidence`, `predictionSource`, and `topPredictions` to help debug unstable predictions.
+- Rule-based matching is used for very obvious symptom clusters before falling back to the ML model.

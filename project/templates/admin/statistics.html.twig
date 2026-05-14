@@ -1,6 +1,6 @@
-{% extends 'forum/embedded_layout.html.twig' %}
+{% extends 'access_control/layout.html.twig' %}
 
-{% block title %}Forum Statistics{% endblock %}
+{% block title %}Forum Statistics | Serinity{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -126,8 +126,12 @@
     </style>
 {% endblock %}
 
-{% block forum_content %}
-<main class="page-shell">
+{% block content %}
+<div class="ac-app-layout">
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+    <div class="ac-main">
+        {% include 'access_control/components/_topbar.html.twig' with { title: topbarTitle, subtitle: topbarSubtitle, username: userName } %}
+        <main class="page-shell">
     <div class="container stats-shell stats-fxml-theme">
         <section class="card-soft p-3 p-md-4 mb-3 stats-head stats-panel">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -262,7 +266,9 @@
             </div>
         </div>
     </div>
-</main>
+        </main>
+    </div>
+</div>
 {% endblock %}
 
 {% block javascripts %}

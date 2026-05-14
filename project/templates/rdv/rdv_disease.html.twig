@@ -1,0 +1,348 @@
+{% extends 'access_control/layout.html.twig' %}
+
+{% block title %}Psychological AI | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+
+    <div class="ac-main" data-controller="flash-toast">
+
+        {% include 'access_control/components/_topbar.html.twig' with {
+            title: 'Psychological AI',
+            subtitle: 'Analyse intelligente des symptômes psychologiques',
+            username: userName
+        } %}
+
+        <section class="ac-card">
+
+            <div class="ac-row-between" style="margin-bottom:1rem; gap:1rem; flex-wrap:wrap;">
+                <div>
+                    <h2 style="margin:0;">Psychological Disease Prediction</h2>
+                    <p style="margin:.35rem 0 0; color:var(--text-muted);">
+                        Describe psychological symptoms and get one probable psychological orientation.
+                    </p>
+                </div>
+
+                <span class="ac-badge ac-badge-success">
+                    Psychological only
+                </span>
+            </div>
+
+            <div class="ai-warning">
+                This tool is only for psychological orientation. It is not a final medical diagnosis.
+            </div>
+
+            <div class="ai-panel">
+
+                <label class="ai-label" for="promptInput">
+                    Describe symptoms
+                </label>
+
+                <textarea
+                    id="promptInput"
+                    class="ai-textarea"
+                    placeholder="Example: I feel sad, hopeless, tired and I lost interest in everything..."
+                ></textarea>
+
+                <div class="ai-examples">
+                    <button type="button" class="ac-ghost-btn ai-example" data-example="I feel very anxious and I have panic attacks every night">
+                        Anxiety / panic
+                    </button>
+
+                    <button type="button" class="ac-ghost-btn ai-example" data-example="I feel sad, hopeless, tired and I lost interest in everything">
+                        Depression
+                    </button>
+
+                    <button type="button" class="ac-ghost-btn ai-example" data-example="I cannot sleep, I feel stressed and exhausted all day">
+                        Stress / insomnia
+                    </button>
+
+                    <button type="button" class="ac-ghost-btn ai-example" data-example="I hear voices, I feel paranoid and I see things that others do not see">
+                        Hallucinations
+                    </button>
+                </div>
+
+                <div class="doctor-actions" style="margin-top:1rem;">
+                    <button type="button" id="predictBtn" class="ac-btn ac-btn-primary">
+                        Predict
+                    </button>
+
+                    
+                </div>
+
+                <div id="loadingBox" class="ai-loading">
+                    Analyse en cours...
+                </div>
+
+                <div id="alertBox"></div>
+
+                <div id="resultBox"></div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+
+<style>
+.ai-warning {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 16px;
+    background: #fff3e0;
+    color: #e65100;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.ai-panel {
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 1rem;
+}
+
+.ai-label {
+    display: block;
+    margin-bottom: .6rem;
+    color: var(--text-muted);
+    font-size: .8rem;
+    text-transform: uppercase;
+    font-weight: 800;
+}
+
+.ai-textarea {
+    width: 100%;
+    min-height: 180px;
+    border-radius: 18px;
+    border: 1px solid var(--border-color);
+    background: #f8fafc;
+    padding: 1rem;
+    resize: vertical;
+    outline: none;
+    font-weight: 600;
+    color: var(--text-color, #0f172a);
+    line-height: 1.6;
+    transition: .25s ease;
+}
+
+.ai-textarea:focus {
+    background: #fff;
+    border-color: #2f6f6d;
+    box-shadow: 0 0 0 4px rgba(47, 111, 109, .10);
+}
+
+.ai-examples {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .65rem;
+    margin-top: .85rem;
+}
+
+.ai-loading {
+    display: none;
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 16px;
+    background: #e8f5e9;
+    color: #2e7d32;
+    font-weight: 800;
+}
+
+.ai-loading.active {
+    display: block;
+}
+
+.ai-error {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 16px;
+    background: #ffebee;
+    color: #c62828;
+    font-weight: 800;
+}
+
+.ai-result {
+    margin-top: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 1rem;
+}
+
+.ai-result-title {
+    margin: 0 0 .35rem;
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--text-color, #0f172a);
+}
+
+.ai-result-muted {
+    color: var(--text-muted);
+    margin-bottom: .8rem;
+}
+
+.symptom-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-bottom: 1rem;
+}
+
+.symptom-pill {
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: .8rem;
+    font-weight: 700;
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.disease-result {
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 18px;
+    padding: 1rem;
+}
+
+.disease-result .label {
+    font-size: .75rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 800;
+    margin-bottom: .4rem;
+}
+
+.disease-result h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: var(--text-color, #0f172a);
+}
+</style>
+
+<script>
+(function () {
+    function initDiseasePredictionPage() {
+        const panel = document.querySelector('.ai-panel');
+
+        if (!panel || panel.dataset.aiInitialized === 'true') {
+            return;
+        }
+
+        panel.dataset.aiInitialized = 'true';
+
+        const promptInput = document.getElementById('promptInput');
+        const predictBtn = document.getElementById('predictBtn');
+        const resultBox = document.getElementById('resultBox');
+        const alertBox = document.getElementById('alertBox');
+        const loadingBox = document.getElementById('loadingBox');
+        const examples = document.querySelectorAll('.ai-example');
+
+        examples.forEach(function (button) {
+            button.addEventListener('click', function () {
+                promptInput.value = this.dataset.example;
+                promptInput.focus();
+            });
+        });
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function showError(message) {
+            resultBox.innerHTML = '';
+            alertBox.innerHTML = `
+                <div class="ai-error">
+                    ${escapeHtml(message)}
+                </div>
+            `;
+        }
+
+        function showResult(data) {
+            alertBox.innerHTML = '';
+
+            if (!data.success) {
+                resultBox.innerHTML = `
+                    <div class="ai-error">
+                        ${escapeHtml(data.message || 'No psychological prediction returned.')}
+                    </div>
+                `;
+                return;
+            }
+
+            let symptomsHtml = '';
+
+            (data.mentionedSymptoms || []).forEach(function (symptom) {
+                symptomsHtml += `<span class="symptom-pill">${escapeHtml(symptom)}</span>`;
+            });
+
+            resultBox.innerHTML = `
+                <div class="ai-result">
+                    <h3 class="ai-result-title">AI Result</h3>
+                    <div class="ai-result-muted">
+                        Psychological orientation based on mentioned symptoms.
+                    </div>
+
+                    <div class="disease-result">
+                        <div class="label">Mentioned symptoms</div>
+                        <div class="symptom-list">
+                            ${symptomsHtml || '<span style="color:var(--text-muted);font-weight:700;">No psychological symptoms detected.</span>'}
+                        </div>
+
+                        <div class="label">Probable psychological disease</div>
+                        <h3>${escapeHtml(data.probableDisease || 'Psychological distress')}</h3>
+                    </div>
+                </div>
+            `;
+        }
+
+        predictBtn.addEventListener('click', async function () {
+            const prompt = promptInput.value.trim();
+
+            if (!prompt) {
+                showError('Please describe psychological symptoms first.');
+                return;
+            }
+
+            predictBtn.disabled = true;
+            loadingBox.classList.add('active');
+            alertBox.innerHTML = '';
+            resultBox.innerHTML = '';
+
+            try {
+                const response = await fetch('{{ path('app_rdv_disease_ai_predict') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+
+                const data = await response.json();
+                showResult(data);
+            } catch (error) {
+                showError('Could not connect to the AI service. Please try again later.');
+            } finally {
+                predictBtn.disabled = false;
+                loadingBox.classList.remove('active');
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', initDiseasePredictionPage);
+    document.addEventListener('turbo:load', initDiseasePredictionPage);
+    initDiseasePredictionPage();
+})();
+</script>
+
+{% endblock %}

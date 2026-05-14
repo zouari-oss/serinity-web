@@ -42,7 +42,10 @@ final class DayAdviceServiceTest extends TestCase
             ['humeur' => '😨 Effrayé', 'type_reve' => 'Cauchemar']
         );
 
-        self::assertStringContainsString('Cauchemar', implode(' ', $result['conseils']));
+        self::assertContains(
+            '🌙 Couchez-vous 30 min plus tôt ce soir.',
+            $result['conseils']
+        );
     }
 
     public function testEmptyData(): void

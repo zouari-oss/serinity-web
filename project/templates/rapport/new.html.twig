@@ -1,0 +1,251 @@
+{% extends 'access_control/layout.html.twig' %}
+
+{% block title %}Ajouter Consultation | Serinity{% endblock %}
+
+{% block content %}
+<div class="ac-app-layout">
+
+    {% include 'access_control/components/_sidebar.html.twig' with { items: nav } %}
+
+    <div class="ac-main">
+
+        {% include 'access_control/components/_topbar.html.twig' with {
+            title: 'Nouvelle Consultation',
+            subtitle: 'Créer un nouveau dossier de consultation',
+            username: userName
+        } %}
+
+<section class="ac-card consultation-shell">
+
+<style>
+.consultation-shell{
+    max-width:900px;
+    margin:auto;
+    padding:1.4rem;
+}
+
+.page-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:1rem;
+    margin-bottom:1.2rem;
+    flex-wrap:wrap;
+}
+
+.page-title{
+    margin:0;
+    font-size:1.25rem;
+    font-weight:800;
+    color:#0f172a;
+}
+
+.page-sub{
+    margin-top:.25rem;
+    color:#64748b;
+    font-size:.92rem;
+}
+
+.hero-icon{
+    width:58px;
+    height:58px;
+    border-radius:18px;
+    background:linear-gradient(135deg,#16a34a,#22c55e);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.3rem;
+    box-shadow:0 12px 24px rgba(34,197,94,.20);
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1rem;
+}
+
+.form-full{
+    grid-column:1 / -1;
+}
+
+.field-card{
+    background:#f8fafc;
+    border:1px solid #eef2f7;
+    border-radius:18px;
+    padding:1rem;
+}
+
+.field-label{
+    display:block;
+    margin-bottom:.55rem;
+    font-size:.85rem;
+    font-weight:800;
+    color:#334155;
+}
+
+.ac-input,
+.form-control,
+.form-select,
+textarea,
+select,
+input{
+    width:100%;
+}
+
+.error-box{
+    color:#dc2626;
+    font-size:.82rem;
+    margin-top:.45rem;
+}
+
+.actions{
+    margin-top:1.25rem;
+    display:flex;
+    justify-content:flex-end;
+    gap:.75rem;
+    flex-wrap:wrap;
+}
+
+.btn-save{
+    border:none;
+    padding:.9rem 1.2rem;
+    border-radius:14px;
+    font-weight:800;
+    color:#fff;
+    background:linear-gradient(135deg,#16a34a,#22c55e);
+    box-shadow:0 10px 22px rgba(34,197,94,.18);
+}
+
+.btn-back{
+    text-decoration:none;
+    padding:.9rem 1.2rem;
+    border-radius:14px;
+    font-weight:800;
+    background:#eef2f7;
+    color:#334155;
+}
+
+@media (max-width: 768px){
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+
+<div class="page-head">
+
+    <div>
+        <h2 class="page-title">
+            <i class="bi bi-journal-plus"></i>
+            Ajouter une Consultation
+        </h2>
+        <div class="page-sub">
+            Remplissez les informations médicales ci-dessous
+        </div>
+    </div>
+
+    <div class="hero-icon">
+        <i class="bi bi-heart-pulse"></i>
+    </div>
+
+</div>
+
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+<div class="form-grid">
+
+    <div class="field-card form-full">
+        <label class="field-label">
+            <i class="bi bi-heart-pulse"></i>
+            Diagnostic
+        </label>
+
+        {{ form_widget(form.diagnostic, {
+            attr: {
+                class: 'ac-input',
+                rows: 5
+            }
+        }) }}
+
+        <div class="error-box">
+            {{ form_errors(form.diagnostic) }}
+        </div>
+    </div>
+
+    <div class="field-card form-full">
+        <label class="field-label">
+            <i class="bi bi-capsule"></i>
+            Prescription
+        </label>
+
+        {{ form_widget(form.prescription, {
+            attr: {
+                class: 'ac-input',
+                rows: 5
+            }
+        }) }}
+
+        <div class="error-box">
+            {{ form_errors(form.prescription) }}
+        </div>
+    </div>
+
+    <div class="field-card form-full">
+        <label class="field-label">
+            <i class="bi bi-journal-text"></i>
+            Notes
+        </label>
+
+        {{ form_widget(form.notes, {
+            attr: {
+                class: 'ac-input',
+                rows: 4
+            }
+        }) }}
+
+        <div class="error-box">
+            {{ form_errors(form.notes) }}
+        </div>
+    </div>
+
+    <div class="field-card form-full">
+        <label class="field-label">
+            <i class="bi bi-calendar-check"></i>
+            Rendez-vous lié
+        </label>
+
+        {{ form_widget(form.rendezVous, {
+            attr: {
+                class: 'ac-input'
+            }
+        }) }}
+
+        <div class="error-box">
+            {{ form_errors(form.rendezVous) }}
+        </div>
+    </div>
+
+</div>
+
+<div class="actions">
+
+    <a href="javascript:history.back()" class="btn-back">
+        <i class="bi bi-arrow-left"></i>
+        Retour
+    </a>
+
+    <button class="btn-save">
+        <i class="bi bi-check-circle"></i>
+        Enregistrer
+    </button>
+
+</div>
+
+{{ form_end(form) }}
+
+</section>
+
+    </div>
+</div>
+{% endblock %}

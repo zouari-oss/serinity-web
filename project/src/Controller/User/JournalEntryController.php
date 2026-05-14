@@ -67,7 +67,9 @@ final class JournalEntryController extends AbstractUserUiController
         $user = $this->currentUser();
         $month = $this->resolveMonthValue($request->request->get('month'));
         $title = trim((string) $request->request->get('title', ''));
-        $content = $this->journalContentSanitizer->sanitize((string) $request->request->get('content', ''));
+        $content = $this->prefixForJavaParsing(
+            $this->journalContentSanitizer->sanitize((string) $request->request->get('content', ''))
+        );
 
         $now = new \DateTimeImmutable();
         $entry = (new JournalEntry())
@@ -116,7 +118,9 @@ final class JournalEntryController extends AbstractUserUiController
             return $this->redirectToJournalIndex($month);
         }
 
-        $sanitizedContent = $this->journalContentSanitizer->sanitize((string) $request->request->get('content', ''));
+        $sanitizedContent = $this->prefixForJavaParsing(
+            $this->journalContentSanitizer->sanitize((string) $request->request->get('content', ''))
+        );
         $contentChanged = $entry->getContent() !== $sanitizedContent;
 
         $entry
@@ -349,5 +353,15 @@ final class JournalEntryController extends AbstractUserUiController
         } catch (\Throwable) {
             $this->addFlash('error', 'Journal entry was saved, but emotion tagging is currently unavailable.');
         }
+    }
+
+    private function prefixForJavaParsing(string $content): string
+    {
+        $trimmed = trim($content);
+        if ($trimmed === '') {
+            return $trimmed;
+        }
+
+        return preg_match('/^A1\s*:/i', $trimmed) === 1 ? $trimmed : 'A1: ' . $trimmed;
     }
 }

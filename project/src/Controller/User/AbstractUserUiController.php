@@ -39,11 +39,43 @@ abstract class AbstractUserUiController extends AbstractController
      */
     protected function buildNav(string $activeRoute): array
     {
+        $user = $this->currentUser();
+        $consultationItem = $user->getRole() === 'THERAPIST'
+            ? [
+                'label' => 'Gestion des rendez-vous',
+                'route' => 'app_therapist_rdv',
+                'icon' => 'calendar_month',
+                'section' => 'modules',
+            ]
+            : [
+                'label' => 'Consultations',
+                'route' => 'user_ui_consultations',
+                'icon' => 'medical_services',
+                'section' => 'modules',
+                'children' => [
+                    [
+                        'label' => 'Doctors',
+                        'route' => 'app_doctors',
+                        'icon' => 'people',
+                    ],
+                    [
+                        'label' => 'Mes rendez vous',
+                        'route' => 'app_patient_rdv',
+                        'icon' => 'calendar_month',
+                    ],
+                    [
+                        'label' => 'Psychological AI',
+                        'route' => 'app_rdv_disease_ai',
+                        'icon' => 'psychology',
+                    ],
+                ],
+            ];
+
         $items = [
             ['label' => 'Dashboard', 'route' => 'user_ui_dashboard', 'icon' => 'dashboard', 'section' => 'home'],
             ['label' => 'Profile', 'route' => 'user_ui_profile', 'icon' => 'person', 'section' => 'home'],
             ['label' => 'Settings', 'route' => 'user_ui_settings', 'icon' => 'settings', 'section' => 'home'],
-            ['label' => 'Consultations', 'route' => 'user_ui_consultations', 'icon' => 'medical_services', 'section' => 'modules'],
+            $consultationItem,
             ['label' => 'Exercises', 'route' => 'user_ui_exercises', 'icon' => 'fitness_center', 'section' => 'modules'],
             ['label' => 'Forum', 'route' => 'user_ui_forum', 'icon' => 'forum', 'section' => 'modules'],
             [

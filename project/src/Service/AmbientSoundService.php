@@ -20,38 +20,72 @@ final readonly class AmbientSoundService
         'https://all.api.radio-browser.info',
     ];
 
+    /**
+     * Soft classical piano is the only fallback we keep when no suitable radio
+     * station is found.
+     */
     private const FALLBACK_AUDIO_URL = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
 
     /**
+     * The service always leans toward calm piano, even if the caller provides
+     * broader session context.
+     *
      * @var list<string>
      */
-    private const INCLUDED_WORDS = ['piano', 'meditation', 'calm', 'sleep', 'relax', 'nature', 'zen', 'soft', 'ambient'];
+    private const SEARCH_QUERIES = [
+        'soft classical piano',
+        'calm piano',
+        'relaxing piano',
+        'piano meditation',
+        'classical piano radio',
+        'peaceful piano',
+        'instrumental piano',
+        'sleep piano',
+    ];
 
     /**
      * @var list<string>
      */
-    private const HARD_BLOCKED_WORDS = [
+    private const POSITIVE_KEYWORDS = [
+        'piano',
+        'classical',
+        'calm',
+        'soft',
+        'relaxing',
+        'relaxation',
+        'meditation',
+        'instrumental',
+        'peaceful',
+        'sleep',
+        'ambient',
+    ];
+
+    /**
+     * Stations with these keywords are rejected outright.
+     *
+     * @var list<string>
+     */
+    private const NEGATIVE_KEYWORDS = [
         'techno',
+        'edm',
+        'house',
         'trance',
         'dubstep',
         'hardstyle',
-        'edm',
+        'rock',
+        'metal',
+        'rap',
+        'hip hop',
+        'pop',
+        'dance',
         'club',
         'party',
+        'remix',
+        'beat',
+        'dj',
     ];
 
-    /**
-     * @var list<string>
-     */
-    private const SOFT_BLOCKED_WORDS = [
-        'electro',
-        'electronic',
-        'house',
-        'deep house',
-        'dj',
-        'beat',
-        'remix',
-    ];
+    private const MIN_ACCEPTABLE_SCORE = 40;
 
     public function __construct(
         private HttpClientInterface $httpClient,
@@ -61,42 +95,67 @@ final readonly class AmbientSoundService
 
     /**
      * @param array<string,mixed> $context
-     * @return array{audioUrl:string,title:string,type:string}
+     * @return array{audioUrl:string,url:string,title:string,type:string,query:string,source:string}
      */
     public function getAmbientSound(array $context = []): array
     {
-        $soundType = $this->resolveSoundType($context);
-        $queries = $this->buildSearchQueries($context);
+        $normalizedContext = $this->normalizeContext($context);
+        $bestCandidate = null;
+        $bestScore = PHP_INT_MIN;
 
-        foreach ($queries as $query) {
+        $this->logger->info('Piano ambient recommendation started.', [
+            'context' => $normalizedContext,
+            'queries' => self::SEARCH_QUERIES,
+        ]);
+
+        foreach (self::SEARCH_QUERIES as $query) {
             foreach (self::BASE_URLS as $baseUrl) {
-                $station = $this->searchStations($baseUrl, $query, $soundType);
-                if ($station !== null) {
-                    return $station;
+                $candidate = $this->searchStations($baseUrl, $query);
+                if ($candidate === null) {
+                    continue;
+                }
+
+                if (($candidate['score'] ?? PHP_INT_MIN) > $bestScore) {
+                    $bestCandidate = $candidate;
+                    $bestScore = (int) $candidate['score'];
                 }
             }
         }
 
-        $this->logger->warning('No suitable ambient radio station found. Falling back to default audio.', [
-            'queries' => $queries,
-            'type' => $soundType,
+        if ($bestCandidate !== null && $bestScore >= self::MIN_ACCEPTABLE_SCORE) {
+            unset($bestCandidate['score']);
+
+            return $bestCandidate;
+        }
+
+        $this->logger->warning('No suitable piano station found. Using fallback audio.', [
+            'context' => $normalizedContext,
+            'bestScore' => $bestScore,
             'fallbackUrl' => self::FALLBACK_AUDIO_URL,
         ]);
 
+        return $this->buildFallbackResult();
+    }
+
+    /**
+     * @return array<string,string>
+     */
+    private function normalizeContext(array $context): array
+    {
         return [
-            'audioUrl' => self::FALLBACK_AUDIO_URL,
-            'title' => $this->resolveFallbackTitle($soundType),
-            'type' => $soundType,
+            'exerciseType' => strtolower(trim((string) ($context['exerciseType'] ?? ''))),
+            'exerciseTheme' => strtolower(trim((string) ($context['exerciseTheme'] ?? $context['theme'] ?? ''))),
+            'fatigue' => strtolower(trim((string) ($context['fatigue'] ?? ''))),
+            'moment' => strtolower(trim((string) ($context['moment'] ?? ''))),
+            'weather' => strtolower(trim((string) ($context['weather'] ?? $context['weatherLabel'] ?? ''))),
         ];
     }
 
     /**
-     * @return array{audioUrl:string,title:string,type:string}|null
+     * @return array{audioUrl:string,url:string,title:string,type:string,query:string,source:string,score:int}|null
      */
-    private function searchStations(string $baseUrl, string $query, string $soundType): ?array
+    private function searchStations(string $baseUrl, string $query): ?array
     {
-        $queryTerms = $this->splitTerms($query);
-
         try {
             $response = $this->httpClient->request('GET', rtrim($baseUrl, '/') . '/json/stations/search', [
                 'headers' => [
@@ -106,7 +165,7 @@ final readonly class AmbientSoundService
                 'query' => [
                     'name' => $query,
                     'hidebroken' => 'true',
-                    'limit' => 50,
+                    'limit' => 40,
                     'order' => 'clicktrend',
                     'reverse' => 'true',
                 ],
@@ -114,8 +173,9 @@ final readonly class AmbientSoundService
             ]);
 
             if ($response->getStatusCode() !== 200) {
-                $this->logger->warning('Radio Browser request returned a non-200 response.', [
+                $this->logger->warning('Radio Browser returned a non-200 response.', [
                     'baseUrl' => $baseUrl,
+                    'query' => $query,
                     'statusCode' => $response->getStatusCode(),
                 ]);
 
@@ -125,31 +185,14 @@ final readonly class AmbientSoundService
             /** @var mixed $payload */
             $payload = $response->toArray(false);
             if (!is_array($payload)) {
-                $this->logger->warning('Radio Browser response was not a station list.', [
-                    'baseUrl' => $baseUrl,
-                ]);
-
                 return null;
             }
 
-            $this->logger->info('Radio Browser search returned stations.', [
+            return $this->selectBestStation($payload, $baseUrl, $query);
+        } catch (ExceptionInterface|\Throwable $exception) {
+            $this->logger->warning('Piano station lookup failed for a Radio Browser mirror.', [
                 'baseUrl' => $baseUrl,
                 'query' => $query,
-                'count' => count($payload),
-            ]);
-
-            $station = $this->selectBestStation($payload, $queryTerms, $soundType, $baseUrl, $query);
-            if ($station === null) {
-                $this->logger->warning('Radio Browser mirror returned no suitable relaxing station.', [
-                    'baseUrl' => $baseUrl,
-                    'query' => $query,
-                ]);
-            }
-
-            return $station;
-        } catch (ExceptionInterface|\Throwable $exception) {
-            $this->logger->warning('Radio Browser request failed.', [
-                'baseUrl' => $baseUrl,
                 'exception' => $exception,
             ]);
 
@@ -159,14 +202,12 @@ final readonly class AmbientSoundService
 
     /**
      * @param list<array<string,mixed>> $stations
-     * @param list<string> $queryTerms
-     * @return array{audioUrl:string,title:string,type:string}|null
+     * @return array{audioUrl:string,url:string,title:string,type:string,query:string,source:string,score:int}|null
      */
-    private function selectBestStation(array $stations, array $queryTerms, string $soundType, string $baseUrl, string $query): ?array
+    private function selectBestStation(array $stations, string $baseUrl, string $query): ?array
     {
         $bestStation = null;
         $bestScore = PHP_INT_MIN;
-        $bestTags = '';
 
         foreach ($stations as $station) {
             if (!is_array($station)) {
@@ -178,45 +219,34 @@ final readonly class AmbientSoundService
                 continue;
             }
 
-            $metadata = strtolower(trim(implode(' ', array_filter([
-                (string) ($station['name'] ?? ''),
-                (string) ($station['tags'] ?? ''),
-                (string) ($station['favicon'] ?? ''),
-                (string) ($station['homepage'] ?? ''),
-                (string) ($station['url'] ?? ''),
-                (string) ($station['url_resolved'] ?? ''),
-                (string) ($station['codec'] ?? ''),
-                (string) ($station['language'] ?? ''),
-                (string) ($station['country'] ?? ''),
-                (string) ($station['state'] ?? ''),
-            ]))));
-
-            if ($metadata === '' || $this->containsHardBlockedWord($metadata)) {
+            $metadata = $this->buildMetadata($station);
+            if ($metadata === '' || $this->containsAny($metadata, self::NEGATIVE_KEYWORDS)) {
                 continue;
             }
 
-            $score = $this->scoreStation($metadata, $station, $queryTerms);
-            if ($score <= 0 || $score <= $bestScore) {
+            $score = $this->scoreStation($station, $metadata);
+            if ($score <= $bestScore) {
                 continue;
             }
 
             $bestScore = $score;
+            $title = $this->resolveStationTitle($station);
             $bestStation = [
                 'audioUrl' => $audioUrl,
-                'title' => $this->resolveStationTitle($station, $soundType),
-                'type' => $soundType,
+                'url' => $audioUrl,
+                'title' => $title,
+                'type' => 'piano',
+                'query' => $query,
+                'source' => $baseUrl,
+                'score' => $score,
             ];
-            $bestTags = (string) ($station['tags'] ?? '');
         }
 
         if ($bestStation !== null) {
-            $this->logger->info('Ambient radio station selected.', [
-                'baseUrl' => $baseUrl,
-                'title' => $bestStation['title'],
-                'tags' => $bestTags,
-                'type' => $soundType,
-                'audioUrl' => $bestStation['audioUrl'],
+            $this->logger->info('Piano station candidate selected from mirror.', [
                 'query' => $query,
+                'source' => $baseUrl,
+                'title' => $bestStation['title'],
                 'score' => $bestScore,
             ]);
         }
@@ -225,50 +255,82 @@ final readonly class AmbientSoundService
     }
 
     /**
+     * Behavioral scoring is intentionally simple: piano is heavily preferred,
+     * classical piano is the strongest match, and noisy genres are filtered out
+     * before scoring.
+     *
      * @param array<string,mixed> $station
-     * @param list<string> $queryTerms
      */
-    private function scoreStation(string $metadata, array $station, array $queryTerms): int
+    private function scoreStation(array $station, string $metadata): int
     {
         $score = 0;
 
-        foreach ($queryTerms as $term) {
-            if (str_contains($metadata, $term)) {
-                $score += 10;
-            }
+        $score += $this->countMatches($metadata, self::POSITIVE_KEYWORDS) * 6;
+
+        if (str_contains($metadata, 'piano')) {
+            $score += 40;
         }
 
-        foreach (self::INCLUDED_WORDS as $word) {
-            if (str_contains($metadata, $word)) {
-                $score += 5;
-            }
+        if (str_contains($metadata, 'classical')) {
+            $score += 22;
         }
 
-        foreach (self::SOFT_BLOCKED_WORDS as $word) {
-            if (str_contains($metadata, $word)) {
-                $score -= 12;
-            }
+        if (str_contains($metadata, 'piano') && str_contains($metadata, 'classical')) {
+            $score += 30;
         }
 
-        $votes = (int) ($station['votes'] ?? 0);
-        $clickCount = (int) ($station['clickcount'] ?? 0);
-        $bitrate = (int) ($station['bitrate'] ?? 0);
+        if (str_contains($metadata, 'meditation') || str_contains($metadata, 'relax')) {
+            $score += 10;
+        }
 
-        return $score
-            + min(10, (int) floor($votes / 20))
-            + min(5, (int) floor($clickCount / 50))
-            + min(4, (int) floor($bitrate / 64));
+        if (str_contains($metadata, 'instrumental') || str_contains($metadata, 'peaceful') || str_contains($metadata, 'sleep')) {
+            $score += 8;
+        }
+
+        $name = strtolower(trim((string) ($station['name'] ?? '')));
+        $tags = strtolower(trim((string) ($station['tags'] ?? '')));
+
+        if (str_contains($name, 'piano')) {
+            $score += 18;
+        }
+        if (str_contains($name, 'classical')) {
+            $score += 10;
+        }
+        if (str_contains($tags, 'piano')) {
+            $score += 12;
+        }
+        if (str_contains($tags, 'classical')) {
+            $score += 8;
+        }
+
+        $votes = max(0, (int) ($station['votes'] ?? 0));
+        $clickCount = max(0, (int) ($station['clickcount'] ?? 0));
+        $bitrate = max(0, (int) ($station['bitrate'] ?? 0));
+
+        $score += min(10, (int) floor($votes / 20));
+        $score += min(8, (int) floor($clickCount / 40));
+
+        if ($bitrate >= 32 && $bitrate <= 192) {
+            $score += 4;
+        }
+
+        return $score;
     }
 
-    private function containsHardBlockedWord(string $metadata): bool
+    /**
+     * @param array<string,mixed> $station
+     */
+    private function buildMetadata(array $station): string
     {
-        foreach (self::HARD_BLOCKED_WORDS as $word) {
-            if (str_contains($metadata, $word)) {
-                return true;
-            }
-        }
-
-        return false;
+        return strtolower(trim(implode(' ', array_filter([
+            (string) ($station['name'] ?? ''),
+            (string) ($station['tags'] ?? ''),
+            (string) ($station['homepage'] ?? ''),
+            (string) ($station['country'] ?? ''),
+            (string) ($station['state'] ?? ''),
+            (string) ($station['language'] ?? ''),
+            (string) ($station['codec'] ?? ''),
+        ]))));
     }
 
     /**
@@ -289,76 +351,54 @@ final readonly class AmbientSoundService
     /**
      * @param array<string,mixed> $station
      */
-    private function resolveStationTitle(array $station, string $soundType): string
+    private function resolveStationTitle(array $station): string
     {
         $title = trim((string) ($station['name'] ?? ''));
 
-        return $title !== '' ? $title : $this->resolveFallbackTitle($soundType);
+        return $title !== '' ? $title : 'Soft classical piano radio';
     }
 
     /**
-     * @param array<string,mixed> $context
+     * @return array{audioUrl:string,url:string,title:string,type:string,query:string,source:string}
      */
-    private function resolveSoundType(array $context): string
+    private function buildFallbackResult(): array
     {
-        $fatigue = strtolower(trim((string) ($context['fatigue'] ?? '')));
-        $moment = strtolower(trim((string) ($context['moment'] ?? '')));
-        $exerciseType = strtolower(trim((string) ($context['exerciseType'] ?? '')));
-
-        return match (true) {
-            $fatigue === 'high' => 'meditation',
-            $moment === 'evening' || $moment === 'night' => 'piano',
-            str_contains($exerciseType, 'respiration')
-                || str_contains($exerciseType, 'breath')
-                || str_contains($exerciseType, 'relax') => 'ambient',
-            default => 'nature',
-        };
+        return [
+            'audioUrl' => self::FALLBACK_AUDIO_URL,
+            'url' => self::FALLBACK_AUDIO_URL,
+            'title' => 'Soft classical piano fallback',
+            'type' => 'piano',
+            'query' => 'soft classical piano',
+            'source' => 'soundhelix',
+        ];
     }
 
     /**
-     * @param array<string,mixed> $context
-     * @return list<string>
+     * @param list<string> $needles
      */
-    private function buildSearchQueries(array $context): array
+    private function containsAny(string $haystack, array $needles): bool
     {
-        $fatigue = strtolower(trim((string) ($context['fatigue'] ?? '')));
-        $moment = strtolower(trim((string) ($context['moment'] ?? '')));
+        foreach ($needles as $needle) {
+            if (str_contains($haystack, $needle)) {
+                return true;
+            }
+        }
 
-        $primaryQuery = match (true) {
-            $fatigue === 'high' => 'sleep piano meditation',
-            $moment === 'evening' || $moment === 'night' => 'calm piano ambient',
-            default => 'nature rain meditation',
-        };
-
-        return array_values(array_unique([
-            $primaryQuery,
-            'calm piano',
-            'meditation piano',
-            'relax piano',
-            'ambient meditation',
-            'nature relax',
-            'sleep calm',
-        ]));
+        return false;
     }
 
     /**
-     * @return list<string>
+     * @param list<string> $needles
      */
-    private function splitTerms(string $query): array
+    private function countMatches(string $haystack, array $needles): int
     {
-        return array_values(array_filter(
-            array_map('trim', explode(' ', strtolower($query))),
-            static fn(string $term): bool => $term !== ''
-        ));
-    }
+        $matches = 0;
+        foreach ($needles as $needle) {
+            if (str_contains($haystack, $needle)) {
+                ++$matches;
+            }
+        }
 
-    private function resolveFallbackTitle(string $soundType): string
-    {
-        return match ($soundType) {
-            'meditation' => 'Calm meditation fallback',
-            'piano' => 'Quiet piano fallback',
-            'ambient' => 'Ambient relaxation fallback',
-            default => 'Nature relaxation fallback',
-        };
+        return $matches;
     }
 }

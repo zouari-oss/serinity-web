@@ -1,0 +1,186 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Prendre Rendez-vous{% endblock %}
+  {% block stylesheets %}{% endblock %}
+        {% block javascripts %}
+         {% endblock %}
+{% block body %}
+
+<style>
+.rdv-container {
+    max-width: 850px;
+    margin: 50px auto;
+}
+
+/* CARD */
+.rdv-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.05);
+}
+
+/* HEADER */
+.rdv-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.avatar {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background: linear-gradient(135deg,#2F6F6D,#88BDBC);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.doctor-info {
+    line-height: 1.2;
+}
+
+.doctor-name {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.doctor-spec {
+    font-size: 13px;
+    color: #2F6F6D;
+}
+
+/* FORM */
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.form-control {
+    border-radius: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+/* BUTTON */
+.btn-submit {
+    background: #2F6F6D;
+    color: white;
+    border-radius: 12px;
+    padding: 12px;
+    width: 100%;
+    border: none;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.btn-submit:hover {
+    background: #255d5b;
+}
+
+/* BACK */
+.btn-back {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+    background: #F0F7F6;
+    color: #2F6F6D;
+    padding: 10px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.btn-back:hover {
+    background: #e1f0ee;
+}
+
+/* ERROR */
+.text-danger {
+    font-size: 13px;
+    margin-top: 4px;
+}
+</style>
+
+<div class="rdv-container">
+
+    <div class="rdv-card">
+
+        <!-- HEADER -->
+<div class="rdv-header">
+
+    <div class="avatar">
+        {{
+            doctor.profile.firstName|default(doctor.email)|slice(0,1)|upper
+        }}
+    </div>
+
+    <div class="doctor-info">
+        <div class="doctor-name">
+            {{ doctor.profile.firstName|default('') }}
+            {{ doctor.profile.lastName|default('') }}
+        </div>
+
+        <div class="doctor-spec">
+            {{ doctor.profile.aboutMe|default('Therapist') }}
+        </div>
+    </div>
+
+</div>
+        <!-- TITLE -->
+        <h5 class="mb-3">
+            <i class="bi bi-calendar-plus"></i>
+            Prendre un rendez-vous
+        </h5>
+
+        <!-- FLASH -->
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+
+        <!-- FORM -->
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+        <!-- DATE -->
+        <div class="form-group">
+            {{ form_label(form.dateTime, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.dateTime, {'attr': {'class': 'form-control'}}) }}
+            <div class="text-danger">{{ form_errors(form.dateTime) }}</div>
+        </div>
+
+        <!-- MOTIF -->
+        <div class="form-group">
+            {{ form_label(form.motif, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.motif, {'attr': {'class': 'form-control'}}) }}
+            <div class="text-danger">{{ form_errors(form.motif) }}</div>
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="form-group">
+            {{ form_label(form.description, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 3}}) }}
+            <div class="text-danger">{{ form_errors(form.description) }}</div>
+        </div>
+<input type="hidden" name="_token" value="{{ csrf_token('submit') }}">
+        <!-- BUTTON -->
+        <button class="btn-submit">
+            <i class="bi bi-check-circle"></i> Confirmer le rendez-vous
+        </button>
+
+        {{ form_end(form) }}
+
+ 
+    </div>
+
+</div>
+
+{% endblock %}

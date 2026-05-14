@@ -27,10 +27,12 @@ class JournalEntry
         minMessage: 'Title must contain at least {{ limit }} characters.',
         maxMessage: 'Title cannot exceed {{ limit }} characters.',
     )]
+
     #[Assert\Regex(
         pattern: '/.*[A-Za-zÀ-ÿ].*/u',
         message: 'Title must contain at least one letter.',
     )]
+
     #[Assert\Regex(
         pattern: "/^[A-Za-zÀ-ÿ0-9\\s'.,!?:()\\-]+$/u",
         message: 'Title contains invalid characters.',
@@ -45,10 +47,18 @@ class JournalEntry
     )]
     private string $content = '';
 
-    #[ORM\Column(name: 'created_at', type: Types::DATETIME_IMMUTABLE)]
+    #[ORM\Column(
+        name: 'created_at',
+        type: Types::DATETIME_IMMUTABLE,
+        options: ['default' => 'CURRENT_TIMESTAMP']
+    )]
     private \DateTimeImmutable $createdAt;
 
-    #[ORM\Column(name: 'updated_at', type: Types::DATETIME_IMMUTABLE)]
+    #[ORM\Column(
+        name: 'updated_at',
+        type: Types::DATETIME_IMMUTABLE,
+        options: ['default' => 'CURRENT_TIMESTAMP']
+    )]
     private \DateTimeImmutable $updatedAt;
 
     #[ORM\Column(name: 'ai_tags', type: Types::TEXT, nullable: true)]
@@ -184,7 +194,84 @@ class JournalEntry
             return null;
         }
 
+        return $this->normalizeDecodedAiTags($decoded);
+    }
+
+    /**
+     * @param array<mixed> $decoded
+     *
+     * @return array<string, mixed>|null
+     */
+    private function normalizeDecodedAiTags(array $decoded): ?array
+    {
+        // Legacy Java/Weka rows are stored as a plain list of {tag, score} objects.
+        if (array_is_list($decoded)) {
+            $labels = $this->normalizeLabels($decoded);
+            if ($labels === []) {
+                return null;
+            }
+
+            return [
+                'top_label' => $labels[0]['label'],
+                'labels' => $labels,
+            ];
+        }
+
+        $labels = $this->normalizeLabels(is_array($decoded['labels'] ?? null) ? $decoded['labels'] : []);
+        $topLabel = is_string($decoded['top_label'] ?? null) ? trim((string) $decoded['top_label']) : '';
+
+        if ($topLabel === '' && $labels !== []) {
+            $topLabel = $labels[0]['label'];
+        }
+
+        if ($topLabel === '' && $labels === []) {
+            return null;
+        }
+
+        if ($topLabel !== '') {
+            $decoded['top_label'] = $topLabel;
+        }
+
+        if ($labels !== []) {
+            $decoded['labels'] = $labels;
+        }
+
         return $decoded;
+    }
+
+    /**
+     * @param array<mixed> $rows
+     *
+     * @return list<array{label: string, score: float}>
+     */
+    private function normalizeLabels(array $rows): array
+    {
+        $labels = [];
+
+        foreach ($rows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+
+            $label = is_string($row['label'] ?? null)
+                ? trim((string) $row['label'])
+                : (is_string($row['tag'] ?? null) ? trim((string) $row['tag']) : '');
+            if ($label === '') {
+                continue;
+            }
+
+            $score = is_numeric($row['score'] ?? null) ? (float) $row['score'] : null;
+            if ($score === null) {
+                continue;
+            }
+
+            $labels[] = [
+                'label' => $label,
+                'score' => $score,
+            ];
+        }
+
+        return $labels;
     }
 
     public function getTopEmotionLabel(): ?string
